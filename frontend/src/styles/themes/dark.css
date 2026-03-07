@@ -4,43 +4,43 @@
 
 [data-theme='dark'] {
   /* Accent */
-  --accent:        var(--orange-500);
-  --accent-hover:  var(--orange-400);
+  --accent: var(--orange-500);
+  --accent-hover: var(--orange-400);
   --accent-subtle: var(--orange-alpha-15);
 
   /* Backgrounds */
-  --bg:           var(--gray-925);
+  --bg: var(--gray-925);
   --bg-secondary: var(--gray-900);
-  --bg-hover:     var(--gray-850);
+  --bg-hover: var(--gray-850);
 
   /* Sidebar */
-  --sidebar-bg:          var(--gray-975);
-  --sidebar-text:        var(--gray-500);
+  --sidebar-bg: var(--gray-975);
+  --sidebar-text: var(--gray-500);
   --sidebar-text-active: var(--gray-0);
-  --sidebar-hover:       var(--gray-925);
-  --sidebar-border:      var(--gray-850);
+  --sidebar-hover: var(--gray-925);
+  --sidebar-border: var(--gray-850);
 
   /* Text */
-  --text:       var(--gray-100);
+  --text: var(--gray-100);
   --text-muted: var(--gray-500);
 
   /* Borders */
   --border: var(--gray-850);
 
   /* Inputs */
-  --input-bg:           var(--gray-900);
-  --input-border:       var(--gray-800);
+  --input-bg: var(--gray-900);
+  --input-border: var(--gray-800);
   --input-border-focus: var(--accent);
 
   /* Buttons */
-  --btn-bg:    var(--accent);
-  --btn-text:  var(--gray-0);
+  --btn-bg: var(--accent);
+  --btn-text: var(--gray-0);
   --btn-hover: var(--accent-hover);
 
   /* Feedback */
   --error: var(--red-400);
 
   /* Cards */
-  --card-bg:     var(--gray-900);
+  --card-bg: var(--gray-900);
   --card-shadow: 0 4px 24px oklch(0 0 0 / 0.4);
 }
