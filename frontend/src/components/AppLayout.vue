@@ -20,7 +20,12 @@
         </li>
       </ul>
 
-      <button class="logout-btn" @click="handleLogout">Sign out</button>
+      <div class="sidebar-footer">
+        <button class="theme-btn" @click="themeStore.cycle()" :title="themeLabel">
+          {{ themeIcon }} {{ themeLabel }}
+        </button>
+        <button class="logout-btn" @click="handleLogout">Sign out</button>
+      </div>
     </nav>
 
     <main class="main-content">
@@ -30,11 +35,26 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 
 const router = useRouter()
 const auth = useAuthStore()
+const themeStore = useThemeStore()
+
+const themeIcon = computed(() => {
+  if (themeStore.theme === 'light') return '☀️'
+  if (themeStore.theme === 'dark') return '🌙'
+  return '💻'
+})
+
+const themeLabel = computed(() => {
+  if (themeStore.theme === 'light') return 'Light'
+  if (themeStore.theme === 'dark') return 'Dark'
+  return 'System'
+})
 
 function handleLogout() {
   auth.logout()
@@ -50,8 +70,8 @@ function handleLogout() {
 
 .sidebar {
   width: 220px;
-  background: #111;
-  color: #fff;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text-active);
   display: flex;
   flex-direction: column;
   padding: 1.5rem 1rem;
@@ -65,6 +85,7 @@ function handleLogout() {
 .logo {
   font-size: 1.4rem;
   font-weight: 700;
+  color: var(--sidebar-text-active);
 }
 
 .nav-links {
@@ -80,7 +101,7 @@ function handleLogout() {
 .nav-links a {
   display: block;
   padding: 0.6rem 0.75rem;
-  color: #aaa;
+  color: var(--sidebar-text);
   text-decoration: none;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -89,31 +110,40 @@ function handleLogout() {
 
 .nav-links a:hover,
 .nav-links a.router-link-active {
-  background: #222;
-  color: #fff;
+  background: var(--sidebar-hover);
+  color: var(--sidebar-text-active);
 }
 
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.theme-btn,
 .logout-btn {
   background: none;
-  border: 1px solid #333;
-  color: #aaa;
+  border: 1px solid var(--sidebar-border);
+  color: var(--sidebar-text);
   padding: 0.6rem 0.75rem;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   cursor: pointer;
   text-align: left;
+  width: 100%;
   transition: background 0.15s, color 0.15s;
 }
 
+.theme-btn:hover,
 .logout-btn:hover {
-  background: #222;
-  color: #fff;
+  background: var(--sidebar-hover);
+  color: var(--sidebar-text-active);
 }
 
 .main-content {
   flex: 1;
   padding: 2rem;
-  background: #f9f9f9;
+  background: var(--bg-secondary);
   overflow-y: auto;
 }
 </style>
