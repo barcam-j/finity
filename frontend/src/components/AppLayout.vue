@@ -22,7 +22,7 @@
 
       <div class="sidebar-footer">
         <button class="theme-btn" @click="themeStore.cycle()" :title="themeLabel">
-          {{ themeIcon }} {{ themeLabel }}
+          {{ themeLabel }}
         </button>
         <button class="logout-btn" @click="handleLogout">Sign out</button>
       </div>
@@ -43,12 +43,6 @@ import { useThemeStore } from '@/stores/theme'
 const router = useRouter()
 const auth = useAuthStore()
 const themeStore = useThemeStore()
-
-const themeIcon = computed(() => {
-  if (themeStore.theme === 'light') return '☀️'
-  if (themeStore.theme === 'dark') return '🌙'
-  return '💻'
-})
 
 const themeLabel = computed(() => {
   if (themeStore.theme === 'light') return 'Light'
