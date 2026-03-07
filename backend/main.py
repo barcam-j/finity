@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
     await close_db()
 
 
-app = FastAPI(title='finity API', lifespan=lifespan)
+app = FastAPI(title='FinanceAI API', lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

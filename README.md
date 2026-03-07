@@ -1,10 +1,10 @@
-# finity
+# FinanceAI
 
 Aplicación de finanzas personales con análisis profundo mediante IA configurable por el usuario.
 
 ## Descripcion
 
-finity es una aplicación web de finanzas personales que permite importar datos financieros históricos y analizarlos mediante inteligencia artificial. El usuario puede configurar el proveedor de IA de su elección (Claude, OpenAI, Gemini, etc.) usando su propia suscripción y API key.
+FinanceAI es una aplicación web de finanzas personales que permite importar datos financieros históricos y analizarlos mediante inteligencia artificial. El usuario puede configurar el proveedor de IA de su elección (Claude, OpenAI, Gemini, etc.) usando su propia suscripción y API key.
 
 La aplicación está construida en dos partes bien diferenciadas: un frontend moderno en Vue 3 y un backend robusto en Python con FastAPI.
 
