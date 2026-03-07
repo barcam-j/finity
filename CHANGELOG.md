@@ -19,20 +19,20 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 
 #### Frontend
 
-- `[a3f2]` Vue 3 + Vite project scaffolded with bun as package manager
-- `[b7c1]` Vue Router with navigation guard — unauthenticated users redirected to `/login`
-- `[d4e9]` Pinia stores: `auth`, `transactions`, `ai`
-- `[f1a6]` HTTP service layer: `api.js` (base client with JWT header), `auth.js`, `transactions.js`
+- `[a3f2]` Vue 3 + Vite project scaffolded with bun as package manager ([#1](https://github.com/barcam-j/finity/pull/1))
+- `[b7c1]` Vue Router with navigation guard — unauthenticated users redirected to `/login` ([#1](https://github.com/barcam-j/finity/pull/1))
+- `[d4e9]` Pinia stores: `auth`, `transactions`, `ai` ([#1](https://github.com/barcam-j/finity/pull/1))
+- `[f1a6]` HTTP service layer: `api.js` (base client with JWT header), `auth.js`, `transactions.js` ([#1](https://github.com/barcam-j/finity/pull/1))
 - `[c8b3]` Login and register form in a single view with toggle between modes
 - `[e2d7]` `AppLayout` component with sidebar navigation and sign out button
-- `[g5f4]` Light / dark / system theme switcher — persisted in `localStorage`, applied via `data-theme` on `<html>`
-- `[h9a2]` Orange accent color (`oklch(0.70 0.19 42)`) for active nav links, buttons and input focus
-- `[i3c8]` CSS architecture with OKLCH colors separated into layers:
+- `[g5f4]` Light / dark / system theme switcher — persisted in `localStorage`, applied via `data-theme` on `<html>` ([#3](https://github.com/barcam-j/finity/pull/3))
+- `[h9a2]` Orange accent color (`oklch(0.70 0.19 42)`) for active nav links, buttons and input focus ([#3](https://github.com/barcam-j/finity/pull/3))
+- `[i3c8]` CSS architecture with OKLCH colors separated into layers ([#5](https://github.com/barcam-j/finity/pull/5)):
   - `primitives.css` — raw color palette
   - `themes/light.css` and `themes/dark.css` — semantic tokens
   - `base.css` — reset and typography
   - `main.css` — entry point
-- `[j6b5]` Prettier configured with single quotes, no semicolons, 2 spaces, print width 100
+- `[j6b5]` Prettier configured with single quotes, no semicolons, 2 spaces, print width 100 ([#6](https://github.com/barcam-j/finity/pull/6))
 
 #### Backend
 
@@ -53,7 +53,7 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[v1o9]` `main` and `develop` protected via GitHub Rulesets (PR required)
 - `[w7p3]` GitHub Action to enforce that only `release/*` and `hotfix/*` branches can merge into `main`
 - `[x4q6]` `CLAUDE.md` with project context for AI-assisted development
-- `[y2r1]` `README.md` with full project documentation including color system guide
+- `[y2r1]` `README.md` with full project documentation including color system guide ([#5](https://github.com/barcam-j/finity/pull/5))
 
 ### Fixed
 
