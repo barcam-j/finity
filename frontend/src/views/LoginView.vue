@@ -84,14 +84,14 @@ async function submit() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
+  background: var(--bg-secondary);
 }
 
 .auth-card {
-  background: #fff;
+  background: var(--card-bg);
   padding: 2.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--card-shadow);
   width: 100%;
   max-width: 380px;
 }
@@ -100,10 +100,11 @@ async function submit() {
   font-size: 1.8rem;
   font-weight: 700;
   margin: 0 0 0.25rem;
+  color: var(--text);
 }
 
 .auth-subtitle {
-  color: #666;
+  color: var(--text-muted);
   margin: 0 0 1.75rem;
   font-size: 0.95rem;
 }
@@ -123,27 +124,29 @@ async function submit() {
 label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #333;
+  color: var(--text);
 }
 
 input {
   padding: 0.6rem 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--input-border);
   border-radius: 8px;
   font-size: 0.95rem;
   outline: none;
+  background: var(--input-bg);
+  color: var(--text);
   transition: border-color 0.2s;
 }
 
 input:focus {
-  border-color: #333;
+  border-color: var(--input-border-focus);
 }
 
 button {
   margin-top: 0.5rem;
   padding: 0.7rem;
-  background: #111;
-  color: #fff;
+  background: var(--btn-bg);
+  color: var(--btn-text);
   border: none;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -153,7 +156,7 @@ button {
 }
 
 button:hover:not(:disabled) {
-  background: #333;
+  background: var(--btn-hover);
 }
 
 button:disabled {
@@ -162,7 +165,7 @@ button:disabled {
 }
 
 .error {
-  color: #e53e3e;
+  color: var(--error);
   font-size: 0.875rem;
   margin: 0;
 }
@@ -171,13 +174,12 @@ button:disabled {
   margin-top: 1.25rem;
   text-align: center;
   font-size: 0.875rem;
-  color: #666;
+  color: var(--text-muted);
 }
 
 .auth-switch a {
-  color: #111;
+  color: var(--text);
   font-weight: 500;
-  text-decoration: none;
 }
 
 .auth-switch a:hover {
