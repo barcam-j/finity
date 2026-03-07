@@ -1,6 +1,10 @@
 <template>
-  <div class="settings">
+  <AppLayout>
     <h1>Settings</h1>
     <p>AI provider config, API keys, profile — coming soon</p>
-  </div>
+  </AppLayout>
 </template>
+
+<script setup>
+import AppLayout from '@/components/AppLayout.vue'
+</script>
