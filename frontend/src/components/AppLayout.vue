@@ -99,7 +99,9 @@ function handleLogout() {
   text-decoration: none;
   border-radius: 8px;
   font-size: 0.95rem;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .nav-links a:hover {
@@ -129,7 +131,9 @@ function handleLogout() {
   cursor: pointer;
   text-align: left;
   width: 100%;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .theme-btn:hover,

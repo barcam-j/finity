@@ -9,9 +9,9 @@ export const transactionsService = {
     const auth = useAuthStore()
     return fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/transactions/import`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${auth.token}` },
+      headers: { Authorization: `Bearer ${auth.token}` },
       body: formData,
-    }).then(r => r.json())
+    }).then((r) => r.json())
   },
   delete: (id) => api.delete(`/transactions/${id}`),
 }
