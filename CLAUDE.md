@@ -1,4 +1,4 @@
-# CLAUDE.md — FinanceAI
+# CLAUDE.md — finity
 
 ## Proyecto
 Aplicación web de finanzas personales con análisis por IA configurable por el usuario.
