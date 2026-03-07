@@ -1,0 +1,47 @@
+/* =============================================================
+   Light theme — semantic tokens mapped from primitives
+   ============================================================= */
+
+:root,
+[data-theme='light'] {
+  /* Accent */
+  --accent: var(--orange-500);
+  --accent-hover: var(--orange-600);
+  --accent-subtle: var(--orange-alpha-12);
+
+  /* Backgrounds */
+  --bg: var(--gray-0);
+  --bg-secondary: var(--gray-100);
+  --bg-hover: var(--gray-150);
+
+  /* Sidebar */
+  --sidebar-bg: var(--gray-950);
+  --sidebar-text: var(--gray-400);
+  --sidebar-text-active: var(--gray-0);
+  --sidebar-hover: var(--gray-850);
+  --sidebar-border: var(--gray-800);
+
+  /* Text */
+  --text: var(--gray-950);
+  --text-muted: var(--gray-600);
+
+  /* Borders */
+  --border: var(--gray-200);
+
+  /* Inputs */
+  --input-bg: var(--gray-0);
+  --input-border: var(--gray-200);
+  --input-border-focus: var(--accent);
+
+  /* Buttons */
+  --btn-bg: var(--accent);
+  --btn-text: var(--gray-0);
+  --btn-hover: var(--accent-hover);
+
+  /* Feedback */
+  --error: var(--red-500);
+
+  /* Cards */
+  --card-bg: var(--gray-0);
+  --card-shadow: 0 4px 24px oklch(0 0 0 / 0.08);
+}
