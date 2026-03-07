@@ -40,6 +40,9 @@ router.beforeEach((to) => {
   if (!to.meta.public && !auth.isAuthenticated) {
     return { name: 'Login' }
   }
+  if (to.meta.public && auth.isAuthenticated) {
+    return { name: 'Dashboard' }
+  }
 })
 
 export default router

@@ -1,6 +1,10 @@
 <template>
-  <div class="transactions">
+  <AppLayout>
     <h1>Transactions</h1>
     <p>CSV import and transaction list — coming soon</p>
-  </div>
+  </AppLayout>
 </template>
+
+<script setup>
+import AppLayout from '@/components/AppLayout.vue'
+</script>
