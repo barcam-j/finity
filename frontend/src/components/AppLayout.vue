@@ -108,10 +108,14 @@ function handleLogout() {
   transition: background 0.15s, color 0.15s;
 }
 
-.nav-links a:hover,
-.nav-links a.router-link-active {
+.nav-links a:hover {
   background: var(--sidebar-hover);
   color: var(--sidebar-text-active);
+}
+
+.nav-links a.router-link-active {
+  background: var(--accent);
+  color: #ffffff;
 }
 
 .sidebar-footer {
