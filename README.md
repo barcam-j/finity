@@ -186,6 +186,37 @@ ENCRYPTION_KEY=tu_clave_para_encriptar_api_keys
 
 ---
 
+## Sistema de colores
+
+Los colores del frontend usan **OKLCH** (perceptualmente uniforme, listo para P3) y siguen una arquitectura de dos capas separada en archivos:
+
+```
+src/styles/
+├── primitives.css       — paleta raw (--orange-500, --gray-100...)
+├── themes/
+│   ├── light.css        — tokens semánticos light
+│   └── dark.css         — tokens semánticos dark
+├── base.css             — reset + tipografía
+└── main.css             — entry point, importa en orden correcto
+```
+
+**Primitivos → Semánticos:**
+
+```css
+/* primitives.css — valor raw */
+--orange-500: oklch(0.70 0.19 42);
+
+/* themes/light.css — intención */
+--accent: var(--orange-500);
+--btn-bg: var(--accent);
+```
+
+- Para cambiar el color de acento: edita `--orange-500` en `primitives.css`
+- Para añadir un tema nuevo (ej. high-contrast): crea `themes/high-contrast.css` e impórtalo en `main.css`
+- Nunca uses primitivos directamente en componentes, siempre a través de tokens semánticos
+
+---
+
 ## Licencia
 
 Uso personal. Sin licencia pública por ahora.
