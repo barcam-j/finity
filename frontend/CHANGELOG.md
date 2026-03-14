@@ -13,6 +13,11 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 
 ### Added
 
+- `[m3c1]` Currency preference in Settings — user selects their currency (EUR, USD, GBP and 7 more); persisted via `GET/PUT /preferences/`
+- `[n5d7]` `useCurrency` composable — centralised `formatAmount` using stored currency with symbol always placed after the number (e.g. `45.30 €`)
+- `[o8e2]` Paginated transaction list in Transactions view with per-row delete, sorted by date descending
+- `[p2f6]` CSV importer preview paginated (20 rows/page) with per-row delete to curate transactions before confirming import
+
 - `[f2s1]` Settings view with AI provider configuration form — provider selector, model field with datalist suggestions, API key input with show/hide toggle
 - `[g4t6]` Step-by-step API key guides for Gemini, Anthropic, OpenAI and xAI (Grok) — shown contextually when each provider is selected
 - `[h7u2]` Gemini pre-selected as default provider with `gemini/gemini-2.0-flash` as default model
