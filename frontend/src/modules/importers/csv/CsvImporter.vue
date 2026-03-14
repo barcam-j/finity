@@ -6,12 +6,10 @@
       <h3>How do you want to import?</h3>
       <div class="method-cards">
         <button class="method-card" @click="selectMethod('ai')">
-          <span class="method-card__icon">🤖</span>
           <strong>AI Import</strong>
           <p>AI reads any CSV format automatically. Requires a configured AI provider.</p>
         </button>
         <button class="method-card" @click="selectMethod('manual')">
-          <span class="method-card__icon">🗂️</span>
           <strong>Manual Import</strong>
           <p>Map columns yourself. No AI or API key required.</p>
         </button>
@@ -29,11 +27,11 @@
         @drop.prevent="onDrop"
         @click="fileInput.click()"
       >
-        <input ref="fileInput" type="file" accept=".csv" hidden @change="onFileChange" />
-        <p class="drop-zone__icon">📄</p>
-        <p class="drop-zone__text">Drop your CSV here or <span>click to browse</span></p>
+        <input ref="fileInput" type="file" accept=".csv,.xlsx,.xls" hidden @change="onFileChange" />
+        <p class="drop-zone__text">Drop your file here or <span>click to browse</span></p>
         <p class="drop-zone__hint">
           {{ method === 'ai' ? 'Any format — AI will read and extract the transactions' : 'The first row must contain column headers' }}
+          · CSV, XLSX or XLS
         </p>
       </div>
       <p v-if="error" class="error">{{ error }}</p>
@@ -216,6 +214,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import * as XLSX from 'xlsx'
 import { csvService } from './service'
 import AiBanner from '@/components/AiBanner.vue'
 import { useCurrency } from '@/composables/useCurrency'
@@ -394,10 +393,32 @@ function applyMapping() {
   step.value = 'preview'
 }
 
+// ── Excel → CSV conversion ────────────────────────────────────────────────────
+function isExcel(file) {
+  return /\.(xlsx|xls)$/i.test(file.name)
+}
+
+async function excelToCsvFile(file) {
+  const buffer = await file.arrayBuffer()
+  const workbook = XLSX.read(buffer, { type: 'array', cellDates: true })
+
+  const csvParts = workbook.SheetNames.map((name, i) => {
+    const rows = XLSX.utils.sheet_to_csv(workbook.Sheets[name], { blankrows: false })
+    if (i === 0) return rows
+    // For subsequent sheets, strip the header row to avoid duplicates
+    const lines = rows.split('\n')
+    return lines.slice(1).join('\n')
+  })
+
+  const csv = csvParts.join('\n')
+  return new File([csv], file.name.replace(/\.(xlsx|xls)$/i, '.csv'), { type: 'text/csv' })
+}
+
 // ── File loading ──────────────────────────────────────────────────────────────
-async function loadFile(file) {
+async function loadFile(rawFile) {
   error.value = null
-  fileName.value = file.name
+  const file = isExcel(rawFile) ? await excelToCsvFile(rawFile) : rawFile
+  fileName.value = rawFile.name
   step.value = 'parsing'
 
   if (method.value === 'manual') {
@@ -507,10 +528,6 @@ async function confirmImport() {
   background: var(--accent-subtle);
 }
 
-.method-card__icon {
-  font-size: 1.5rem;
-}
-
 .method-card strong {
   font-size: 1rem;
   color: var(--text);
@@ -536,11 +553,6 @@ async function confirmImport() {
 .drop-zone--active {
   border-color: var(--accent);
   background: var(--accent-subtle);
-}
-
-.drop-zone__icon {
-  font-size: 2.5rem;
-  margin: 0 0 0.75rem;
 }
 
 .drop-zone__text {
