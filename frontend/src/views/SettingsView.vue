@@ -38,7 +38,7 @@
           </div>
 
           <!-- Provider guide -->
-          <div v-if="['gemini', 'anthropic', 'openai'].includes(form.provider)" class="provider-guide">
+          <div v-if="['gemini', 'anthropic', 'openai', 'xai'].includes(form.provider)" class="provider-guide">
             <!-- Gemini -->
             <template v-if="form.provider === 'gemini'">
               <p class="guide-title">How to get your Gemini API key</p>
@@ -88,6 +88,23 @@
               </ol>
               <p class="guide-note">Recommended model: <code>gpt-4o-mini</code> — best balance of speed and cost.</p>
             </template>
+
+            <!-- xAI -->
+            <template v-if="form.provider === 'xai'">
+              <p class="guide-title">How to get your xAI (Grok) API key</p>
+              <ol class="guide-steps">
+                <li>
+                  Go to
+                  <a href="https://console.x.ai" target="_blank" rel="noopener">console.x.ai</a>
+                  and sign in with your X (Twitter) account
+                </li>
+                <li>Go to <strong>API Keys</strong> in the left sidebar</li>
+                <li>Click <strong>Create API Key</strong>, give it a name and copy it</li>
+                <li>Add credits under <strong>Billing</strong> to activate API access</li>
+                <li>Paste the key below</li>
+              </ol>
+              <p class="guide-note">Recommended model: <code>xai/grok-2-mini</code> — faster and cheaper than Grok-2.</p>
+            </template>
           </div>
 
           <!-- API Key -->
@@ -134,6 +151,7 @@ const PROVIDERS = [
   { value: 'gemini', label: 'Google (Gemini)' },
   { value: 'mistral', label: 'Mistral' },
   { value: 'groq', label: 'Groq' },
+  { value: 'xai', label: 'xAI (Grok)' },
   { value: 'ollama', label: 'Ollama (local)' },
 ]
 
@@ -147,6 +165,7 @@ const MODELS = {
   gemini: ['gemini/gemini-2.0-flash', 'gemini/gemini-2.0-flash-lite', 'gemini/gemini-1.5-flash'],
   mistral: ['mistral/mistral-large-latest', 'mistral/mistral-small-latest'],
   groq: ['groq/llama-3.3-70b-versatile', 'groq/llama-3.1-8b-instant'],
+  xai: ['xai/grok-2', 'xai/grok-2-mini'],
   ollama: ['ollama/llama3.2', 'ollama/mistral', 'ollama/phi3'],
 }
 
