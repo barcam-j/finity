@@ -38,7 +38,7 @@
           </div>
 
           <!-- Provider guide -->
-          <div v-if="form.provider === 'gemini' || form.provider === 'anthropic'" class="provider-guide">
+          <div v-if="['gemini', 'anthropic', 'openai'].includes(form.provider)" class="provider-guide">
             <!-- Gemini -->
             <template v-if="form.provider === 'gemini'">
               <p class="guide-title">How to get your Gemini API key</p>
@@ -70,6 +70,23 @@
                 <li>Paste the key below</li>
               </ol>
               <p class="guide-note">Recommended model: <code>claude-3-5-haiku-20241022</code> — fast and very cheap (~$0.001 per import).</p>
+            </template>
+
+            <!-- OpenAI -->
+            <template v-if="form.provider === 'openai'">
+              <p class="guide-title">How to get your OpenAI API key</p>
+              <ol class="guide-steps">
+                <li>
+                  Go to
+                  <a href="https://platform.openai.com" target="_blank" rel="noopener">platform.openai.com</a>
+                  and create an account or sign in
+                </li>
+                <li>Click your profile icon (top right) → <strong>API keys</strong></li>
+                <li>Click <strong>Create new secret key</strong>, give it a name and copy it</li>
+                <li>Add credits under <strong>Settings → Billing</strong> to activate API access</li>
+                <li>Paste the key below</li>
+              </ol>
+              <p class="guide-note">Recommended model: <code>gpt-4o-mini</code> — best balance of speed and cost.</p>
             </template>
           </div>
 
