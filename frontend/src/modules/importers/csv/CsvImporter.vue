@@ -33,6 +33,9 @@
           <h3>Preview</h3>
           <p class="step-subtitle">
             {{ rows.length }} transactions found in <strong>{{ fileName }}</strong>
+            <span v-if="rows.length < totalParsed" class="removed-badge">
+              {{ totalParsed - rows.length }} removed
+            </span>
           </p>
         </div>
         <button class="btn-secondary" @click="reset">Change file</button>
@@ -43,31 +46,52 @@
           <thead>
             <tr>
               <th>Date</th>
-              <th>Amount</th>
               <th>Description</th>
               <th>Category</th>
+              <th class="col-amount">Amount</th>
+              <th class="col-action"></th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(row, i) in previewRows" :key="i">
-              <td>{{ row.date }}</td>
-              <td :class="row.amount < 0 ? 'amount--negative' : 'amount--positive'">
+            <tr v-for="(row, i) in pageRows" :key="i">
+              <td class="col-date">{{ row.date }}</td>
+              <td>{{ row.description || '—' }}</td>
+              <td>
+                <span v-if="row.category" class="badge">{{ row.category }}</span>
+                <span v-else class="text-muted">—</span>
+              </td>
+              <td class="col-amount" :class="row.amount < 0 ? 'amount--negative' : 'amount--positive'">
                 {{ formatAmount(row.amount) }}
               </td>
-              <td>{{ row.description || '—' }}</td>
-              <td>{{ row.category || '—' }}</td>
+              <td class="col-action">
+                <button class="btn-delete" @click="removeRow(previewPage, i)">✕</button>
+              </td>
             </tr>
           </tbody>
         </table>
-        <p v-if="rows.length > PREVIEW_LIMIT" class="preview-more">
-          Showing {{ PREVIEW_LIMIT }} of {{ rows.length }} rows
-        </p>
+      </div>
+
+      <div class="pagination">
+        <span class="pagination-info">
+          {{ (previewPage - 1) * PAGE_SIZE + 1 }}–{{ Math.min(previewPage * PAGE_SIZE, rows.length) }}
+          of {{ rows.length }}
+        </span>
+        <div class="pagination-controls">
+          <button :disabled="previewPage <= 1" @click="previewPage--">←</button>
+          <button
+            v-for="p in visiblePages"
+            :key="p"
+            :class="{ active: p === previewPage }"
+            @click="previewPage = p"
+          >{{ p }}</button>
+          <button :disabled="previewPage >= totalPages" @click="previewPage++">→</button>
+        </div>
       </div>
 
       <p v-if="error" class="error">{{ error }}</p>
 
       <div class="step-actions">
-        <button class="btn-primary" :disabled="importing" @click="confirmImport">
+        <button class="btn-primary" :disabled="importing || !rows.length" @click="confirmImport">
           {{ importing ? 'Importing…' : `Import ${rows.length} transactions` }}
         </button>
       </div>
@@ -88,18 +112,38 @@ import { ref, computed } from 'vue'
 import { csvService } from './service'
 import AiBanner from '@/components/AiBanner.vue'
 
-const PREVIEW_LIMIT = 10
+const PAGE_SIZE = 20
 
 const step = ref('upload')
 const isDragging = ref(false)
 const fileInput = ref(null)
 const fileName = ref('')
 const rows = ref([])
+const totalParsed = ref(0)
+const previewPage = ref(1)
 const importing = ref(false)
 const error = ref(null)
 const importedCount = ref(0)
 
-const previewRows = computed(() => rows.value.slice(0, PREVIEW_LIMIT))
+const totalPages = computed(() => Math.max(1, Math.ceil(rows.value.length / PAGE_SIZE)))
+const pageRows = computed(() => {
+  const start = (previewPage.value - 1) * PAGE_SIZE
+  return rows.value.slice(start, start + PAGE_SIZE)
+})
+const visiblePages = computed(() => {
+  const range = []
+  const delta = 2
+  for (let i = Math.max(1, previewPage.value - delta); i <= Math.min(totalPages.value, previewPage.value + delta); i++) {
+    range.push(i)
+  }
+  return range
+})
+
+function removeRow(page, indexInPage) {
+  const globalIndex = (page - 1) * PAGE_SIZE + indexInPage
+  rows.value.splice(globalIndex, 1)
+  if (previewPage.value > totalPages.value) previewPage.value = totalPages.value
+}
 
 function formatAmount(amount) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
@@ -108,6 +152,8 @@ function formatAmount(amount) {
 function reset() {
   step.value = 'upload'
   rows.value = []
+  totalParsed.value = 0
+  previewPage.value = 1
   error.value = null
   fileName.value = ''
   if (fileInput.value) fileInput.value.value = ''
@@ -126,6 +172,8 @@ async function loadFile(file) {
       return
     }
     rows.value = transactions
+    totalParsed.value = transactions.length
+    previewPage.value = 1
     step.value = 'preview'
   } catch (e) {
     error.value = e.status === 429
@@ -288,6 +336,23 @@ td {
   color: var(--text);
 }
 
+.col-date {
+  white-space: nowrap;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.col-amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.col-action {
+  width: 2rem;
+  text-align: center;
+}
+
 .amount--positive {
   color: oklch(0.55 0.15 145);
 }
@@ -296,12 +361,84 @@ td {
   color: var(--error);
 }
 
-.preview-more {
-  padding: 0.6rem 1rem;
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  font-size: 0.78rem;
   color: var(--text-muted);
-  font-size: 0.85rem;
-  border-top: 1px solid var(--border);
-  margin: 0;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.removed-badge {
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--error);
+}
+
+.btn-delete {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.btn-delete:hover {
+  color: var(--error);
+  background: var(--accent-subtle);
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.pagination-controls button {
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pagination-controls button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.pagination-controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* Actions */
