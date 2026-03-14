@@ -13,6 +13,9 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 
 ### Added
 
+- `[c4g3]` `UserPreferences` model and `GET/PUT /preferences/` router — stores per-user settings (currency, default `EUR`)
+- `[d6h9]` `GET /transactions/` now supports pagination via `?page` and `?limit` query params, returns `{ items, total, page, pages }` sorted by date descending
+
 - `[x2a5]` `GET /ai-config/models/{provider}` endpoint — returns real models fetched from provider API using stored user key, with 1-hour in-memory cache; falls back to defaults if key unavailable or request fails
 - `[y4b1]` `app/ai/models.py` — provider model fetcher supporting OpenAI-compatible APIs (OpenAI, Mistral, Groq, xAI), Gemini and Ollama
 - `[z6c7]` `PUT /ai-config/` accepts optional `api_key` — omitting it on update preserves the existing encrypted key

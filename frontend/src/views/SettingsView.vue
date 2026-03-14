@@ -4,6 +4,27 @@
       <h1>Settings</h1>
 
       <section class="settings-section">
+        <h2>General</h2>
+        <p class="section-desc">Regional preferences for displaying your financial data.</p>
+        <form class="settings-form" @submit.prevent="saveCurrency">
+          <div class="field">
+            <label for="currency">Currency</label>
+            <select id="currency" v-model="currencyForm">
+              <option v-for="c in CURRENCIES" :key="c.code" :value="c.code">
+                {{ c.code }} — {{ c.label }}
+              </option>
+            </select>
+          </div>
+          <div class="form-footer">
+            <span v-if="currencySaved" class="saved-badge">Saved</span>
+            <button class="btn-primary" type="submit" :disabled="prefsStore.loading">
+              {{ prefsStore.loading ? 'Saving…' : 'Save' }}
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section class="settings-section">
         <h2>AI Provider</h2>
         <p class="section-desc">
           Configure the AI provider used to read and categorize your transactions.
@@ -147,6 +168,30 @@ import { ref, computed, onMounted } from 'vue'
 import AppLayout from '@/components/AppLayout.vue'
 import { useAiStore } from '@/stores/ai'
 import { aiConfigService } from '@/services/ai-config'
+import { usePreferencesStore } from '@/stores/preferences'
+
+const CURRENCIES = [
+  { code: 'EUR', label: 'Euro' },
+  { code: 'USD', label: 'US Dollar' },
+  { code: 'GBP', label: 'British Pound' },
+  { code: 'CHF', label: 'Swiss Franc' },
+  { code: 'JPY', label: 'Japanese Yen' },
+  { code: 'CAD', label: 'Canadian Dollar' },
+  { code: 'AUD', label: 'Australian Dollar' },
+  { code: 'MXN', label: 'Mexican Peso' },
+  { code: 'BRL', label: 'Brazilian Real' },
+  { code: 'ARS', label: 'Argentine Peso' },
+]
+
+const prefsStore = usePreferencesStore()
+const currencyForm = ref('EUR')
+const currencySaved = ref(false)
+
+async function saveCurrency() {
+  await prefsStore.save({ currency: currencyForm.value })
+  currencySaved.value = true
+  setTimeout(() => (currencySaved.value = false), 3000)
+}
 
 const PROVIDERS = [
   { value: 'anthropic', label: 'Anthropic (Claude)' },
@@ -201,7 +246,10 @@ async function save() {
 }
 
 onMounted(async () => {
-  await aiStore.fetchConfig()
+  await Promise.all([aiStore.fetchConfig(), prefsStore.fetch()])
+
+  currencyForm.value = prefsStore.currency
+
   if (aiStore.config) {
     form.value.provider = aiStore.config.provider
     form.value.model = aiStore.config.model

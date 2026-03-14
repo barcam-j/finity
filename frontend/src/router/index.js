@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { usePreferencesStore } from '@/stores/preferences'
 
 const routes = [
   {
@@ -35,13 +36,21 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to) => {
+let prefsLoaded = false
+
+router.beforeEach(async (to) => {
   const auth = useAuthStore()
+
   if (!to.meta.public && !auth.isAuthenticated) {
+    prefsLoaded = false
     return { name: 'Login' }
   }
   if (to.meta.public && auth.isAuthenticated) {
     return { name: 'Dashboard' }
+  }
+  if (auth.isAuthenticated && !prefsLoaded) {
+    prefsLoaded = true
+    usePreferencesStore().fetch()
   }
 })
 
