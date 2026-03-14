@@ -46,7 +46,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
@@ -57,10 +57,10 @@ const auth = useAuthStore()
 const isLogin = ref(true)
 const email = ref('')
 const password = ref('')
-const error = ref(null)
+const error = ref<string | null>(null)
 const loading = ref(false)
 
-async function submit() {
+async function submit(): Promise<void> {
   error.value = null
   loading.value = true
   try {
@@ -71,7 +71,7 @@ async function submit() {
     }
     router.push({ name: 'Dashboard' })
   } catch (e) {
-    error.value = e.message
+    error.value = (e as Error).message
   } finally {
     loading.value = false
   }

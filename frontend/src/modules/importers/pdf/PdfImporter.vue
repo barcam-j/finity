@@ -107,7 +107,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { pdfService } from './service'
 import AiBanner from '@/components/AiBanner.vue'

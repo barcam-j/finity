@@ -41,7 +41,7 @@
                     {{ formatAmount(tx.amount) }}
                   </td>
                   <td class="col-action">
-                    <button class="btn-delete" :disabled="deleting === tx.id" @click="remove(tx.id)">
+                    <button class="btn-delete" :disabled="deleting === tx.id" @click="tx.id && remove(tx.id)">
                       ✕
                     </button>
                   </td>
@@ -80,7 +80,7 @@
   </AppLayout>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import AppLayout from '@/components/AppLayout.vue'
 import ImporterSelector from '@/modules/importers/ImporterSelector.vue'
@@ -91,11 +91,11 @@ import { useCurrency } from '@/composables/useCurrency'
 const store = useTransactionsStore()
 const { formatAmount } = useCurrency()
 const showImporter = ref(false)
-const deleting = ref(null)
+const deleting = ref<string | null>(null)
 
 const visiblePages = computed(() => {
   const { page, pages } = store
-  const range = []
+  const range: number[] = []
   const delta = 2
   for (let i = Math.max(1, page - delta); i <= Math.min(pages, page + delta); i++) {
     range.push(i)
@@ -103,21 +103,20 @@ const visiblePages = computed(() => {
   return range
 })
 
-
-function toggleImporter() {
+function toggleImporter(): void {
   showImporter.value = !showImporter.value
 }
 
-async function onImportDone() {
+async function onImportDone(): Promise<void> {
   showImporter.value = false
   await store.fetch(1)
 }
 
-async function goTo(p) {
+async function goTo(p: number): Promise<void> {
   await store.fetch(p)
 }
 
-async function remove(id) {
+async function remove(id: string): Promise<void> {
   deleting.value = id
   try {
     await store.remove(id)

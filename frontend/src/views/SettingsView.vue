@@ -163,14 +163,14 @@
   </AppLayout>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import AppLayout from '@/components/AppLayout.vue'
 import { useAiStore } from '@/stores/ai'
 import { aiConfigService } from '@/services/ai-config'
 import { usePreferencesStore } from '@/stores/preferences'
 
-const CURRENCIES = [
+const CURRENCIES: { code: string; label: string }[] = [
   { code: 'EUR', label: 'Euro' },
   { code: 'USD', label: 'US Dollar' },
   { code: 'GBP', label: 'British Pound' },
@@ -205,7 +205,7 @@ const PROVIDERS = [
 
 const aiStore = useAiStore()
 
-const currentModels = ref([])
+const currentModels = ref<string[]>([])
 const modelsLoading = ref(false)
 const form = ref({ provider: 'gemini', model: '', apiKey: '' })
 const showKey = ref(false)
@@ -216,7 +216,7 @@ const canSave = computed(
   () => form.value.provider && form.value.model && (form.value.apiKey || hasExistingConfig.value),
 )
 
-async function onProviderChange() {
+async function onProviderChange(): Promise<void> {
   modelsLoading.value = true
   form.value.model = ''
   try {
@@ -227,13 +227,12 @@ async function onProviderChange() {
   }
 }
 
-async function save() {
+async function save(): Promise<void> {
   saved.value = false
   const payload = {
     provider: form.value.provider,
     model: form.value.model,
     ...(form.value.apiKey ? { api_key: form.value.apiKey } : {}),
-    params: {},
   }
   try {
     await aiStore.saveConfig(payload)
