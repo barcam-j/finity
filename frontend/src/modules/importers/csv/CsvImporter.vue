@@ -1,8 +1,24 @@
 <template>
   <div class="csv-importer">
+
+    <!-- Step 0: Method selector -->
+    <div v-if="step === 'method'" class="method-selector">
+      <h3>How do you want to import?</h3>
+      <div class="method-cards">
+        <button class="method-card" @click="selectMethod('ai')">
+          <strong>AI Import</strong>
+          <p>AI reads any CSV format automatically. Requires a configured AI provider.</p>
+        </button>
+        <button class="method-card" @click="selectMethod('manual')">
+          <strong>Manual Import</strong>
+          <p>Map columns yourself. No AI or API key required.</p>
+        </button>
+      </div>
+    </div>
+
     <!-- Step 1: Upload -->
-    <div v-if="step === 'upload'">
-      <AiBanner class="banner" />
+    <div v-else-if="step === 'upload'">
+      <AiBanner v-if="method === 'ai'" class="banner" />
       <div
         class="drop-zone"
         :class="{ 'drop-zone--active': isDragging }"
@@ -11,10 +27,12 @@
         @drop.prevent="onDrop"
         @click="fileInput.click()"
       >
-        <input ref="fileInput" type="file" accept=".csv" hidden @change="onFileChange" />
-        <p class="drop-zone__icon">📄</p>
-        <p class="drop-zone__text">Drop your CSV here or <span>click to browse</span></p>
-        <p class="drop-zone__hint">Any format — AI will read and extract the transactions</p>
+        <input ref="fileInput" type="file" accept=".csv,.xlsx,.xls" hidden @change="onFileChange" />
+        <p class="drop-zone__text">Drop your file here or <span>click to browse</span></p>
+        <p class="drop-zone__hint">
+          {{ method === 'ai' ? 'Any format — AI will read and extract the transactions' : 'The first row must contain column headers' }}
+          · CSV, XLSX or XLS
+        </p>
       </div>
       <p v-if="error" class="error">{{ error }}</p>
     </div>
@@ -22,11 +40,95 @@
     <!-- Step 2: Parsing (loading) -->
     <div v-else-if="step === 'parsing'" class="parsing">
       <div class="spinner" />
-      <p>Reading transactions from <strong>{{ fileName }}</strong>…</p>
-      <p class="parsing-hint">AI is interpreting the file, this may take a few seconds</p>
+      <p>{{ method === 'ai' ? 'Reading transactions from' : 'Reading file' }} <strong>{{ fileName }}</strong>…</p>
+      <p v-if="method === 'ai'" class="parsing-hint">AI is interpreting the file, this may take a few seconds</p>
     </div>
 
-    <!-- Step 3: Preview -->
+    <!-- Step 3: Column mapping (manual only) -->
+    <div v-else-if="step === 'mapping'">
+      <div class="step-header">
+        <div>
+          <h3>Map columns</h3>
+          <p class="step-subtitle">Tell us which column contains each field</p>
+        </div>
+        <button class="btn-secondary" @click="resetToUpload">Change file</button>
+      </div>
+
+      <div v-if="hasHeaderWarning" class="warning-banner">
+        ⚠️ The first row looks like data, not headers. Make sure your CSV has a header row before importing.
+      </div>
+
+      <div class="sample-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th v-for="h in parsedHeaders" :key="h">{{ h }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, i) in sampleRows" :key="i">
+              <td v-for="(cell, j) in row" :key="j">{{ cell }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mapping-form">
+        <div class="mapping-row">
+          <label>Date column <span class="required">*</span></label>
+          <select v-model="mapping.date">
+            <option value="">— select —</option>
+            <option v-for="h in parsedHeaders" :key="h" :value="h">{{ h }}</option>
+          </select>
+        </div>
+        <div class="mapping-row">
+          <label>Date format <span class="required">*</span></label>
+          <select v-model="mapping.dateFormat">
+            <option value="YYYY-MM-DD">YYYY-MM-DD (e.g. 2024-03-15)</option>
+            <option value="DD/MM/YYYY">DD/MM/YYYY (e.g. 15/03/2024)</option>
+            <option value="MM/DD/YYYY">MM/DD/YYYY (e.g. 03/15/2024)</option>
+            <option value="DD-MM-YYYY">DD-MM-YYYY (e.g. 15-03-2024)</option>
+            <option value="MM-DD-YYYY">MM-DD-YYYY (e.g. 03-15-2024)</option>
+          </select>
+        </div>
+        <div class="mapping-row">
+          <label>Amount column <span class="required">*</span></label>
+          <select v-model="mapping.amount">
+            <option value="">— select —</option>
+            <option v-for="h in parsedHeaders" :key="h" :value="h">{{ h }}</option>
+          </select>
+        </div>
+        <div class="mapping-row">
+          <label>Amount format <span class="required">*</span></label>
+          <select v-model="mapping.amountFormat">
+            <option value="dot">Period as decimal — 1,234.56</option>
+            <option value="comma">Comma as decimal — 1.234,56</option>
+          </select>
+        </div>
+        <div class="mapping-row">
+          <label>Description column <span class="text-muted">(optional)</span></label>
+          <select v-model="mapping.description">
+            <option value="">— none —</option>
+            <option v-for="h in parsedHeaders" :key="h" :value="h">{{ h }}</option>
+          </select>
+        </div>
+        <div class="mapping-row">
+          <label>Category column <span class="text-muted">(optional)</span></label>
+          <select v-model="mapping.category">
+            <option value="">— none —</option>
+            <option v-for="h in parsedHeaders" :key="h" :value="h">{{ h }}</option>
+          </select>
+        </div>
+      </div>
+
+      <p v-if="mappingError" class="error">{{ mappingError }}</p>
+
+      <div class="step-actions">
+        <button class="btn-primary" @click="applyMapping">Preview transactions</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Preview -->
     <div v-else-if="step === 'preview'">
       <div class="step-header">
         <div>
@@ -38,7 +140,9 @@
             </span>
           </p>
         </div>
-        <button class="btn-secondary" @click="reset">Change file</button>
+        <button class="btn-secondary" @click="method === 'manual' ? (step = 'mapping') : resetToUpload()">
+          {{ method === 'manual' ? 'Edit mapping' : 'Change file' }}
+        </button>
       </div>
 
       <div class="table-wrapper">
@@ -97,18 +201,20 @@
       </div>
     </div>
 
-    <!-- Step 4: Success -->
+    <!-- Step 5: Success -->
     <div v-else-if="step === 'success'" class="success">
       <p class="success__icon">✓</p>
       <h3>Import complete</h3>
       <p>{{ importedCount }} transactions imported successfully.</p>
       <button class="btn-primary" @click="reset">Import another file</button>
     </div>
+
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import * as XLSX from 'xlsx'
 import { csvService } from './service'
 import AiBanner from '@/components/AiBanner.vue'
 import { useCurrency } from '@/composables/useCurrency'
@@ -116,7 +222,9 @@ import { useCurrency } from '@/composables/useCurrency'
 const { formatAmount } = useCurrency()
 const PAGE_SIZE = 20
 
-const step = ref('upload')
+// State
+const step = ref('method')
+const method = ref(null)
 const isDragging = ref(false)
 const fileInput = ref(null)
 const fileName = ref('')
@@ -127,6 +235,22 @@ const importing = ref(false)
 const error = ref(null)
 const importedCount = ref(0)
 
+// Manual mapping state
+const parsedHeaders = ref([])
+const parsedRows = ref([])
+const sampleRows = ref([])
+const hasHeaderWarning = ref(false)
+const mappingError = ref(null)
+const mapping = ref({
+  date: '',
+  dateFormat: 'DD/MM/YYYY',
+  amount: '',
+  amountFormat: 'dot',
+  description: '',
+  category: '',
+})
+
+// Pagination
 const totalPages = computed(() => Math.max(1, Math.ceil(rows.value.length / PAGE_SIZE)))
 const pageRows = computed(() => {
   const start = (previewPage.value - 1) * PAGE_SIZE
@@ -135,11 +259,20 @@ const pageRows = computed(() => {
 const visiblePages = computed(() => {
   const range = []
   const delta = 2
-  for (let i = Math.max(1, previewPage.value - delta); i <= Math.min(totalPages.value, previewPage.value + delta); i++) {
+  for (
+    let i = Math.max(1, previewPage.value - delta);
+    i <= Math.min(totalPages.value, previewPage.value + delta);
+    i++
+  ) {
     range.push(i)
   }
   return range
 })
+
+function selectMethod(m) {
+  method.value = m
+  step.value = 'upload'
+}
 
 function removeRow(page, indexInPage) {
   const globalIndex = (page - 1) * PAGE_SIZE + indexInPage
@@ -147,22 +280,169 @@ function removeRow(page, indexInPage) {
   if (previewPage.value > totalPages.value) previewPage.value = totalPages.value
 }
 
-
 function reset() {
-  step.value = 'upload'
+  step.value = 'method'
+  method.value = null
   rows.value = []
   totalParsed.value = 0
   previewPage.value = 1
   error.value = null
+  mappingError.value = null
   fileName.value = ''
+  parsedHeaders.value = []
+  parsedRows.value = []
+  sampleRows.value = []
+  hasHeaderWarning.value = false
+  mapping.value = {
+    date: '',
+    dateFormat: 'DD/MM/YYYY',
+    amount: '',
+    amountFormat: 'dot',
+    description: '',
+    category: '',
+  }
   if (fileInput.value) fileInput.value.value = ''
 }
 
-async function loadFile(file) {
+function resetToUpload() {
+  step.value = 'upload'
   error.value = null
-  fileName.value = file.name
+  if (fileInput.value) fileInput.value.value = ''
+}
+
+// ── Date parsing ──────────────────────────────────────────────────────────────
+function parseDate(raw, format) {
+  const s = raw.trim()
+  let day, month, year
+
+  if (format === 'YYYY-MM-DD') {
+    ;[year, month, day] = s.split('-').map(Number)
+  } else if (format === 'DD/MM/YYYY') {
+    ;[day, month, year] = s.split('/').map(Number)
+  } else if (format === 'MM/DD/YYYY') {
+    ;[month, day, year] = s.split('/').map(Number)
+  } else if (format === 'DD-MM-YYYY') {
+    ;[day, month, year] = s.split('-').map(Number)
+  } else if (format === 'MM-DD-YYYY') {
+    ;[month, day, year] = s.split('-').map(Number)
+  }
+
+  if (!day || !month || !year) return null
+  const mm = String(month).padStart(2, '0')
+  const dd = String(day).padStart(2, '0')
+  return `${year}-${mm}-${dd}`
+}
+
+// ── Amount parsing ────────────────────────────────────────────────────────────
+function parseAmount(raw, format) {
+  let s = raw.trim().replace(/\s/g, '')
+  const negative = s.startsWith('-') || (s.startsWith('(') && s.endsWith(')'))
+  s = s.replace(/^-/, '').replace(/^\(/, '').replace(/\)$/, '')
+
+  if (format === 'comma') {
+    s = s.replace(/\./g, '').replace(',', '.')
+  } else {
+    s = s.replace(/,/g, '')
+  }
+
+  const n = parseFloat(s)
+  if (isNaN(n)) return null
+  return negative ? -Math.abs(n) : n
+}
+
+// ── Apply mapping ─────────────────────────────────────────────────────────────
+function applyMapping() {
+  mappingError.value = null
+
+  if (!mapping.value.date) {
+    mappingError.value = 'Select the date column.'
+    return
+  }
+  if (!mapping.value.amount) {
+    mappingError.value = 'Select the amount column.'
+    return
+  }
+
+  const transactions = []
+  for (const row of parsedRows.value) {
+    const dateRaw = row[mapping.value.date]
+    const amountRaw = row[mapping.value.amount]
+    if (!dateRaw || !amountRaw) continue
+
+    const date = parseDate(dateRaw, mapping.value.dateFormat)
+    const amount = parseAmount(amountRaw, mapping.value.amountFormat)
+    if (!date || amount === null) continue
+
+    transactions.push({
+      date,
+      amount,
+      description: mapping.value.description ? (row[mapping.value.description] ?? '') : '',
+      category: mapping.value.category ? (row[mapping.value.category] || null) : null,
+    })
+  }
+
+  if (!transactions.length) {
+    mappingError.value =
+      'No valid transactions found with the selected mapping. Check the column and format settings.'
+    return
+  }
+
+  rows.value = transactions
+  totalParsed.value = transactions.length
+  previewPage.value = 1
+  step.value = 'preview'
+}
+
+// ── Excel → CSV conversion ────────────────────────────────────────────────────
+function isExcel(file) {
+  return /\.(xlsx|xls)$/i.test(file.name)
+}
+
+async function excelToCsvFile(file) {
+  const buffer = await file.arrayBuffer()
+  const workbook = XLSX.read(buffer, { type: 'array', cellDates: true })
+
+  const csvParts = workbook.SheetNames.map((name, i) => {
+    const rows = XLSX.utils.sheet_to_csv(workbook.Sheets[name], { blankrows: false })
+    if (i === 0) return rows
+    // For subsequent sheets, strip the header row to avoid duplicates
+    const lines = rows.split('\n')
+    return lines.slice(1).join('\n')
+  })
+
+  const csv = csvParts.join('\n')
+  return new File([csv], file.name.replace(/\.(xlsx|xls)$/i, '.csv'), { type: 'text/csv' })
+}
+
+// ── File loading ──────────────────────────────────────────────────────────────
+async function loadFile(rawFile) {
+  error.value = null
+  const file = isExcel(rawFile) ? await excelToCsvFile(rawFile) : rawFile
+  fileName.value = rawFile.name
   step.value = 'parsing'
 
+  if (method.value === 'manual') {
+    try {
+      const data = await csvService.parse(file)
+      parsedHeaders.value = data.headers
+      parsedRows.value = data.rows.map((row) => {
+        const obj = {}
+        data.headers.forEach((h, i) => {
+          obj[h] = row[i] ?? ''
+        })
+        return obj
+      })
+      sampleRows.value = data.rows.slice(0, 5)
+      hasHeaderWarning.value = data.has_header_warning
+      step.value = 'mapping'
+    } catch (e) {
+      error.value = e.message
+      step.value = 'upload'
+    }
+    return
+  }
+
+  // AI mode
   try {
     const { transactions } = await csvService.preview(file)
     if (!transactions?.length) {
@@ -175,9 +455,10 @@ async function loadFile(file) {
     previewPage.value = 1
     step.value = 'preview'
   } catch (e) {
-    error.value = e.status === 429
-      ? 'AI rate limit reached. Wait a moment and try again, or switch to a different model in Settings.'
-      : e.message
+    error.value =
+      e.status === 429
+        ? 'AI rate limit reached. Wait a moment and try again, or switch to a different model in Settings.'
+        : e.message
     step.value = 'upload'
   }
 }
@@ -217,6 +498,47 @@ async function confirmImport() {
   margin-bottom: 1rem;
 }
 
+/* Method selector */
+.method-selector h3 {
+  margin: 0 0 1.25rem;
+}
+
+.method-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.method-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 1.25rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.method-card:hover {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.method-card strong {
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.method-card p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
 /* Drop zone */
 .drop-zone {
   border: 2px dashed var(--border);
@@ -231,11 +553,6 @@ async function confirmImport() {
 .drop-zone--active {
   border-color: var(--accent);
   background: var(--accent-subtle);
-}
-
-.drop-zone__icon {
-  font-size: 2.5rem;
-  margin: 0 0 0.75rem;
 }
 
 .drop-zone__text {
@@ -285,6 +602,62 @@ async function confirmImport() {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Warning banner */
+.warning-banner {
+  background: oklch(0.97 0.05 85);
+  border: 1px solid oklch(0.85 0.1 85);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: oklch(0.45 0.1 60);
+  margin-bottom: 1rem;
+}
+
+/* Sample table */
+.sample-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+/* Mapping form */
+.mapping-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mapping-row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  align-items: center;
+  gap: 1rem;
+}
+
+.mapping-row label {
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.mapping-row select {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.mapping-row select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.required {
+  color: var(--error);
 }
 
 /* Step header */

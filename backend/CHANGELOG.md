@@ -26,6 +26,10 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[v1o8]` CSV importer module (`app/importers/csv/`) with improved column detection (EN/ES aliases), `source='csv'` tagging on each transaction
 - `[w4p2]` Removed old `POST /transactions/import` endpoint — CSV import now served exclusively from `POST /importers/csv/import`
 
+- `[e3f1]` PDF importer module (`app/importers/pdf/`) — `POST /importers/pdf/preview` extracts text via `pypdf` and sends to AI; `POST /importers/pdf/import` saves transactions with `source='pdf'`; `pypdf==5.4.0` added to dependencies
+- `[f5g7]` `POST /importers/csv/parse` endpoint — reads and decodes CSV without AI, returns headers, all rows and `has_header_warning` flag for the manual import flow
+- `[g8h2]` CSV validators extracted to `app/importers/csv/validators.py` as FastAPI dependencies (`get_csv_text`, `get_parsed_csv`) — validates file is not empty, has multiple columns and rows are properly delimited; injected via `Depends` keeping router handlers clean
+
 ---
 
 ## [0.1.0] - 2026-03-07

@@ -1,14 +1,16 @@
 import json
 import re
 from datetime import date as date_type
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
 from app.ai.adapter import get_ai_response
 from app.core.deps import get_current_user
 from app.models.user import User
 from app.models.transaction import Transaction
+from app.importers.csv.validators import CsvText, ParsedCsvFile, get_csv_text, get_parsed_csv
 
 router = APIRouter(prefix='/importers/csv', tags=['importers'])
 
@@ -26,12 +28,9 @@ class ImportRequest(BaseModel):
 
 @router.post('/preview')
 async def preview_csv(
-    file: UploadFile = File(...),
+    csv: Annotated[CsvText, Depends(get_csv_text)],
     current_user: User = Depends(get_current_user),
 ):
-    content = await file.read()
-    text = content.decode('utf-8-sig')
-
     prompt = (
         'You are a financial data extractor. '
         'Below is the raw content of a CSV file where each row represents a bank transaction.\n\n'
@@ -41,7 +40,7 @@ async def preview_csv(
         '- "description": string (transaction concept or narration, empty string if none)\n'
         '- "category": string or null\n\n'
         'Skip rows you cannot parse. Return ONLY the JSON array, no markdown, no explanation.\n\n'
-        f'CSV content:\n{text}'
+        f'CSV content:\n{csv.text}'
     )
 
     try:
@@ -73,6 +72,18 @@ async def preview_csv(
         )
 
     return {'transactions': transactions}
+
+
+@router.post('/parse')
+async def parse_csv_manual(
+    parsed: Annotated[ParsedCsvFile, Depends(get_parsed_csv)],
+    current_user: User = Depends(get_current_user),
+):
+    return {
+        'headers': parsed.headers,
+        'rows': parsed.data_rows,
+        'has_header_warning': parsed.has_header_warning,
+    }
 
 
 @router.post('/import', status_code=status.HTTP_201_CREATED)
