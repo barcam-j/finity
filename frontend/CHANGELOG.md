@@ -31,6 +31,12 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[d8q4]` `ImporterSelector` component — card grid to choose between available import formats
 - `[e1r9]` Transactions view updated with Import toggle and empty state
 
+- `[q1a2]` PDF importer module (`src/modules/importers/pdf/`) — same flow as CSV, AI extracts transactions from bank statement PDFs; `source='pdf'` tagging
+- `[r3b8]` CSV importer method selector — user chooses between AI import (any format) or Manual import (no API key required) before uploading
+- `[s5c4]` Manual CSV import — column mapping step with date column, date format, amount column, amount format (period/comma), description and category selectors; frontend applies mapping and generates transaction preview
+- `[t7d1]` CSV and Excel support — importer accepts `.csv`, `.xlsx` and `.xls`; SheetJS converts Excel to CSV on the frontend before sending to backend; all sheets are merged (headers taken from first sheet)
+- `[u2e6]` CSV structure validation feedback — clear error shown when file has only one column or rows are not properly delimited
+
 ---
 
 ## [0.1.0] - 2026-03-07
