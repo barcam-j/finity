@@ -12,13 +12,13 @@ La aplicación está construida en dos partes bien diferenciadas: un frontend mo
 
 ## Stack tecnológico
 
-| Capa | Tecnología | Razón |
-|------|-----------|-------|
-| Frontend | Vue 3 + Vite + Pinia + Vue Router | Moderno, reactivo, ecosistema maduro |
-| Backend | Python + FastAPI | Async nativo, ideal para llamadas a IA, auto-documentación |
-| Base de datos | MongoDB | Flexible para estructuras variables de transacciones y resultados de análisis |
-| IA | LiteLLM (capa de abstracción) | Soporta Claude, OpenAI, Gemini, Mistral... con la misma interfaz |
-| Auth | JWT (tokens) | Simple y seguro para uso personal |
+| Capa          | Tecnología                        | Razón                                                                         |
+| ------------- | --------------------------------- | ----------------------------------------------------------------------------- |
+| Frontend      | Vue 3 + Vite + Pinia + Vue Router | Moderno, reactivo, ecosistema maduro                                          |
+| Backend       | Python + FastAPI                  | Async nativo, ideal para llamadas a IA, auto-documentación                    |
+| Base de datos | MongoDB                           | Flexible para estructuras variables de transacciones y resultados de análisis |
+| IA            | LiteLLM (capa de abstracción)     | Soporta Claude, OpenAI, Gemini, Mistral... con la misma interfaz              |
+| Auth          | JWT (tokens)                      | Simple y seguro para uso personal                                             |
 
 ---
 
@@ -83,14 +83,14 @@ La aplicación está construida en dos partes bien diferenciadas: un frontend mo
 
 ## Base de datos — Colecciones MongoDB
 
-| Colección | Campos principales |
-|-----------|-------------------|
-| `users` | `_id`, `email`, `password_hash`, `created_at` |
-| `transactions` | `_id`, `user_id`, `date`, `amount`, `category`, `description`, `source`, `tags` |
-| `categories` | `_id`, `user_id`, `name`, `type` (income/expense), `color`, `icon` |
-| `ai_configs` | `_id`, `user_id`, `provider`, `api_key` (encrypted), `model`, `params` |
-| `alerts` | `_id`, `user_id`, `type`, `message`, `severity`, `transaction_id`, `seen`, `created_at` |
-| `analysis_cache` | `_id`, `user_id`, `period`, `result`, `generated_at` |
+| Colección        | Campos principales                                                                      |
+| ---------------- | --------------------------------------------------------------------------------------- |
+| `users`          | `_id`, `email`, `password_hash`, `created_at`                                           |
+| `transactions`   | `_id`, `user_id`, `date`, `amount`, `category`, `description`, `source`, `tags`         |
+| `categories`     | `_id`, `user_id`, `name`, `type` (income/expense), `color`, `icon`                      |
+| `ai_configs`     | `_id`, `user_id`, `provider`, `api_key` (encrypted), `model`, `params`                  |
+| `alerts`         | `_id`, `user_id`, `type`, `message`, `severity`, `transaction_id`, `seen`, `created_at` |
+| `analysis_cache` | `_id`, `user_id`, `period`, `result`, `generated_at`                                    |
 
 ---
 
@@ -130,17 +130,17 @@ La capa de abstracción con **LiteLLM** permite que el backend use cualquier pro
 
 ## Features — Hoja de ruta por fases
 
-| Fase | Feature | Estado |
-|------|---------|--------|
-| v1 | Importación CSV + CRUD de transacciones | Pendiente |
-| v1 | Detección de anomalías y alertas con IA | Pendiente |
-| v1 | Dashboard con KPIs básicos | Pendiente |
-| v1 | Configuración de proveedor IA por usuario | Pendiente |
-| v2 | Chat en lenguaje natural con los datos | Pendiente |
-| v2 | Gráficas y visualización avanzada | Pendiente |
-| v3 | Predicciones y análisis de tendencias | Pendiente |
-| v4 | Recomendaciones personalizadas | Pendiente |
-| v5 | Módulo de inversiones | Pendiente |
+| Fase | Feature                                   | Estado    |
+| ---- | ----------------------------------------- | --------- |
+| v1   | Importación CSV + CRUD de transacciones   | Pendiente |
+| v1   | Detección de anomalías y alertas con IA   | Pendiente |
+| v1   | Dashboard con KPIs básicos                | Pendiente |
+| v1   | Configuración de proveedor IA por usuario | Pendiente |
+| v2   | Chat en lenguaje natural con los datos    | Pendiente |
+| v2   | Gráficas y visualización avanzada         | Pendiente |
+| v3   | Predicciones y análisis de tendencias     | Pendiente |
+| v4   | Recomendaciones personalizadas            | Pendiente |
+| v5   | Módulo de inversiones                     | Pendiente |
 
 ---
 
@@ -204,7 +204,7 @@ src/styles/
 
 ```css
 /* primitives.css — valor raw */
---orange-500: oklch(0.70 0.19 42);
+--orange-500: oklch(0.7 0.19 42);
 
 /* themes/light.css — intención */
 --accent: var(--orange-500);
