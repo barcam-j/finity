@@ -23,15 +23,16 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
-import importers from './index.js'
+import importers from './index'
+import type { ImporterDefinition } from '@/types'
 
-const emit = defineEmits(['done'])
+const emit = defineEmits<{ done: [] }>()
 
-const active = ref(null)
+const active = ref<ImporterDefinition | null>(null)
 
-function onDone() {
+function onDone(): void {
   active.value = null
   emit('done')
 }

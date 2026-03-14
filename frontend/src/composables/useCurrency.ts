@@ -3,7 +3,7 @@ import { usePreferencesStore } from '@/stores/preferences'
 export function useCurrency() {
   const prefs = usePreferencesStore()
 
-  function formatAmount(amount) {
+  function formatAmount(amount: number): string {
     const parts = new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: prefs.currency,

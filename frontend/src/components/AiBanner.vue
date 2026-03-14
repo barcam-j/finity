@@ -16,7 +16,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useAiStore } from '@/stores/ai'
@@ -32,7 +32,7 @@ onMounted(async () => {
   visible.value = !aiStore.config
 })
 
-function dismiss() {
+function dismiss(): void {
   visible.value = false
   sessionStorage.setItem(DISMISSED_KEY, '1')
 }
