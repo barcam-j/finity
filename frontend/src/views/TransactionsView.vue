@@ -86,8 +86,10 @@ import AppLayout from '@/components/AppLayout.vue'
 import ImporterSelector from '@/modules/importers/ImporterSelector.vue'
 import AiBanner from '@/components/AiBanner.vue'
 import { useTransactionsStore } from '@/stores/transactions'
+import { useCurrency } from '@/composables/useCurrency'
 
 const store = useTransactionsStore()
+const { formatAmount } = useCurrency()
 const showImporter = ref(false)
 const deleting = ref(null)
 
@@ -101,9 +103,6 @@ const visiblePages = computed(() => {
   return range
 })
 
-function formatAmount(amount) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
-}
 
 function toggleImporter() {
   showImporter.value = !showImporter.value

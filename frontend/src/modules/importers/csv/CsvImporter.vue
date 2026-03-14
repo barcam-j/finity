@@ -111,7 +111,9 @@
 import { ref, computed } from 'vue'
 import { csvService } from './service'
 import AiBanner from '@/components/AiBanner.vue'
+import { useCurrency } from '@/composables/useCurrency'
 
+const { formatAmount } = useCurrency()
 const PAGE_SIZE = 20
 
 const step = ref('upload')
@@ -145,9 +147,6 @@ function removeRow(page, indexInPage) {
   if (previewPage.value > totalPages.value) previewPage.value = totalPages.value
 }
 
-function formatAmount(amount) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
-}
 
 function reset() {
   step.value = 'upload'
