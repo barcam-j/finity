@@ -17,16 +17,14 @@ export const csvService = {
       body: form,
     })
     if (!res.ok) throw new Error((await res.json()).detail || 'Preview failed')
-    return res.json()
+    return res.json() // { transactions: [...] }
   },
 
-  async import(file) {
-    const form = new FormData()
-    form.append('file', file)
+  async import(transactions) {
     const res = await fetch(`${BASE_URL}/importers/csv/import`, {
       method: 'POST',
-      headers: authHeaders(),
-      body: form,
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transactions }),
     })
     if (!res.ok) throw new Error((await res.json()).detail || 'Import failed')
     return res.json()

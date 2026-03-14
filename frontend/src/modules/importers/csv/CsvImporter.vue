@@ -1,6 +1,6 @@
 <template>
   <div class="csv-importer">
-    <!-- Step 1: Drop zone -->
+    <!-- Step 1: Upload -->
     <div v-if="step === 'upload'">
       <div
         class="drop-zone"
@@ -13,17 +13,26 @@
         <input ref="fileInput" type="file" accept=".csv" hidden @change="onFileChange" />
         <p class="drop-zone__icon">📄</p>
         <p class="drop-zone__text">Drop your CSV here or <span>click to browse</span></p>
-        <p class="drop-zone__hint">Supported columns: date, amount, description, category</p>
+        <p class="drop-zone__hint">Any format — AI will read and extract the transactions</p>
       </div>
       <p v-if="error" class="error">{{ error }}</p>
     </div>
 
-    <!-- Step 2: Preview -->
+    <!-- Step 2: Parsing (loading) -->
+    <div v-else-if="step === 'parsing'" class="parsing">
+      <div class="spinner" />
+      <p>Reading transactions from <strong>{{ fileName }}</strong>…</p>
+      <p class="parsing-hint">AI is interpreting the file, this may take a few seconds</p>
+    </div>
+
+    <!-- Step 3: Preview -->
     <div v-else-if="step === 'preview'">
-      <div class="preview-header">
+      <div class="step-header">
         <div>
           <h3>Preview</h3>
-          <p class="preview-count">{{ rows.length }} transactions found in <strong>{{ fileName }}</strong></p>
+          <p class="step-subtitle">
+            {{ rows.length }} transactions found in <strong>{{ fileName }}</strong>
+          </p>
         </div>
         <button class="btn-secondary" @click="reset">Change file</button>
       </div>
@@ -44,7 +53,7 @@
               <td :class="row.amount < 0 ? 'amount--negative' : 'amount--positive'">
                 {{ formatAmount(row.amount) }}
               </td>
-              <td>{{ row.description }}</td>
+              <td>{{ row.description || '—' }}</td>
               <td>{{ row.category || '—' }}</td>
             </tr>
           </tbody>
@@ -56,14 +65,14 @@
 
       <p v-if="error" class="error">{{ error }}</p>
 
-      <div class="preview-actions">
-        <button class="btn-primary" :disabled="loading" @click="confirmImport">
-          {{ loading ? 'Importing...' : `Import ${rows.length} transactions` }}
+      <div class="step-actions">
+        <button class="btn-primary" :disabled="importing" @click="confirmImport">
+          {{ importing ? 'Importing…' : `Import ${rows.length} transactions` }}
         </button>
       </div>
     </div>
 
-    <!-- Step 3: Success -->
+    <!-- Step 4: Success -->
     <div v-else-if="step === 'success'" class="success">
       <p class="success__icon">✓</p>
       <h3>Import complete</h3>
@@ -84,10 +93,9 @@ const isDragging = ref(false)
 const fileInput = ref(null)
 const fileName = ref('')
 const rows = ref([])
-const loading = ref(false)
+const importing = ref(false)
 const error = ref(null)
 const importedCount = ref(0)
-const currentFile = ref(null)
 
 const previewRows = computed(() => rows.value.slice(0, PREVIEW_LIMIT))
 
@@ -100,48 +108,51 @@ function reset() {
   rows.value = []
   error.value = null
   fileName.value = ''
-  currentFile.value = null
   if (fileInput.value) fileInput.value.value = ''
 }
 
-async function loadPreview(file) {
+async function loadFile(file) {
   error.value = null
-  loading.value = true
+  fileName.value = file.name
+  step.value = 'parsing'
+
   try {
-    currentFile.value = file
-    fileName.value = file.name
-    const data = await csvService.preview(file)
-    rows.value = data.rows
+    const { transactions } = await csvService.preview(file)
+    if (!transactions?.length) {
+      error.value = 'No transactions found in file'
+      step.value = 'upload'
+      return
+    }
+    rows.value = transactions
     step.value = 'preview'
   } catch (e) {
     error.value = e.message
-  } finally {
-    loading.value = false
+    step.value = 'upload'
   }
 }
 
 function onDrop(e) {
   isDragging.value = false
   const file = e.dataTransfer.files[0]
-  if (file) loadPreview(file)
+  if (file) loadFile(file)
 }
 
 function onFileChange(e) {
   const file = e.target.files[0]
-  if (file) loadPreview(file)
+  if (file) loadFile(file)
 }
 
 async function confirmImport() {
   error.value = null
-  loading.value = true
+  importing.value = true
   try {
-    const data = await csvService.import(currentFile.value)
+    const data = await csvService.import(rows.value)
     importedCount.value = data.imported
     step.value = 'success'
   } catch (e) {
     error.value = e.message
   } finally {
-    loading.value = false
+    importing.value = false
   }
 }
 </script>
@@ -189,24 +200,57 @@ async function confirmImport() {
   font-size: 0.85rem;
 }
 
-/* Preview */
-.preview-header {
+/* Parsing state */
+.parsing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: var(--text);
+}
+
+.parsing-hint {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Step header */
+.step-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
-.preview-header h3 {
+.step-header h3 {
   margin: 0 0 0.25rem;
 }
 
-.preview-count {
+.step-subtitle {
   margin: 0;
   color: var(--text-muted);
   font-size: 0.9rem;
 }
 
+/* Table */
 .table-wrapper {
   overflow-x: auto;
   border: 1px solid var(--border);
@@ -252,7 +296,8 @@ td {
   margin: 0;
 }
 
-.preview-actions {
+/* Actions */
+.step-actions {
   margin-top: 1.25rem;
   display: flex;
   justify-content: flex-end;
