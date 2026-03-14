@@ -9,6 +9,7 @@ from app.models.transaction import Transaction
 from app.models.ai_config import AiConfig
 from app.models.alert import Alert
 from app.routers import auth, transactions, ai_config, alerts
+from app.importers.registry import register_importers
 
 DOCUMENT_MODELS = [User, Transaction, AiConfig, Alert]
 
@@ -34,6 +35,7 @@ app.include_router(auth.router)
 app.include_router(transactions.router)
 app.include_router(ai_config.router)
 app.include_router(alerts.router)
+register_importers(app)
 
 
 @app.get('/health')

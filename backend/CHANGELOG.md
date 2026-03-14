@@ -11,6 +11,12 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 
 ## [Unreleased]
 
+### Added
+
+- `[u7n3]` Modular importer architecture — `ImporterBase` ABC, registry with `register_importers()`, importers mounted under `/importers/<type>`
+- `[v1o8]` CSV importer module (`app/importers/csv/`) with improved column detection (EN/ES aliases), `source='csv'` tagging on each transaction
+- `[w4p2]` Removed old `POST /transactions/import` endpoint — CSV import now served exclusively from `POST /importers/csv/import`
+
 ---
 
 ## [0.1.0] - 2026-03-07
