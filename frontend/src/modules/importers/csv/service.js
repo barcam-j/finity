@@ -16,8 +16,13 @@ export const csvService = {
       headers: authHeaders(),
       body: form,
     })
-    if (!res.ok) throw new Error((await res.json()).detail || 'Preview failed')
-    return res.json() // { transactions: [...] }
+    if (!res.ok) {
+      const body = await res.json()
+      const err = new Error(body.detail || 'Preview failed')
+      err.status = res.status
+      throw err
+    }
+    return res.json()
   },
 
   async import(transactions) {

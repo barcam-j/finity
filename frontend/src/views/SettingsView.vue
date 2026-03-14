@@ -109,7 +109,7 @@ const MODELS = {
     'claude-3-opus-20240229',
   ],
   openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-  gemini: ['gemini/gemini-1.5-pro', 'gemini/gemini-1.5-flash', 'gemini/gemini-2.0-flash'],
+  gemini: ['gemini/gemini-2.0-flash', 'gemini/gemini-2.0-flash-lite', 'gemini/gemini-1.5-flash'],
   mistral: ['mistral/mistral-large-latest', 'mistral/mistral-small-latest'],
   groq: ['groq/llama-3.3-70b-versatile', 'groq/llama-3.1-8b-instant'],
   ollama: ['ollama/llama3.2', 'ollama/mistral', 'ollama/phi3'],
@@ -117,7 +117,7 @@ const MODELS = {
 
 const aiStore = useAiStore()
 
-const form = ref({ provider: 'gemini', model: MODELS.gemini[0], apiKey: '' })
+const form = ref({ provider: 'gemini', model: 'gemini/gemini-2.0-flash', apiKey: '' })
 const showKey = ref(false)
 const saved = ref(false)
 

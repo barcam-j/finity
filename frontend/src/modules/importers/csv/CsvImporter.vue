@@ -128,7 +128,9 @@ async function loadFile(file) {
     rows.value = transactions
     step.value = 'preview'
   } catch (e) {
-    error.value = e.message
+    error.value = e.status === 429
+      ? 'AI rate limit reached. Wait a moment and try again, or switch to a different model in Settings.'
+      : e.message
     step.value = 'upload'
   }
 }
