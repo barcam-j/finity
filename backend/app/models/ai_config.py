@@ -1,5 +1,4 @@
 from beanie import Document, PydanticObjectId
-from typing import Optional
 
 
 class AiConfig(Document):
