@@ -8,6 +8,21 @@ function authHeaders() {
 }
 
 export const csvService = {
+  async parse(file) {
+    const form = new FormData()
+    form.append('file', file)
+    const res = await fetch(`${BASE_URL}/importers/csv/parse`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: form,
+    })
+    if (!res.ok) {
+      const body = await res.json()
+      throw new Error(body.detail || 'Parse failed')
+    }
+    return res.json()
+  },
+
   async preview(file) {
     const form = new FormData()
     form.append('file', file)
