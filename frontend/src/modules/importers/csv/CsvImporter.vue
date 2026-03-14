@@ -2,6 +2,7 @@
   <div class="csv-importer">
     <!-- Step 1: Upload -->
     <div v-if="step === 'upload'">
+      <AiBanner class="banner" />
       <div
         class="drop-zone"
         :class="{ 'drop-zone--active': isDragging }"
@@ -85,6 +86,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { csvService } from './service'
+import AiBanner from '@/components/AiBanner.vue'
 
 const PREVIEW_LIMIT = 10
 
@@ -126,7 +128,9 @@ async function loadFile(file) {
     rows.value = transactions
     step.value = 'preview'
   } catch (e) {
-    error.value = e.message
+    error.value = e.status === 429
+      ? 'AI rate limit reached. Wait a moment and try again, or switch to a different model in Settings.'
+      : e.message
     step.value = 'upload'
   }
 }
@@ -160,6 +164,10 @@ async function confirmImport() {
 <style scoped>
 .csv-importer {
   width: 100%;
+}
+
+.banner {
+  margin-bottom: 1rem;
 }
 
 /* Drop zone */

@@ -13,6 +13,12 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 
 ### Added
 
+- `[x2a5]` `GET /ai-config/models/{provider}` endpoint — returns real models fetched from provider API using stored user key, with 1-hour in-memory cache; falls back to defaults if key unavailable or request fails
+- `[y4b1]` `app/ai/models.py` — provider model fetcher supporting OpenAI-compatible APIs (OpenAI, Mistral, Groq, xAI), Gemini and Ollama
+- `[z6c7]` `PUT /ai-config/` accepts optional `api_key` — omitting it on update preserves the existing encrypted key
+- `[a8d3]` xAI (Grok) added as supported provider with models `xai/grok-2` and `xai/grok-2-mini`
+- `[b1e9]` Improved AI error handling in CSV importer — rate limit (429), authentication (401) and model not found (404) mapped to user-friendly messages
+
 - `[u7n3]` Modular importer architecture — `ImporterBase` ABC, registry with `register_importers()`, importers mounted under `/importers/<type>`
 - `[v1o8]` CSV importer module (`app/importers/csv/`) with improved column detection (EN/ES aliases), `source='csv'` tagging on each transaction
 - `[w4p2]` Removed old `POST /transactions/import` endpoint — CSV import now served exclusively from `POST /importers/csv/import`

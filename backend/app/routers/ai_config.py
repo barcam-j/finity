@@ -1,17 +1,18 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
 from app.core.deps import get_current_user
-from app.core.encryption import encrypt, decrypt
+from app.core.encryption import encrypt
 from app.models.user import User
 from app.models.ai_config import AiConfig
+from app.ai.models import fetch_models, DEFAULTS
 
 router = APIRouter(prefix='/ai-config', tags=['ai-config'])
 
 
 class AiConfigRequest(BaseModel):
     provider: str
-    api_key: str
+    api_key: str | None = None
     model: str
     params: dict = {}
 
@@ -20,6 +21,16 @@ class AiConfigResponse(BaseModel):
     provider: str
     model: str
     params: dict
+
+
+@router.get('/models/{provider}')
+async def get_provider_models(provider: str, current_user: User = Depends(get_current_user)):
+    config = await AiConfig.find_one(AiConfig.user_id == current_user.id)
+    if config and config.provider == provider:
+        from app.core.encryption import decrypt
+        api_key = decrypt(config.api_key_encrypted)
+        return await fetch_models(provider, api_key)
+    return DEFAULTS.get(provider, [])
 
 
 @router.get('/', response_model=AiConfigResponse | None)
@@ -35,11 +46,16 @@ async def save_config(body: AiConfigRequest, current_user: User = Depends(get_cu
     config = await AiConfig.find_one(AiConfig.user_id == current_user.id)
     if config:
         config.provider = body.provider
-        config.api_key_encrypted = encrypt(body.api_key)
+        if body.api_key:
+            config.api_key_encrypted = encrypt(body.api_key)
         config.model = body.model
         config.params = body.params
-        await config.save()
     else:
+        if not body.api_key:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail='API key is required when creating a new configuration',
+            )
         config = AiConfig(
             user_id=current_user.id,
             provider=body.provider,
@@ -47,5 +63,10 @@ async def save_config(body: AiConfigRequest, current_user: User = Depends(get_cu
             model=body.model,
             params=body.params,
         )
+
+    if config.id:
+        await config.save()
+    else:
         await config.insert()
+
     return {'status': 'saved'}

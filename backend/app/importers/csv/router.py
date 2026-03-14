@@ -51,9 +51,25 @@ async def preview_csv(
             raise ValueError('AI did not return a valid JSON array')
         transactions = json.loads(match.group())
     except Exception as e:
+        msg = str(e)
+        if '429' in msg or 'RateLimitError' in msg or 'quota' in msg.lower():
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail='AI provider rate limit reached. Wait a moment and try again, or add credits in your provider dashboard.',
+            )
+        if '401' in msg or 'AuthenticationError' in msg or 'invalid api key' in msg.lower():
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='Invalid API key. Check your key in Settings.',
+            )
+        if 'NotFoundError' in msg or '404' in msg:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail='AI model not found. Check the model name in Settings.',
+            )
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(e),
+            detail=f'AI error: {msg}',
         )
 
     return {'transactions': transactions}

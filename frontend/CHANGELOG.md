@@ -13,6 +13,14 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 
 ### Added
 
+- `[f2s1]` Settings view with AI provider configuration form — provider selector, model field with datalist suggestions, API key input with show/hide toggle
+- `[g4t6]` Step-by-step API key guides for Gemini, Anthropic, OpenAI and xAI (Grok) — shown contextually when each provider is selected
+- `[h7u2]` Gemini pre-selected as default provider with `gemini/gemini-2.0-flash` as default model
+- `[i9v8]` Provider models fetched from backend on provider select — shows real available models with "Loading models…" feedback
+- `[j1w4]` `AiBanner` component — warns user when no AI provider is configured, with direct links to Google AI Studio and Settings. Shown in Transactions view and CSV importer. Dismissable per session
+- `[k3x9]` Friendly error messages in CSV importer for AI provider failures (rate limit, invalid key, model not found)
+- `[l6y3]` `ai-config` service and completed `ai` store with `fetchConfig` and `saveConfig` actions
+
 - `[b3n7]` Modular importer system — self-contained modules under `src/modules/importers/`, each with its own component, service and definition
 - `[c5p2]` CSV importer module with drag & drop upload, row preview and import confirmation (`CsvImporter.vue`)
 - `[d8q4]` `ImporterSelector` component — card grid to choose between available import formats
