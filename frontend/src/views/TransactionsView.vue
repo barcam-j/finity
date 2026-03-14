@@ -1,6 +1,8 @@
 <template>
   <AppLayout>
     <div class="transactions-view">
+      <AiBanner />
+
       <div class="view-header">
         <h1>Transactions</h1>
         <button class="btn-primary" @click="showImporter = !showImporter">
@@ -23,6 +25,7 @@
 import { ref } from 'vue'
 import AppLayout from '@/components/AppLayout.vue'
 import ImporterSelector from '@/modules/importers/ImporterSelector.vue'
+import AiBanner from '@/components/AiBanner.vue'
 
 const showImporter = ref(false)
 

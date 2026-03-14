@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
 from app.core.deps import get_current_user
@@ -11,7 +11,7 @@ router = APIRouter(prefix='/ai-config', tags=['ai-config'])
 
 class AiConfigRequest(BaseModel):
     provider: str
-    api_key: str
+    api_key: str | None = None
     model: str
     params: dict = {}
 
@@ -35,11 +35,17 @@ async def save_config(body: AiConfigRequest, current_user: User = Depends(get_cu
     config = await AiConfig.find_one(AiConfig.user_id == current_user.id)
     if config:
         config.provider = body.provider
-        config.api_key_encrypted = encrypt(body.api_key)
+        if body.api_key:
+            config.api_key_encrypted = encrypt(body.api_key)
         config.model = body.model
         config.params = body.params
         await config.save()
     else:
+        if not body.api_key:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail='API key is required when creating a new configuration',
+            )
         config = AiConfig(
             user_id=current_user.id,
             provider=body.provider,
