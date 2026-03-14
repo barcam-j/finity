@@ -34,7 +34,9 @@
             <datalist id="model-suggestions">
               <option v-for="m in currentModels" :key="m" :value="m" />
             </datalist>
-            <span class="field-hint">You can type any model supported by your provider</span>
+            <span class="field-hint">
+              {{ modelsLoading ? 'Loading models…' : 'You can type any model supported by your provider' }}
+            </span>
           </div>
 
           <!-- Provider guide -->
@@ -144,6 +146,7 @@
 import { ref, computed, onMounted } from 'vue'
 import AppLayout from '@/components/AppLayout.vue'
 import { useAiStore } from '@/stores/ai'
+import { aiConfigService } from '@/services/ai-config'
 
 const PROVIDERS = [
   { value: 'anthropic', label: 'Anthropic (Claude)' },
@@ -155,36 +158,28 @@ const PROVIDERS = [
   { value: 'ollama', label: 'Ollama (local)' },
 ]
 
-const MODELS = {
-  anthropic: [
-    'claude-3-5-sonnet-20241022',
-    'claude-3-5-haiku-20241022',
-    'claude-3-opus-20240229',
-  ],
-  openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-  gemini: ['gemini/gemini-2.0-flash', 'gemini/gemini-2.0-flash-lite', 'gemini/gemini-1.5-flash'],
-  mistral: ['mistral/mistral-large-latest', 'mistral/mistral-small-latest'],
-  groq: ['groq/llama-3.3-70b-versatile', 'groq/llama-3.1-8b-instant'],
-  xai: ['xai/grok-2', 'xai/grok-2-mini'],
-  ollama: ['ollama/llama3.2', 'ollama/mistral', 'ollama/phi3'],
-}
-
 const aiStore = useAiStore()
 
-const form = ref({ provider: 'gemini', model: 'gemini/gemini-2.0-flash', apiKey: '' })
+const currentModels = ref([])
+const modelsLoading = ref(false)
+const form = ref({ provider: 'gemini', model: '', apiKey: '' })
 const showKey = ref(false)
 const saved = ref(false)
 
 const hasExistingConfig = computed(() => !!aiStore.config)
-const currentModels = computed(() => MODELS[form.value.provider] ?? [])
 const canSave = computed(
   () => form.value.provider && form.value.model && (form.value.apiKey || hasExistingConfig.value),
 )
 
-function onProviderChange() {
-  const suggestions = MODELS[form.value.provider]
-  if (suggestions?.length) form.value.model = suggestions[0]
-  else form.value.model = ''
+async function onProviderChange() {
+  modelsLoading.value = true
+  form.value.model = ''
+  try {
+    currentModels.value = await aiConfigService.models(form.value.provider)
+    if (currentModels.value.length) form.value.model = currentModels.value[0]
+  } finally {
+    modelsLoading.value = false
+  }
 }
 
 async function save() {
@@ -211,6 +206,7 @@ onMounted(async () => {
     form.value.provider = aiStore.config.provider
     form.value.model = aiStore.config.model
   }
+  await onProviderChange()
 })
 </script>
 

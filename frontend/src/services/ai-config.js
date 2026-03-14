@@ -8,6 +8,12 @@ function authHeaders() {
 }
 
 export const aiConfigService = {
+  async models(provider) {
+    const res = await fetch(`${BASE_URL}/ai-config/models/${provider}`, { headers: authHeaders() })
+    if (!res.ok) return []
+    return res.json() // string[]
+  },
+
   async get() {
     const res = await fetch(`${BASE_URL}/ai-config/`, { headers: authHeaders() })
     if (res.status === 404) return null
