@@ -11,6 +11,15 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 
 ## [Unreleased]
 
+### Added
+
+#### Frontend
+
+- `[b3n7]` Modular importer system — self-contained modules under `src/modules/importers/`, each with its own component, service and definition
+- `[c5p2]` CSV importer module with drag & drop upload, row preview and import confirmation (`CsvImporter.vue`)
+- `[d8q4]` `ImporterSelector` component — card grid to choose between available import formats
+- `[e1r9]` Transactions view updated with Import toggle and empty state
+
 ---
 
 ## [0.1.0] - 2026-03-07
