@@ -117,7 +117,7 @@ const MODELS = {
 
 const aiStore = useAiStore()
 
-const form = ref({ provider: '', model: '', apiKey: '' })
+const form = ref({ provider: 'gemini', model: MODELS.gemini[0], apiKey: '' })
 const showKey = ref(false)
 const saved = ref(false)
 
