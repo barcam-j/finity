@@ -37,22 +37,40 @@
             <span class="field-hint">You can type any model supported by your provider</span>
           </div>
 
-          <!-- Gemini guide -->
-          <div v-if="form.provider === 'gemini'" class="gemini-guide">
-            <p class="guide-title">How to get your Gemini API key</p>
-            <ol class="guide-steps">
-              <li>
-                Go to
-                <a href="https://aistudio.google.com" target="_blank" rel="noopener">
-                  aistudio.google.com
-                </a>
-                and sign in with your Google account
-              </li>
-              <li>Click <strong>Get API key</strong> in the left sidebar</li>
-              <li>Click <strong>Create API key</strong> and select or create a project</li>
-              <li>Copy the generated key and paste it below</li>
-            </ol>
-            <p class="guide-note">Free tier includes generous usage limits — no credit card required.</p>
+          <!-- Provider guide -->
+          <div v-if="form.provider === 'gemini' || form.provider === 'anthropic'" class="provider-guide">
+            <!-- Gemini -->
+            <template v-if="form.provider === 'gemini'">
+              <p class="guide-title">How to get your Gemini API key</p>
+              <ol class="guide-steps">
+                <li>
+                  Go to
+                  <a href="https://aistudio.google.com" target="_blank" rel="noopener">aistudio.google.com</a>
+                  and sign in with your Google account
+                </li>
+                <li>Click <strong>Get API key</strong> in the left sidebar</li>
+                <li>Click <strong>Create API key</strong> and select or create a project</li>
+                <li>Copy the generated key and paste it below</li>
+              </ol>
+              <p class="guide-note">Free tier available — no credit card required.</p>
+            </template>
+
+            <!-- Anthropic -->
+            <template v-if="form.provider === 'anthropic'">
+              <p class="guide-title">How to get your Anthropic API key</p>
+              <ol class="guide-steps">
+                <li>
+                  Go to
+                  <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>
+                  and create an account or sign in
+                </li>
+                <li>Go to <strong>Settings → API Keys</strong></li>
+                <li>Click <strong>Create Key</strong>, give it a name and copy it</li>
+                <li>Add at least <strong>$5 of credits</strong> under <strong>Settings → Billing</strong> to activate API access</li>
+                <li>Paste the key below</li>
+              </ol>
+              <p class="guide-note">Recommended model: <code>claude-3-5-haiku-20241022</code> — fast and very cheap (~$0.001 per import).</p>
+            </template>
           </div>
 
           <!-- API Key -->
@@ -273,7 +291,7 @@ select:focus {
   cursor: not-allowed;
 }
 
-.gemini-guide {
+.provider-guide {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -304,6 +322,15 @@ select:focus {
   margin: 0;
   color: var(--text-muted);
   font-size: 0.8rem;
+}
+
+.guide-note code {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.8rem;
+  font-family: monospace;
 }
 
 .btn-icon {
