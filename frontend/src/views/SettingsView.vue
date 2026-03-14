@@ -37,6 +37,24 @@
             <span class="field-hint">You can type any model supported by your provider</span>
           </div>
 
+          <!-- Gemini guide -->
+          <div v-if="form.provider === 'gemini'" class="gemini-guide">
+            <p class="guide-title">How to get your Gemini API key</p>
+            <ol class="guide-steps">
+              <li>
+                Go to
+                <a href="https://aistudio.google.com" target="_blank" rel="noopener">
+                  aistudio.google.com
+                </a>
+                and sign in with your Google account
+              </li>
+              <li>Click <strong>Get API key</strong> in the left sidebar</li>
+              <li>Click <strong>Create API key</strong> and select or create a project</li>
+              <li>Copy the generated key and paste it below</li>
+            </ol>
+            <p class="guide-note">Free tier includes generous usage limits — no credit card required.</p>
+          </div>
+
           <!-- API Key -->
           <div class="field">
             <label for="api-key">API Key</label>
@@ -253,6 +271,39 @@ select:focus {
 .btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.gemini-guide {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.1rem;
+  font-size: 0.875rem;
+}
+
+.guide-title {
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.guide-steps {
+  margin: 0 0 0.75rem;
+  padding-left: 1.25rem;
+  color: var(--text);
+  line-height: 1.8;
+}
+
+.guide-steps a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.guide-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
 }
 
 .btn-icon {
