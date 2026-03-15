@@ -89,3 +89,12 @@ export interface ImportResponse {
 export interface PreviewResponse {
   transactions: Transaction[]
 }
+
+export interface TransactionFilters {
+  search?: string
+  categories?: string[]
+  date_from?: string
+  date_to?: string
+  amount_min?: number
+  amount_max?: number
+}

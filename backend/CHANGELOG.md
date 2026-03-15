@@ -45,6 +45,8 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[s2t4]` `Transaction` model field changed from `category: Optional[str]` to `categories: list[str]` — supports multiple categories per transaction
 - `[t6u1]` Dashboard KPI and AI analysis updated for multi-category: investment exclusion checks the full list; category totals accumulate per category across all transactions; AI prompt renders comma-separated categories
 
+- `[v2w6]` `GET /transactions/` supports filter params: `search` (case-insensitive regex on description), `categories` (array `$in` match), `date_from`, `date_to`, `amount_min`, `amount_max` — all optional, combinable
+
 ### Fixed
 
 - `[u9v3]` Transaction `id` serialized as `_id` by FastAPI's `jsonable_encoder` (uses `by_alias=True` by default) — all transaction endpoints now use `model_dump(mode='json', by_alias=False)` via a shared `_tx_out` helper

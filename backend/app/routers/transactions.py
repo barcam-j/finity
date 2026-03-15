@@ -43,8 +43,34 @@ async def list_transactions(
     current_user: User = Depends(get_current_user),
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
+    search: str | None = Query(None),
+    categories: list[str] = Query(default=[]),
+    date_from: DateType | None = Query(None),
+    date_to: DateType | None = Query(None),
+    amount_min: float | None = Query(None),
+    amount_max: float | None = Query(None),
 ):
-    query = Transaction.find(Transaction.user_id == current_user.id)
+    conditions = [Transaction.user_id == current_user.id]
+
+    if search and search.strip():
+        conditions.append({'description': {'$regex': search.strip(), '$options': 'i'}})
+
+    if categories:
+        conditions.append({'categories': {'$in': categories}})
+
+    if date_from:
+        conditions.append(Transaction.date >= date_from)
+
+    if date_to:
+        conditions.append(Transaction.date <= date_to)
+
+    if amount_min is not None:
+        conditions.append(Transaction.amount >= amount_min)
+
+    if amount_max is not None:
+        conditions.append(Transaction.amount <= amount_max)
+
+    query = Transaction.find(*conditions)
     total = await query.count()
     items = await query.sort(-Transaction.date).skip((page - 1) * limit).limit(limit).to_list()
     return {

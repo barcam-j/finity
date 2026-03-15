@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { transactionsService } from '@/services/transactions'
-import type { Transaction } from '@/types'
+import type { Transaction, TransactionFilters } from '@/types'
 
 export const useTransactionsStore = defineStore('transactions', () => {
   const items = ref<Transaction[]>([])
@@ -12,11 +12,11 @@ export const useTransactionsStore = defineStore('transactions', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  async function fetch(p = 1): Promise<void> {
+  async function fetch(p = 1, filters: TransactionFilters = {}): Promise<void> {
     loading.value = true
     error.value = null
     try {
-      const data = await transactionsService.getAll({ page: p, limit: 20 })
+      const data = await transactionsService.getAll({ page: p, limit: 20, ...filters })
       items.value = data.items
       total.value = data.total
       page.value = data.page
