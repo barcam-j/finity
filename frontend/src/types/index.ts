@@ -5,7 +5,7 @@ export interface Transaction {
   date: string
   amount: number
   description: string
-  category: string | null
+  categories: string[]
   source?: string
   user_id?: string
 }

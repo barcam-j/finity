@@ -5,6 +5,7 @@ import type { Transaction } from '@/types'
 
 export const useTransactionsStore = defineStore('transactions', () => {
   const items = ref<Transaction[]>([])
+  const categories = ref<string[]>([])
   const total = ref(0)
   const page = ref(1)
   const pages = ref(1)
@@ -27,10 +28,42 @@ export const useTransactionsStore = defineStore('transactions', () => {
     }
   }
 
+  async function fetchCategories(): Promise<void> {
+    try {
+      categories.value = await transactionsService.getCategories()
+    } catch { /* non-blocking */ }
+  }
+
+  async function updateTransaction(id: string, data: Partial<Transaction>): Promise<void> {
+    const updated = await transactionsService.update(id, data)
+    const idx = items.value.findIndex((t) => t.id === id)
+    if (idx !== -1) items.value[idx] = updated
+    // refresh categories if categories changed
+    if ('categories' in data) await fetchCategories()
+  }
+
+  async function bulkUpdateCategory(ids: string[], category: string): Promise<void> {
+    await transactionsService.bulkUpdateCategory(ids, category)
+    items.value = items.value.map((t) => {
+      if (!t.id || !ids.includes(t.id)) return t
+      const cats = t.categories.includes(category) ? t.categories : [...t.categories, category]
+      return { ...t, categories: cats }
+    })
+    await fetchCategories()
+  }
+
   async function remove(id: string): Promise<void> {
     await transactionsService.delete(id)
     await fetch(page.value)
   }
 
-  return { items, total, page, pages, loading, error, fetch, remove }
+  async function bulkRemove(ids: string[]): Promise<void> {
+    await Promise.all(ids.map((id) => transactionsService.delete(id)))
+    await fetch(page.value)
+  }
+
+  return {
+    items, categories, total, page, pages, loading, error,
+    fetch, fetchCategories, updateTransaction, bulkUpdateCategory, remove, bulkRemove,
+  }
 })

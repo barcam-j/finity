@@ -3,11 +3,17 @@
     <table>
       <thead>
         <tr>
+          <th class="col-select">
+            <input
+              ref="headerCheckbox"
+              type="checkbox"
+              @click.prevent="emit('toggle-select-all')"
+            />
+          </th>
           <th>Date</th>
           <th>Description</th>
           <th>Category</th>
           <th class="col-amount">Amount</th>
-          <th class="col-action"></th>
         </tr>
       </thead>
       <tbody>
@@ -15,8 +21,10 @@
           v-for="tx in transactions"
           :key="tx.id"
           :tx="tx"
-          :is-deleting="deleting === tx.id"
-          @delete="emit('delete', $event)"
+          :selected="selectedIds.includes(tx.id!)"
+          :categories="categories"
+          @toggle-select="emit('toggle-select', $event)"
+          @update="(id, field, value) => emit('update', id, field, value)"
         />
       </tbody>
     </table>
@@ -24,17 +32,35 @@
 </template>
 
 <script setup lang="ts">
+import { computed, useTemplateRef, watchEffect } from 'vue'
 import type { Transaction } from '@/types'
 import TransactionRow from './TransactionRow.vue'
 
-defineProps<{
+const props = defineProps<{
   transactions: Transaction[]
-  deleting: string | null
+  selectedIds: string[]
+  categories: string[]
 }>()
 
 const emit = defineEmits<{
-  delete: [id: string]
+  'toggle-select': [id: string]
+  'toggle-select-all': []
+  update: [id: string, field: string, value: string | string[]]
 }>()
+
+const allSelected = computed(
+  () => props.transactions.length > 0 && props.transactions.every((t) => props.selectedIds.includes(t.id!)),
+)
+const someSelected = computed(() => props.transactions.some((t) => props.selectedIds.includes(t.id!)))
+
+const headerCheckbox = useTemplateRef<HTMLInputElement>('headerCheckbox')
+
+watchEffect(() => {
+  if (headerCheckbox.value) {
+    headerCheckbox.value.checked = allSelected.value
+    headerCheckbox.value.indeterminate = someSelected.value && !allSelected.value
+  }
+})
 </script>
 
 <style scoped>
@@ -53,7 +79,7 @@ table {
 
 th {
   background: var(--bg-secondary);
-  padding: 0.65rem 1rem;
+  padding: 0.7rem 1.5rem;
   text-align: left;
   font-weight: 600;
   color: var(--text-muted);
@@ -63,18 +89,10 @@ th {
   white-space: nowrap;
 }
 
-td {
-  padding: 0.65rem 1rem;
-  border-top: 1px solid var(--border);
-  color: var(--text);
-}
-
-.col-amount {
-  text-align: right;
-}
-
-.col-action {
-  width: 2rem;
+.col-select {
+  width: 2.5rem;
   text-align: center;
 }
+
+.col-amount { text-align: right; }
 </style>

@@ -53,7 +53,18 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[m7h5]` AI analysis toggle auto-saves immediately on click via `PATCH /ai-config/analysis-enabled` — no need to press Save
 - `[n3i1]` Enabling AI auto-activates when API key is entered in the form — toggle turns on as soon as a key is typed
 
+- `[o5k3]` Transaction row selection with per-row checkboxes and select-all header checkbox (indeterminate state supported)
+- `[p7l6]` Inline editing for date, description and categories directly in the transaction table — click any cell to edit, Enter/Esc to confirm/cancel
+- `[q2m8]` Multi-category support per transaction — tag editor with datalist autocomplete, add via Enter, remove via × chip button
+- `[r4n1]` Category badges on each row with hover-to-remove animation (smooth `max-width` + opacity transition)
+- `[s6o5]` `BulkEditBar` component — appears when rows are selected; add category to all selected, delete selected, close panel; animated slide-in via JS height transition
+- `[t9p2]` Bulk action buttons converted to icons (checkmark for apply, trash for delete, ✕ for close) for a cleaner, icon-consistent toolbar
+- `[u1q7]` Categories displayed with `text-transform: capitalize` and reduced font size across table and bulk bar
+
 ### Fixed
+
+- `[v3r4]` Transaction `id` field was not reaching the frontend — Beanie serialized it as `_id` (alias) via `jsonable_encoder`; fixed with `model_dump(mode='json', by_alias=False)` in all transaction endpoints
+- `[w5s9]` Select-all triggered on single row click — `indeterminate` DOM property set via `watchEffect` could fire a spurious `change` event in Chrome; fixed by switching header checkbox to `@click.prevent` so only explicit user clicks trigger the handler
 
 - `[b2c4]` AI provider loading spinner never showed on settings page — replaced broken `aiLoading && !form.provider` condition with dedicated `initializing` ref
 - `[c3d5]` Saved AI model overwritten on page load — `onProviderChange` reset the model before the saved value could be restored; now preserved via `savedModel` after models are fetched

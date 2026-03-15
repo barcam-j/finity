@@ -65,7 +65,7 @@ async def get_kpis(user_id: PydanticObjectId, period: str) -> dict:
         }
 
     def is_investment(t: Transaction) -> bool:
-        return (t.category or '').strip().lower() == 'inversión'
+        return any(c.strip().lower() == 'inversión' for c in t.categories)
 
     total_income = sum(t.amount for t in transactions if t.amount > 0)
     total_expenses = sum(t.amount for t in transactions if t.amount < 0 and not is_investment(t))
@@ -73,8 +73,9 @@ async def get_kpis(user_id: PydanticObjectId, period: str) -> dict:
 
     category_totals: dict[str, float] = {}
     for t in transactions:
-        if t.amount < 0 and t.category and not is_investment(t):
-            category_totals[t.category] = category_totals.get(t.category, 0) + abs(t.amount)
+        if t.amount < 0 and t.categories and not is_investment(t):
+            for cat in t.categories:
+                category_totals[cat] = category_totals.get(cat, 0) + abs(t.amount)
 
     total_spent = abs(total_expenses) or 1
     categories = sorted(
@@ -133,7 +134,7 @@ async def get_ai_analysis(user_id: PydanticObjectId, month: str) -> str:
         return cached.analysis
 
     lines = [
-        f'{t.date} | {t.category or "Uncategorized"} | {t.amount:+.2f}'
+        f'{t.date} | {", ".join(t.categories) or "Uncategorized"} | {t.amount:+.2f}'
         for t in transactions
     ]
     summary = '\n'.join(lines)

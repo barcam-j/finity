@@ -39,6 +39,16 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[n7o5]` Auto-enable `analysis_enabled` when an API key is provided on `PUT /ai-config/` — first-time setup and key rotation both activate analysis automatically
 - `[o1p8]` Investment transactions excluded from expenses, balance and category breakdown in KPI calculations
 
+- `[p3q6]` `GET /transactions/categories` aggregates distinct values across the new `categories` array field
+- `[q5r2]` `PATCH /transactions/{id}` accepts `categories: list[str]` to replace the full categories list
+- `[r8s7]` `POST /transactions/bulk-category` appends a category to each selected transaction without duplicating existing ones
+- `[s2t4]` `Transaction` model field changed from `category: Optional[str]` to `categories: list[str]` — supports multiple categories per transaction
+- `[t6u1]` Dashboard KPI and AI analysis updated for multi-category: investment exclusion checks the full list; category totals accumulate per category across all transactions; AI prompt renders comma-separated categories
+
+### Fixed
+
+- `[u9v3]` Transaction `id` serialized as `_id` by FastAPI's `jsonable_encoder` (uses `by_alias=True` by default) — all transaction endpoints now use `model_dump(mode='json', by_alias=False)` via a shared `_tx_out` helper
+
 ---
 
 ## [0.1.0] - 2026-03-07

@@ -4,7 +4,6 @@
       <AiBanner />
 
       <div class="view-header">
-        <h1>Transactions</h1>
         <button class="btn-primary" @click="toggleImporter">
           {{ showImporter ? 'Cancel' : 'Import' }}
         </button>
@@ -18,10 +17,20 @@
         <div v-if="store.loading && !store.items.length" class="state-msg">Loading…</div>
 
         <template v-else-if="store.items.length">
+          <BulkEditBar
+            :count="selectedIds.length"
+            :categories="store.categories"
+            @apply-category="onBulkCategory"
+            @delete-selected="onBulkDelete"
+            @clear-selection="selectedIds = []"
+          />
           <TransactionTable
             :transactions="store.items"
-            :deleting="deleting"
-            @delete="remove"
+            :selected-ids="selectedIds"
+            :categories="store.categories"
+            @toggle-select="toggleSelect"
+            @toggle-select-all="toggleSelectAll"
+            @update="onUpdate"
           />
           <TransactionPagination
             :page="store.page"
@@ -46,11 +55,12 @@ import AiBanner from '@/components/AiBanner.vue'
 import TransactionTable from '@/components/transactions/TransactionTable.vue'
 import TransactionPagination from '@/components/transactions/TransactionPagination.vue'
 import TransactionsEmptyState from '@/components/transactions/TransactionsEmptyState.vue'
+import BulkEditBar from '@/components/transactions/BulkEditBar.vue'
 import { useTransactionsStore } from '@/stores/transactions'
 
 const store = useTransactionsStore()
 const showImporter = ref(false)
-const deleting = ref<string | null>(null)
+const selectedIds = ref<string[]>([])
 
 const visiblePages = computed(() => {
   const { page, pages } = store
@@ -68,23 +78,49 @@ function toggleImporter(): void {
 
 async function onImportDone(): Promise<void> {
   showImporter.value = false
-  await store.fetch(1)
+  selectedIds.value = []
+  await Promise.all([store.fetch(1), store.fetchCategories()])
 }
 
 async function goTo(p: number): Promise<void> {
+  selectedIds.value = []
   await store.fetch(p)
 }
 
-async function remove(id: string): Promise<void> {
-  deleting.value = id
-  try {
-    await store.remove(id)
-  } finally {
-    deleting.value = null
+function toggleSelect(id: string): void {
+  const idx = selectedIds.value.indexOf(id)
+  if (idx === -1) selectedIds.value.push(id)
+  else selectedIds.value.splice(idx, 1)
+}
+
+function toggleSelectAll(): void {
+  const pageIds = store.items.map((t) => t.id!)
+  const allSelected = pageIds.every((id) => selectedIds.value.includes(id))
+  if (allSelected) {
+    selectedIds.value = selectedIds.value.filter((id) => !pageIds.includes(id))
+  } else {
+    pageIds.forEach((id) => {
+      if (!selectedIds.value.includes(id)) selectedIds.value.push(id)
+    })
   }
 }
 
-onMounted(() => store.fetch(1))
+async function onUpdate(id: string, field: string, value: string | string[]): Promise<void> {
+  await store.updateTransaction(id, { [field]: value })
+}
+
+async function onBulkCategory(category: string): Promise<void> {
+  await store.bulkUpdateCategory(selectedIds.value, category)
+  selectedIds.value = []
+}
+
+async function onBulkDelete(): Promise<void> {
+  const ids = [...selectedIds.value]
+  selectedIds.value = []
+  await store.bulkRemove(ids)
+}
+
+onMounted(() => Promise.all([store.fetch(1), store.fetchCategories()]))
 </script>
 
 <style scoped>
@@ -100,9 +136,7 @@ onMounted(() => store.fetch(1))
   justify-content: space-between;
 }
 
-.view-header h1 {
-  margin: 0;
-}
+.view-header h1 { margin: 0; }
 
 .importer-panel {
   background: var(--card-bg);
@@ -130,7 +164,5 @@ onMounted(() => store.fetch(1))
   transition: background 0.2s;
 }
 
-.btn-primary:hover {
-  background: var(--btn-hover);
-}
+.btn-primary:hover { background: var(--btn-hover); }
 </style>
