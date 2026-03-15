@@ -30,6 +30,15 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[f5g7]` `POST /importers/csv/parse` endpoint — reads and decodes CSV without AI, returns headers, all rows and `has_header_warning` flag for the manual import flow
 - `[g8h2]` CSV validators extracted to `app/importers/csv/validators.py` as FastAPI dependencies (`get_csv_text`, `get_parsed_csv`) — validates file is not empty, has multiple columns and rows are properly delimited; injected via `Depends` keeping router handlers clean
 
+- `[h1i4]` `GET /dashboard/kpis?period=` endpoint — supports `month` (most recent recorded month), `all` and specific `YYYY-MM`; returns income, expenses, balance, top category, transaction count, spending by category (top 5), period label and last import date
+- `[i3j7]` `GET /dashboard/analysis?month=YYYY-MM` endpoint — returns AI-generated analysis for the given month; requires `analysis_enabled` flag on user's AI config
+- `[j5k2]` `GET /dashboard/months` endpoint — returns sorted list of distinct months (`YYYY-MM`) that have transactions for the current user
+- `[k8l6]` `AnalysisCache` model and collection — caches AI analysis per user per month; invalidated automatically when transactions for that month change (MD5 hash of transaction IDs)
+- `[l2m9]` `analysis_enabled` flag added to `AiConfig` model — controls whether AI analysis runs on the dashboard
+- `[m4n3]` `PATCH /ai-config/analysis-enabled` endpoint — toggles AI analysis flag independently of the full config save
+- `[n7o5]` Auto-enable `analysis_enabled` when an API key is provided on `PUT /ai-config/` — first-time setup and key rotation both activate analysis automatically
+- `[o1p8]` Investment transactions excluded from expenses, balance and category breakdown in KPI calculations
+
 ---
 
 ## [0.1.0] - 2026-03-07
