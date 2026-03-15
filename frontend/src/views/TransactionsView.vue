@@ -17,6 +17,10 @@
         <div v-if="store.loading && !store.items.length" class="state-msg">Loading…</div>
 
         <template v-else-if="store.items.length">
+          <TransactionFilters
+            :categories="store.categories"
+            @filter="onFiltersChange"
+          />
           <BulkEditBar
             :count="selectedIds.length"
             :categories="store.categories"
@@ -56,11 +60,14 @@ import TransactionTable from '@/components/transactions/TransactionTable.vue'
 import TransactionPagination from '@/components/transactions/TransactionPagination.vue'
 import TransactionsEmptyState from '@/components/transactions/TransactionsEmptyState.vue'
 import BulkEditBar from '@/components/transactions/BulkEditBar.vue'
+import TransactionFilters from '@/components/transactions/TransactionFilters.vue'
+import type { TransactionFilters as TFilters } from '@/types'
 import { useTransactionsStore } from '@/stores/transactions'
 
 const store = useTransactionsStore()
 const showImporter = ref(false)
 const selectedIds = ref<string[]>([])
+const currentFilters = ref<TFilters>({})
 
 const visiblePages = computed(() => {
   const { page, pages } = store
@@ -82,9 +89,15 @@ async function onImportDone(): Promise<void> {
   await Promise.all([store.fetch(1), store.fetchCategories()])
 }
 
+function onFiltersChange(filters: TFilters): void {
+  currentFilters.value = filters
+  selectedIds.value = []
+  store.fetch(1, filters)
+}
+
 async function goTo(p: number): Promise<void> {
   selectedIds.value = []
-  await store.fetch(p)
+  await store.fetch(p, currentFilters.value)
 }
 
 function toggleSelect(id: string): void {

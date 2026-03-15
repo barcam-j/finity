@@ -3,7 +3,16 @@ import type { PaginatedTransactions, Transaction } from '@/types'
 
 export const transactionsService = {
   getAll: (params: Record<string, unknown> = {}) => {
-    const query = new URLSearchParams(params as Record<string, string>).toString()
+    const qs = new URLSearchParams()
+    for (const [key, val] of Object.entries(params)) {
+      if (val === undefined || val === null) continue
+      if (Array.isArray(val)) {
+        val.forEach((v) => qs.append(key, String(v)))
+      } else {
+        qs.set(key, String(val))
+      }
+    }
+    const query = qs.toString()
     return api.get<PaginatedTransactions>(`/transactions${query ? `?${query}` : ''}`)
   },
   getCategories: () => api.get<string[]>('/transactions/categories'),

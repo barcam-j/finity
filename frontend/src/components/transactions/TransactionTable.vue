@@ -16,7 +16,7 @@
           <th class="col-amount">Amount</th>
         </tr>
       </thead>
-      <tbody>
+      <TransitionGroup tag="tbody" name="row">
         <TransactionRow
           v-for="tx in transactions"
           :key="tx.id"
@@ -26,7 +26,7 @@
           @toggle-select="emit('toggle-select', $event)"
           @update="(id, field, value) => emit('update', id, field, value)"
         />
-      </tbody>
+      </TransitionGroup>
     </table>
   </div>
 </template>
@@ -95,4 +95,23 @@ th {
 }
 
 .col-amount { text-align: right; }
+
+.row-enter-active,
+.row-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.row-enter-from {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.row-leave-to {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.row-move {
+  transition: transform 0.25s ease;
+}
 </style>
