@@ -1,6 +1,5 @@
 from beanie import Document, PydanticObjectId
 from datetime import date
-from typing import Optional
 from pydantic import Field
 
 
@@ -9,7 +8,7 @@ class Transaction(Document):
     date: date
     amount: float
     description: str
-    category: Optional[str] = None
+    categories: list[str] = Field(default_factory=list)
     source: str = 'manual'
     tags: list[str] = Field(default_factory=list)
 
