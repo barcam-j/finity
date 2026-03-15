@@ -64,6 +64,7 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[x7t5]` Transaction filters bar — search by description (debounced), multi-select category dropdown, date range and amount range; all filters combined and sent to backend on every change
 - `[y2u8]` Smooth row enter/leave/move transitions on transaction table repaint using `<TransitionGroup>`
 - `[z4v1]` Confirmation dialog before bulk delete — shows count of affected transactions, animated backdrop with scale transition; reusable `ConfirmDialog` component via `<Teleport>`
+- `[a5w2]` `lucide-vue-next` installed as icon library — replaced all inline hardcoded SVGs (`Search`, `ChevronDown`, `X`, `Check`, `Trash2`) in `TransactionFilters` and `BulkEditBar` — shows count of affected transactions, animated backdrop with scale transition; reusable `ConfirmDialog` component via `<Teleport>`
 
 ### Fixed
 
