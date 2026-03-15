@@ -117,59 +117,6 @@ onMounted(async () => {
   font-size: 0.9rem;
 }
 
-.settings-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text);
-}
-
-input,
-select {
-  padding: 0.55rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 0.9rem;
-  width: 100%;
-}
-
-input:focus,
-select:focus {
-  outline: none;
-  border-color: var(--accent);
-}
-
-.field-hint {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-.form-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 1rem;
-  padding-top: 0.5rem;
-}
-
-.saved-badge {
-  font-size: 0.875rem;
-  color: oklch(0.55 0.15 145);
-}
-
 .error {
   font-size: 0.875rem;
   color: var(--error);
