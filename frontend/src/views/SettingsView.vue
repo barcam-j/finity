@@ -18,8 +18,8 @@
           </div>
           <div class="form-footer">
             <span v-if="currencySaved" class="saved-badge">Saved</span>
-            <button class="btn-primary" type="submit" :disabled="prefsStore.loading">
-              {{ prefsStore.loading ? 'Saving…' : 'Save' }}
+            <button class="btn-primary" type="submit" :disabled="currencyLoading">
+              {{ currencyLoading ? 'Saving…' : 'Save' }}
             </button>
           </div>
         </form>
@@ -29,7 +29,7 @@
         title="AI Provider"
         description="Configure the AI provider used to read and categorize your transactions."
       >
-        <div v-if="aiStore.loading && !form.provider" class="loading">Loading…</div>
+        <div v-if="aiLoading && !form.provider" class="loading">Loading…</div>
 
         <form v-else class="settings-form" @submit.prevent="save">
           <div class="field">
@@ -66,9 +66,9 @@
 
           <div class="form-footer">
             <span v-if="saved" class="saved-badge">Saved</span>
-            <span v-if="aiStore.error" class="error">{{ aiStore.error }}</span>
-            <button class="btn-primary" type="submit" :disabled="aiStore.loading || !canSave">
-              {{ aiStore.loading ? 'Saving…' : 'Save' }}
+            <span v-if="aiError" class="error">{{ aiError }}</span>
+            <button class="btn-primary" type="submit" :disabled="aiLoading || !canSave">
+              {{ aiLoading ? 'Saving…' : 'Save' }}
             </button>
           </div>
         </form>
@@ -88,19 +88,10 @@ import { AI_PROVIDERS, PROVIDERS_WITH_GUIDE } from '@/constants/ai-providers'
 import { useCurrencyForm } from '@/composables/useCurrencyForm'
 import { useAiProviderForm } from '@/composables/useAiProviderForm'
 
-const { prefsStore, currencyForm, currencySaved, init: initCurrency, saveCurrency } = useCurrencyForm()
-const { aiStore, form, currentModels, modelsLoading, hasExistingConfig, canSave, saved, init: initAi, onProviderChange, save } = useAiProviderForm()
+const { loading: currencyLoading, currencyForm, currencySaved, init: initCurrency, saveCurrency } = useCurrencyForm()
+const { loading: aiLoading, error: aiError, form, currentModels, modelsLoading, hasExistingConfig, canSave, saved, init: initAi, onProviderChange, save } = useAiProviderForm()
 
-onMounted(async () => {
-  await Promise.all([aiStore.fetchConfig(), prefsStore.fetch()])
-
-  initCurrency(prefsStore.currency)
-
-  if (aiStore.config) {
-    initAi(aiStore.config.provider, aiStore.config.model)
-  }
-  await onProviderChange()
-})
+onMounted(() => Promise.all([initCurrency(), initAi()]))
 </script>
 
 <style scoped>

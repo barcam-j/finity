@@ -17,9 +17,13 @@ export function useAiProviderForm() {
       form.value.provider && form.value.model && (form.value.apiKey || hasExistingConfig.value),
   )
 
-  function init(provider: string, model: string) {
-    form.value.provider = provider
-    form.value.model = model
+  async function init(): Promise<void> {
+    await aiStore.fetchConfig()
+    if (aiStore.config) {
+      form.value.provider = aiStore.config.provider
+      form.value.model = aiStore.config.model
+    }
+    await onProviderChange()
   }
 
   async function onProviderChange(): Promise<void> {
@@ -48,8 +52,12 @@ export function useAiProviderForm() {
     }
   }
 
+  const loading = computed(() => aiStore.loading)
+  const error = computed(() => aiStore.error)
+
   return {
-    aiStore,
+    loading,
+    error,
     form,
     currentModels,
     modelsLoading,
