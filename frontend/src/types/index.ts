@@ -20,13 +20,28 @@ export interface PaginatedTransactions {
 export interface AiConfig {
   provider: string
   model: string
-  has_key: boolean
+  params: Record<string, unknown>
+  analysis_enabled: boolean
 }
 
 export interface SaveAiConfigRequest {
   provider: string
   model: string
   api_key?: string
+  analysis_enabled?: boolean
+}
+
+export interface DashboardKpis {
+  total_income: number
+  total_expenses: number
+  balance: number
+  top_category: string | null
+  transaction_count: number
+}
+
+export interface DashboardAnalysis {
+  analysis: string | null
+  enabled: boolean
 }
 
 export interface UserPreferences {

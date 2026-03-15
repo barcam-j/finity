@@ -64,6 +64,24 @@
 
           <ApiKeyField v-model="form.apiKey" :has-existing-config="hasExistingConfig" />
 
+          <div class="field field--toggle">
+            <label for="analysis-enabled" class="toggle-label">
+              <span>
+                Enable AI analysis on dashboard
+                <span class="field-hint">Automatically analyze your transactions when you open the dashboard</span>
+              </span>
+              <button
+                id="analysis-enabled"
+                type="button"
+                role="switch"
+                :aria-checked="form.analysisEnabled"
+                class="toggle"
+                :class="{ 'toggle--on': form.analysisEnabled }"
+                @click="form.analysisEnabled = !form.analysisEnabled"
+              />
+            </label>
+          </div>
+
           <div class="form-footer">
             <span v-if="saved" class="saved-badge">Saved</span>
             <span v-if="aiError" class="error">{{ aiError }}</span>

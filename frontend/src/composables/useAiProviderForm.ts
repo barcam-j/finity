@@ -7,7 +7,7 @@ export function useAiProviderForm() {
   const aiStore = useAiStore()
   const { saved, markSaved } = useSavedFeedback()
 
-  const form = ref({ provider: 'gemini', model: '', apiKey: '' })
+  const form = ref({ provider: 'gemini', model: '', apiKey: '', analysisEnabled: false })
   const currentModels = ref<string[]>([])
   const modelsLoading = ref(false)
   const initializing = ref(true)
@@ -23,6 +23,7 @@ export function useAiProviderForm() {
       await aiStore.fetchConfig()
       if (aiStore.config) {
         form.value.provider = aiStore.config.provider
+        form.value.analysisEnabled = aiStore.config.analysis_enabled
         const savedModel = aiStore.config.model
         await onProviderChange()
         // Restore saved model after onProviderChange resets it
@@ -55,6 +56,7 @@ export function useAiProviderForm() {
     const payload = {
       provider: form.value.provider,
       model: form.value.model,
+      analysis_enabled: form.value.analysisEnabled,
       ...(form.value.apiKey ? { api_key: form.value.apiKey } : {}),
     }
     try {
