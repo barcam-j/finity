@@ -9,8 +9,7 @@ from app.models.transaction import Transaction
 from app.models.ai_config import AiConfig
 from app.models.alert import Alert
 from app.models.user_preferences import UserPreferences
-from app.routers import auth, transactions, ai_config, alerts
-from app.routers import preferences
+from app.routers import auth, transactions, ai_config, alerts, preferences, dashboard
 from app.importers.registry import register_importers
 
 DOCUMENT_MODELS = [User, Transaction, AiConfig, Alert, UserPreferences]
@@ -38,6 +37,7 @@ app.include_router(transactions.router)
 app.include_router(ai_config.router)
 app.include_router(alerts.router)
 app.include_router(preferences.router)
+app.include_router(dashboard.router)
 register_importers(app)
 
 

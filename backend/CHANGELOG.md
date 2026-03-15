@@ -30,6 +30,11 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[f5g7]` `POST /importers/csv/parse` endpoint — reads and decodes CSV without AI, returns headers, all rows and `has_header_warning` flag for the manual import flow
 - `[g8h2]` CSV validators extracted to `app/importers/csv/validators.py` as FastAPI dependencies (`get_csv_text`, `get_parsed_csv`) — validates file is not empty, has multiple columns and rows are properly delimited; injected via `Depends` keeping router handlers clean
 
+- `[h2i5]` `analysis_enabled` flag added to `AiConfig` model — controls whether AI analysis runs automatically on the dashboard
+- `[i4j8]` `GET /dashboard/kpis?period=month|all` — returns `total_income`, `total_expenses`, `balance`, `top_category` and `transaction_count` for the selected period
+- `[j6k1]` `GET /dashboard/analysis` — generates AI analysis from the last 100 transactions using the configured LLM; returns `{analysis, enabled}` respecting the `analysis_enabled` flag
+- `[k8l4]` `app/services/dashboard_service.py` — KPI aggregation and AI analysis prompt logic extracted as a service
+
 ---
 
 ## [0.1.0] - 2026-03-07
