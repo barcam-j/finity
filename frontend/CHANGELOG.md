@@ -61,6 +61,10 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[t9p2]` Bulk action buttons converted to icons (checkmark for apply, trash for delete, ✕ for close) for a cleaner, icon-consistent toolbar
 - `[u1q7]` Categories displayed with `text-transform: capitalize` and reduced font size across table and bulk bar
 
+- `[x7t5]` Transaction filters bar — search by description (debounced), multi-select category dropdown, date range and amount range; all filters combined and sent to backend on every change
+- `[y2u8]` Smooth row enter/leave/move transitions on transaction table repaint using `<TransitionGroup>`
+- `[z4v1]` Confirmation dialog before bulk delete — shows count of affected transactions, animated backdrop with scale transition; reusable `ConfirmDialog` component via `<Teleport>`
+
 ### Fixed
 
 - `[v3r4]` Transaction `id` field was not reaching the frontend — Beanie serialized it as `_id` (alias) via `jsonable_encoder`; fixed with `model_dump(mode='json', by_alias=False)` in all transaction endpoints
