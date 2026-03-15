@@ -38,6 +38,7 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[u2e6]` CSV structure validation feedback — clear error shown when file has only one column or rows are not properly delimited
 - `[v4f3]` TypeScript migration — all source files converted from JavaScript to TypeScript; strict mode enabled; shared types centralised in `src/types/index.ts`; custom `ApiError` class with typed `status` field; all Vue components use `<script setup lang="ts">`
 - `[w6g8]` Auto-logout on expired session — any `401` response from the API clears the token and redirects to `/login`
+- `[x9i4]` `TransactionsView` atomized into four components under `src/components/transactions/`: `TransactionRow`, `TransactionTable`, `TransactionPagination`, `TransactionsEmptyState`
 
 ---
 
