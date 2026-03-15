@@ -38,10 +38,17 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[u2e6]` CSV structure validation feedback — clear error shown when file has only one column or rows are not properly delimited
 - `[v4f3]` TypeScript migration — all source files converted from JavaScript to TypeScript; strict mode enabled; shared types centralised in `src/types/index.ts`; custom `ApiError` class with typed `status` field; all Vue components use `<script setup lang="ts">`
 - `[w6g8]` Auto-logout on expired session — any `401` response from the API clears the token and redirects to `/login`
+- `[x9i4]` `TransactionsView` atomized into four components under `src/components/transactions/`: `TransactionRow`, `TransactionTable`, `TransactionPagination`, `TransactionsEmptyState`
 - `[y3j7]` `SettingsView` atomized into three components under `src/components/settings/`: `SettingsSection` (slot-based section wrapper), `ProviderGuide` (per-provider API key instructions), `ApiKeyField` (password input with show/hide toggle)
 - `[z1k2]` Extracted `CURRENCIES` and `AI_PROVIDERS` constants to `src/constants/`; extracted `useSavedFeedback`, `useCurrencyForm` and `useAiProviderForm` composables to `src/composables/`
-- `[x9i4]` `TransactionsView` atomized into four components under `src/components/transactions/`: `TransactionRow`, `TransactionTable`, `TransactionPagination`, `TransactionsEmptyState`
+- `[a1b3]` Centralised shared form styles into `src/styles/forms.css` — eliminates CSS duplication across settings components
 
+### Fixed
+
+- `[b2c4]` AI provider loading spinner never showed on settings page — replaced broken `aiLoading && !form.provider` condition with dedicated `initializing` ref
+- `[c3d5]` Saved AI model overwritten on page load — `onProviderChange` reset the model before the saved value could be restored; now preserved via `savedModel` after models are fetched
+- `[d4e6]` Currency save button showed "Saving…" during initial data fetch — `saving` ref now tracks only the save operation, separate from the fetch
+- `[e5f7]` Calling `onProviderChange` with empty provider triggered a spurious API call — guarded with early return when provider is blank
 
 ---
 
