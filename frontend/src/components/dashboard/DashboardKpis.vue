@@ -4,13 +4,20 @@
       <h2>Overview</h2>
       <div class="period-selector">
         <button :class="{ active: period === 'month' }" @click="emit('update:period', 'month')">
-          This month
+          Last month
         </button>
         <button :class="{ active: period === 'all' }" @click="emit('update:period', 'all')">
           All time
         </button>
       </div>
     </div>
+
+    <p v-if="!loading && kpis?.period_label" class="period-meta">
+      {{ kpis.period_label }}
+      <span v-if="kpis.last_import_date" class="period-import">
+        · Imported on {{ formatDate(kpis.last_import_date) }}
+      </span>
+    </p>
 
     <div v-if="loading" class="kpis-loading">Loading…</div>
 
@@ -55,6 +62,14 @@ const emit = defineEmits<{
 }>()
 
 const { formatAmount } = useCurrency()
+
+function formatDate(iso: string): string {
+  return new Date(iso + 'T00:00:00').toLocaleDateString(undefined, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
 </script>
 
 <style scoped>
@@ -110,6 +125,18 @@ const { formatAmount } = useCurrency()
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
+}
+
+.period-meta {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.period-import {
+  font-weight: 400;
+  color: var(--text-muted);
 }
 
 .kpis-loading {

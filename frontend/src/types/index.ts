@@ -31,12 +31,21 @@ export interface SaveAiConfigRequest {
   analysis_enabled?: boolean
 }
 
+export interface DashboardCategory {
+  name: string
+  total: number
+  percentage: number
+}
+
 export interface DashboardKpis {
   total_income: number
   total_expenses: number
   balance: number
   top_category: string | null
   transaction_count: number
+  categories: DashboardCategory[]
+  period_label: string | null
+  last_import_date: string | null
 }
 
 export interface DashboardAnalysis {

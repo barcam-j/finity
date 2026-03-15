@@ -1,34 +1,79 @@
 <template>
   <div class="analysis-panel">
-    <h2>AI Analysis</h2>
-
-    <div v-if="!enabled" class="analysis-disabled">
-      AI analysis is disabled. Enable it in
-      <RouterLink to="/settings" class="link">Settings → AI Provider</RouterLink>.
+    <div class="analysis-header">
+      <h2>Analysis</h2>
+      <span v-if="enabled" class="ai-badge">AI</span>
     </div>
 
-    <div v-else-if="loading" class="analysis-loading">
+    <div v-if="loading" class="analysis-loading">
       <span class="spinner" />
       Analyzing your transactions…
     </div>
 
-    <div v-else-if="error" class="analysis-error">{{ error }}</div>
+    <template v-else-if="kpis && kpis.transaction_count > 0">
+      <!-- AI analysis -->
+      <div v-if="enabled && analysis" class="analysis-content">{{ analysis }}</div>
+      <div v-if="enabled && error" class="analysis-error">{{ error }}</div>
 
-    <div v-else-if="analysis" class="analysis-content">{{ analysis }}</div>
+      <!-- Basic analysis — always shown -->
+      <div class="basic-analysis">
+        <p class="basic-summary">
+          <template v-if="kpis.balance >= 0">
+            You're <strong class="positive">ahead by {{ formatAmount(kpis.balance) }}</strong> —
+            {{ formatAmount(kpis.total_income) }} in and {{ formatAmount(kpis.total_expenses) }} out
+            across {{ kpis.transaction_count }} transactions.
+          </template>
+          <template v-else>
+            You're <strong class="negative">{{ formatAmount(Math.abs(kpis.balance)) }} over budget</strong> —
+            {{ formatAmount(kpis.total_income) }} in and {{ formatAmount(kpis.total_expenses) }} out
+            across {{ kpis.transaction_count }} transactions.
+          </template>
+        </p>
 
-    <div v-else class="analysis-empty">No transactions to analyze yet.</div>
+        <div v-if="kpis.categories.length" class="categories">
+          <p class="categories-title">Spending by category</p>
+          <div
+            v-for="cat in kpis.categories"
+            :key="cat.name"
+            class="category-row"
+          >
+            <span class="category-name">{{ cat.name }}</span>
+            <div class="category-bar-wrap">
+              <div class="category-bar" :style="{ width: `${cat.percentage}%` }" />
+            </div>
+            <span class="category-amount">{{ formatAmount(cat.total) }}</span>
+            <span class="category-pct">{{ cat.percentage }}%</span>
+          </div>
+        </div>
+
+        <p v-if="!enabled" class="ai-hint">
+          Enable
+          <RouterLink to="/settings" class="link">AI analysis in Settings</RouterLink>
+          for personalised insights.
+        </p>
+      </div>
+    </template>
+
+    <div v-else class="analysis-empty">
+      No transactions yet. Import a file to see your analysis.
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import type { DashboardKpis } from '@/types'
+import { useCurrency } from '@/composables/useCurrency'
 
 defineProps<{
+  kpis: DashboardKpis | null
   analysis: string | null
   enabled: boolean
   loading: boolean
   error?: string | null
 }>()
+
+const { formatAmount } = useCurrency()
 </script>
 
 <style scoped>
@@ -40,10 +85,16 @@ defineProps<{
   box-shadow: var(--card-shadow);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
-.analysis-panel h2 {
+.analysis-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.analysis-header h2 {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
@@ -52,15 +103,14 @@ defineProps<{
   letter-spacing: 0.05em;
 }
 
-.analysis-disabled,
-.analysis-empty {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-}
-
-.link {
-  color: var(--accent);
-  text-underline-offset: 2px;
+.ai-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  letter-spacing: 0.05em;
 }
 
 .analysis-loading {
@@ -87,7 +137,7 @@ defineProps<{
 }
 
 .analysis-error {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: var(--error);
 }
 
@@ -96,5 +146,90 @@ defineProps<{
   color: var(--text);
   line-height: 1.7;
   white-space: pre-wrap;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Basic analysis */
+.basic-analysis {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.basic-summary {
+  margin: 0;
+  font-size: 0.925rem;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.positive { color: oklch(0.55 0.15 145); }
+.negative { color: var(--error); }
+
+.categories-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.category-row {
+  display: grid;
+  grid-template-columns: 8rem 1fr 5rem 2.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.category-name {
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.category-bar-wrap {
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.category-bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+.category-amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.category-pct {
+  text-align: right;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.ai-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.link {
+  color: var(--accent);
+  text-underline-offset: 2px;
+}
+
+.analysis-empty {
+  font-size: 0.9rem;
+  color: var(--text-muted);
 }
 </style>

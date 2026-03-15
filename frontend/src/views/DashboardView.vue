@@ -12,6 +12,7 @@
         @update:period="store.fetchKpis"
       />
       <AiAnalysisPanel
+        :kpis="store.kpis"
         :analysis="store.analysis"
         :enabled="store.analysisEnabled"
         :loading="store.loadingAnalysis"

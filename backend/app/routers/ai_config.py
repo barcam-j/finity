@@ -15,12 +15,14 @@ class AiConfigRequest(BaseModel):
     api_key: str | None = None
     model: str
     params: dict = {}
+    analysis_enabled: bool = False
 
 
 class AiConfigResponse(BaseModel):
     provider: str
     model: str
     params: dict
+    analysis_enabled: bool
 
 
 @router.get('/models/{provider}')
@@ -38,7 +40,12 @@ async def get_config(current_user: User = Depends(get_current_user)):
     config = await AiConfig.find_one(AiConfig.user_id == current_user.id)
     if not config:
         return None
-    return AiConfigResponse(provider=config.provider, model=config.model, params=config.params)
+    return AiConfigResponse(
+        provider=config.provider,
+        model=config.model,
+        params=config.params,
+        analysis_enabled=config.analysis_enabled,
+    )
 
 
 @router.put('/')
@@ -50,6 +57,7 @@ async def save_config(body: AiConfigRequest, current_user: User = Depends(get_cu
             config.api_key_encrypted = encrypt(body.api_key)
         config.model = body.model
         config.params = body.params
+        config.analysis_enabled = body.analysis_enabled
     else:
         if not body.api_key:
             raise HTTPException(
@@ -62,6 +70,7 @@ async def save_config(body: AiConfigRequest, current_user: User = Depends(get_cu
             api_key_encrypted=encrypt(body.api_key),
             model=body.model,
             params=body.params,
+            analysis_enabled=body.analysis_enabled,
         )
 
     if config.id:
