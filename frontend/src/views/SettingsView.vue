@@ -36,7 +36,7 @@
             <label for="provider">Provider</label>
             <select id="provider" v-model="form.provider" @change="onProviderChange">
               <option value="">— select a provider —</option>
-              <option v-for="p in PROVIDERS" :key="p.value" :value="p.value">{{ p.label }}</option>
+              <option v-for="p in AI_PROVIDERS" :key="p.value" :value="p.value">{{ p.label }}</option>
             </select>
           </div>
 
@@ -58,7 +58,7 @@
           </div>
 
           <ProviderGuide
-            v-if="['gemini', 'anthropic', 'openai', 'xai'].includes(form.provider)"
+            v-if="PROVIDERS_WITH_GUIDE.includes(form.provider)"
             :provider="form.provider"
           />
 
@@ -78,96 +78,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import AppLayout from '@/components/AppLayout.vue'
 import SettingsSection from '@/components/settings/SettingsSection.vue'
 import ProviderGuide from '@/components/settings/ProviderGuide.vue'
 import ApiKeyField from '@/components/settings/ApiKeyField.vue'
-import { useAiStore } from '@/stores/ai'
-import { aiConfigService } from '@/services/ai-config'
-import { usePreferencesStore } from '@/stores/preferences'
+import { CURRENCIES } from '@/constants/currencies'
+import { AI_PROVIDERS, PROVIDERS_WITH_GUIDE } from '@/constants/ai-providers'
+import { useCurrencyForm } from '@/composables/useCurrencyForm'
+import { useAiProviderForm } from '@/composables/useAiProviderForm'
 
-const CURRENCIES: { code: string; label: string }[] = [
-  { code: 'EUR', label: 'Euro' },
-  { code: 'USD', label: 'US Dollar' },
-  { code: 'GBP', label: 'British Pound' },
-  { code: 'CHF', label: 'Swiss Franc' },
-  { code: 'JPY', label: 'Japanese Yen' },
-  { code: 'CAD', label: 'Canadian Dollar' },
-  { code: 'AUD', label: 'Australian Dollar' },
-  { code: 'MXN', label: 'Mexican Peso' },
-  { code: 'BRL', label: 'Brazilian Real' },
-  { code: 'ARS', label: 'Argentine Peso' },
-]
-
-const prefsStore = usePreferencesStore()
-const currencyForm = ref('EUR')
-const currencySaved = ref(false)
-
-async function saveCurrency() {
-  await prefsStore.save({ currency: currencyForm.value })
-  currencySaved.value = true
-  setTimeout(() => (currencySaved.value = false), 3000)
-}
-
-const PROVIDERS = [
-  { value: 'anthropic', label: 'Anthropic (Claude)' },
-  { value: 'openai', label: 'OpenAI (GPT)' },
-  { value: 'gemini', label: 'Google (Gemini)' },
-  { value: 'mistral', label: 'Mistral' },
-  { value: 'groq', label: 'Groq' },
-  { value: 'xai', label: 'xAI (Grok)' },
-  { value: 'ollama', label: 'Ollama (local)' },
-]
-
-const aiStore = useAiStore()
-
-const currentModels = ref<string[]>([])
-const modelsLoading = ref(false)
-const form = ref({ provider: 'gemini', model: '', apiKey: '' })
-const saved = ref(false)
-
-const hasExistingConfig = computed(() => !!aiStore.config)
-const canSave = computed(
-  () => form.value.provider && form.value.model && (form.value.apiKey || hasExistingConfig.value),
-)
-
-async function onProviderChange(): Promise<void> {
-  modelsLoading.value = true
-  form.value.model = ''
-  try {
-    currentModels.value = await aiConfigService.models(form.value.provider)
-    if (currentModels.value.length) form.value.model = currentModels.value[0]
-  } finally {
-    modelsLoading.value = false
-  }
-}
-
-async function save(): Promise<void> {
-  saved.value = false
-  const payload = {
-    provider: form.value.provider,
-    model: form.value.model,
-    ...(form.value.apiKey ? { api_key: form.value.apiKey } : {}),
-  }
-  try {
-    await aiStore.saveConfig(payload)
-    form.value.apiKey = ''
-    saved.value = true
-    setTimeout(() => (saved.value = false), 3000)
-  } catch {
-    // error shown via aiStore.error
-  }
-}
+const { prefsStore, currencyForm, currencySaved, init: initCurrency, saveCurrency } = useCurrencyForm()
+const { aiStore, form, currentModels, modelsLoading, hasExistingConfig, canSave, saved, init: initAi, onProviderChange, save } = useAiProviderForm()
 
 onMounted(async () => {
   await Promise.all([aiStore.fetchConfig(), prefsStore.fetch()])
 
-  currencyForm.value = prefsStore.currency
+  initCurrency(prefsStore.currency)
 
   if (aiStore.config) {
-    form.value.provider = aiStore.config.provider
-    form.value.model = aiStore.config.model
+    initAi(aiStore.config.provider, aiStore.config.model)
   }
   await onProviderChange()
 })

@@ -39,6 +39,7 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[v4f3]` TypeScript migration — all source files converted from JavaScript to TypeScript; strict mode enabled; shared types centralised in `src/types/index.ts`; custom `ApiError` class with typed `status` field; all Vue components use `<script setup lang="ts">`
 - `[w6g8]` Auto-logout on expired session — any `401` response from the API clears the token and redirects to `/login`
 - `[y3j7]` `SettingsView` atomized into three components under `src/components/settings/`: `SettingsSection` (slot-based section wrapper), `ProviderGuide` (per-provider API key instructions), `ApiKeyField` (password input with show/hide toggle)
+- `[z1k2]` Extracted `CURRENCIES` and `AI_PROVIDERS` constants to `src/constants/`; extracted `useSavedFeedback`, `useCurrencyForm` and `useAiProviderForm` composables to `src/composables/`
 
 ---
 
