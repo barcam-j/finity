@@ -10,6 +10,7 @@ export function useAiProviderForm() {
   const form = ref({ provider: 'gemini', model: '', apiKey: '' })
   const currentModels = ref<string[]>([])
   const modelsLoading = ref(false)
+  const initializing = ref(true)
 
   const hasExistingConfig = computed(() => !!aiStore.config)
   const canSave = computed(
@@ -18,15 +19,28 @@ export function useAiProviderForm() {
   )
 
   async function init(): Promise<void> {
-    await aiStore.fetchConfig()
-    if (aiStore.config) {
-      form.value.provider = aiStore.config.provider
-      form.value.model = aiStore.config.model
+    try {
+      await aiStore.fetchConfig()
+      if (aiStore.config) {
+        form.value.provider = aiStore.config.provider
+        const savedModel = aiStore.config.model
+        await onProviderChange()
+        // Restore saved model after onProviderChange resets it
+        if (savedModel) form.value.model = savedModel
+      } else {
+        await onProviderChange()
+      }
+    } finally {
+      initializing.value = false
     }
-    await onProviderChange()
   }
 
   async function onProviderChange(): Promise<void> {
+    if (!form.value.provider) {
+      currentModels.value = []
+      form.value.model = ''
+      return
+    }
     modelsLoading.value = true
     form.value.model = ''
     try {
@@ -58,6 +72,7 @@ export function useAiProviderForm() {
   return {
     loading,
     error,
+    initializing,
     form,
     currentModels,
     modelsLoading,

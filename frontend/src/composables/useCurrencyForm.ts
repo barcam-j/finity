@@ -5,9 +5,8 @@ import { useSavedFeedback } from './useSavedFeedback'
 export function useCurrencyForm() {
   const prefsStore = usePreferencesStore()
   const currencyForm = ref('EUR')
+  const saving = ref(false)
   const { saved: currencySaved, markSaved } = useSavedFeedback()
-
-  const loading = computed(() => prefsStore.loading)
 
   async function init() {
     await prefsStore.fetch()
@@ -15,12 +14,17 @@ export function useCurrencyForm() {
   }
 
   async function saveCurrency() {
-    await prefsStore.save({ currency: currencyForm.value })
-    markSaved()
+    saving.value = true
+    try {
+      await prefsStore.save({ currency: currencyForm.value })
+      markSaved()
+    } finally {
+      saving.value = false
+    }
   }
 
   return {
-    loading,
+    saving,
     currencyForm,
     currencySaved,
     init,

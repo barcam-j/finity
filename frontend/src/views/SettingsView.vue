@@ -18,8 +18,8 @@
           </div>
           <div class="form-footer">
             <span v-if="currencySaved" class="saved-badge">Saved</span>
-            <button class="btn-primary" type="submit" :disabled="currencyLoading">
-              {{ currencyLoading ? 'Saving…' : 'Save' }}
+            <button class="btn-primary" type="submit" :disabled="currencySaving">
+              {{ currencySaving ? 'Saving…' : 'Save' }}
             </button>
           </div>
         </form>
@@ -29,7 +29,7 @@
         title="AI Provider"
         description="Configure the AI provider used to read and categorize your transactions."
       >
-        <div v-if="aiLoading && !form.provider" class="loading">Loading…</div>
+        <div v-if="aiInitializing" class="loading">Loading…</div>
 
         <form v-else class="settings-form" @submit.prevent="save">
           <div class="field">
@@ -88,8 +88,8 @@ import { AI_PROVIDERS, PROVIDERS_WITH_GUIDE } from '@/constants/ai-providers'
 import { useCurrencyForm } from '@/composables/useCurrencyForm'
 import { useAiProviderForm } from '@/composables/useAiProviderForm'
 
-const { loading: currencyLoading, currencyForm, currencySaved, init: initCurrency, saveCurrency } = useCurrencyForm()
-const { loading: aiLoading, error: aiError, form, currentModels, modelsLoading, hasExistingConfig, canSave, saved, init: initAi, onProviderChange, save } = useAiProviderForm()
+const { saving: currencySaving, currencyForm, currencySaved, init: initCurrency, saveCurrency } = useCurrencyForm()
+const { loading: aiLoading, error: aiError, initializing: aiInitializing, form, currentModels, modelsLoading, hasExistingConfig, canSave, saved, init: initAi, onProviderChange, save } = useAiProviderForm()
 
 onMounted(() => Promise.all([initCurrency(), initAi()]))
 </script>
