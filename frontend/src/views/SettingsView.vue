@@ -75,9 +75,10 @@
                 type="button"
                 role="switch"
                 :aria-checked="form.analysisEnabled"
+                :disabled="togglingAnalysis"
                 class="toggle"
                 :class="{ 'toggle--on': form.analysisEnabled }"
-                @click="form.analysisEnabled = !form.analysisEnabled"
+                @click="toggleAnalysis"
               />
             </label>
           </div>
@@ -107,7 +108,7 @@ import { useCurrencyForm } from '@/composables/useCurrencyForm'
 import { useAiProviderForm } from '@/composables/useAiProviderForm'
 
 const { saving: currencySaving, currencyForm, currencySaved, init: initCurrency, saveCurrency } = useCurrencyForm()
-const { loading: aiLoading, error: aiError, initializing: aiInitializing, form, currentModels, modelsLoading, hasExistingConfig, canSave, saved, init: initAi, onProviderChange, save } = useAiProviderForm()
+const { loading: aiLoading, error: aiError, initializing: aiInitializing, togglingAnalysis, form, currentModels, modelsLoading, hasExistingConfig, canSave, saved, init: initAi, onProviderChange, save, toggleAnalysis } = useAiProviderForm()
 
 onMounted(() => Promise.all([initCurrency(), initAi()]))
 </script>

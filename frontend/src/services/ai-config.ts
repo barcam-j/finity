@@ -31,4 +31,13 @@ export const aiConfigService = {
     if (!res.ok) throw new Error((await res.json()).detail || 'Failed to save AI config')
     return res.json() as Promise<AiConfig>
   },
+
+  async setAnalysisEnabled(enabled: boolean): Promise<void> {
+    const res = await fetch(`${BASE_URL}/ai-config/analysis-enabled`, {
+      method: 'PATCH',
+      headers: authHeaders(),
+      body: JSON.stringify({ enabled }),
+    })
+    if (!res.ok) throw new Error((await res.json()).detail || 'Failed to update analysis setting')
+  },
 }
