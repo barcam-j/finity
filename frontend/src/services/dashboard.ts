@@ -9,7 +9,13 @@ function authHeaders(): Record<string, string> {
 }
 
 export const dashboardService = {
-  async getKpis(period: 'month' | 'all'): Promise<DashboardKpis> {
+  async getAvailableMonths(): Promise<string[]> {
+    const res = await fetch(`${BASE_URL}/dashboard/months`, { headers: authHeaders() })
+    if (!res.ok) throw new Error('Failed to load available months')
+    return res.json() as Promise<string[]>
+  },
+
+  async getKpis(period: string): Promise<DashboardKpis> {
     const res = await fetch(`${BASE_URL}/dashboard/kpis?period=${period}`, {
       headers: authHeaders(),
     })

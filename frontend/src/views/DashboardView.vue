@@ -8,6 +8,7 @@
       <DashboardKpis
         :kpis="store.kpis"
         :period="store.period"
+        :available-months="store.availableMonths"
         :loading="store.loadingKpis"
         @update:period="store.fetchKpis"
       />
@@ -32,7 +33,7 @@ import { useDashboardStore } from '@/stores/dashboard'
 
 const store = useDashboardStore()
 
-onMounted(() => Promise.all([store.fetchKpis(), store.fetchAnalysis()]))
+onMounted(() => Promise.all([store.fetchAvailableMonths(), store.fetchKpis(), store.fetchAnalysis()]))
 </script>
 
 <style scoped>

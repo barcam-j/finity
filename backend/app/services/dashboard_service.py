@@ -6,6 +6,12 @@ from app.models.transaction import Transaction
 from app.ai.adapter import get_ai_response
 
 
+async def get_available_months(user_id: PydanticObjectId) -> list[str]:
+    transactions = await Transaction.find(Transaction.user_id == user_id).to_list()
+    months = sorted({t.date.strftime('%Y-%m') for t in transactions}, reverse=True)
+    return months
+
+
 async def get_kpis(user_id: PydanticObjectId, period: str) -> dict:
     base_query = Transaction.find(Transaction.user_id == user_id)
 
@@ -22,6 +28,13 @@ async def get_kpis(user_id: PydanticObjectId, period: str) -> dict:
             period_label = start.strftime('%B %Y')
         else:
             query = base_query
+    elif len(period) == 7 and period[4] == '-':
+        year, month = int(period[:4]), int(period[5:])
+        _, last_day = monthrange(year, month)
+        start = date(year, month, 1)
+        end = date(year, month, last_day)
+        query = base_query.find(Transaction.date >= start, Transaction.date <= end)
+        period_label = start.strftime('%B %Y')
     else:
         query = base_query
 

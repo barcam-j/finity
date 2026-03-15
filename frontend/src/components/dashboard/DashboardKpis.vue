@@ -3,10 +3,12 @@
     <div class="kpis-header">
       <h2>Overview</h2>
       <div class="period-selector">
-        <button :class="{ active: period === 'month' }" @click="emit('update:period', 'month')">
-          Last month
-        </button>
-        <button :class="{ active: period === 'all' }" @click="emit('update:period', 'all')">
+        <div v-if="availableMonths.length" class="month-nav">
+          <button :disabled="monthIndex >= availableMonths.length - 1 || loading" @click="stepMonth(1)">‹</button>
+          <span class="month-nav-label">{{ monthLabel }}</span>
+          <button :disabled="monthIndex <= 0 || loading" @click="stepMonth(-1)">›</button>
+        </div>
+        <button :class="{ active: period === 'all' }" :disabled="loading" @click="emit('update:period', 'all')">
           All time
         </button>
       </div>
@@ -47,21 +49,44 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { DashboardKpis } from '@/types'
 import { useCurrency } from '@/composables/useCurrency'
 import KpiCard from './KpiCard.vue'
 
-defineProps<{
+const props = defineProps<{
   kpis: DashboardKpis | null
-  period: 'month' | 'all'
+  period: string
+  availableMonths: string[]
   loading: boolean
 }>()
 
 const emit = defineEmits<{
-  'update:period': [period: 'month' | 'all']
+  'update:period': [period: string]
 }>()
 
 const { formatAmount } = useCurrency()
+
+// Index of the currently selected month in availableMonths (sorted desc)
+const monthIndex = computed(() => {
+  if (props.period === 'all' || !props.availableMonths.length) return 0
+  const idx = props.availableMonths.indexOf(props.period)
+  return idx === -1 ? 0 : idx
+})
+
+const monthLabel = computed(() => {
+  const m = props.availableMonths[monthIndex.value]
+  if (!m) return ''
+  const [year, month] = m.split('-').map(Number)
+  return new Date(year, month - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+})
+
+function stepMonth(delta: number): void {
+  const next = monthIndex.value + delta
+  if (next >= 0 && next < props.availableMonths.length) {
+    emit('update:period', props.availableMonths[next])
+  }
+}
 
 function formatDate(iso: string): string {
   return new Date(iso + 'T00:00:00').toLocaleDateString(undefined, {
@@ -96,16 +121,52 @@ function formatDate(iso: string): string {
 
 .period-selector {
   display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.month-nav {
+  display: flex;
+  align-items: center;
   gap: 0.25rem;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 0.2rem;
+  padding: 0.2rem 0.4rem;
 }
 
-.period-selector button {
-  padding: 0.3rem 0.75rem;
+.month-nav button {
+  padding: 0.15rem 0.4rem;
   border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.month-nav button:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.month-nav button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.month-nav-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+  min-width: 9rem;
+  text-align: center;
+}
+
+.period-selector > button {
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--border);
   border-radius: 6px;
   background: none;
   color: var(--text-muted);
@@ -114,11 +175,15 @@ function formatDate(iso: string): string {
   transition: background 0.15s, color 0.15s;
 }
 
-.period-selector button.active {
-  background: var(--card-bg);
+.period-selector > button.active {
+  background: var(--bg-secondary);
   color: var(--text);
   font-weight: 500;
-  box-shadow: 0 1px 3px oklch(0 0 0 / 0.1);
+}
+
+.period-selector > button:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .kpis-grid {

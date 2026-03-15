@@ -8,9 +8,14 @@ from app.services import dashboard_service
 router = APIRouter(prefix='/dashboard', tags=['dashboard'])
 
 
+@router.get('/months')
+async def get_available_months(current_user: User = Depends(get_current_user)):
+    return await dashboard_service.get_available_months(current_user.id)
+
+
 @router.get('/kpis')
 async def get_kpis(
-    period: str = Query('month', pattern='^(month|all)$'),
+    period: str = Query('month', pattern=r'^(month|all|\d{4}-\d{2})$'),
     current_user: User = Depends(get_current_user),
 ):
     return await dashboard_service.get_kpis(current_user.id, period)

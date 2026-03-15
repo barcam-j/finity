@@ -7,13 +7,25 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const kpis = ref<DashboardKpis | null>(null)
   const analysis = ref<string | null>(null)
   const analysisEnabled = ref(false)
-  const period = ref<'month' | 'all'>('month')
+  const period = ref<string>('month')
+  const availableMonths = ref<string[]>([])
   const loadingKpis = ref(false)
   const loadingAnalysis = ref(false)
   const errorKpis = ref<string | null>(null)
   const errorAnalysis = ref<string | null>(null)
 
-  async function fetchKpis(p?: 'month' | 'all'): Promise<void> {
+  async function fetchAvailableMonths(): Promise<void> {
+    try {
+      availableMonths.value = await dashboardService.getAvailableMonths()
+      if (availableMonths.value.length && period.value === 'month') {
+        period.value = availableMonths.value[0]
+      }
+    } catch {
+      // non-blocking
+    }
+  }
+
+  async function fetchKpis(p?: string): Promise<void> {
     if (p) period.value = p
     loadingKpis.value = true
     errorKpis.value = null
@@ -45,10 +57,12 @@ export const useDashboardStore = defineStore('dashboard', () => {
     analysis,
     analysisEnabled,
     period,
+    availableMonths,
     loadingKpis,
     loadingAnalysis,
     errorKpis,
     errorAnalysis,
+    fetchAvailableMonths,
     fetchKpis,
     fetchAnalysis,
   }
