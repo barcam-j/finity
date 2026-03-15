@@ -49,6 +49,14 @@
       </template>
     </div>
   </AppLayout>
+
+  <ConfirmDialog
+    :open="showDeleteConfirm"
+    :message="`Delete ${selectedIds.length} transaction${selectedIds.length !== 1 ? 's' : ''}? This action cannot be undone.`"
+    confirm-label="Delete"
+    @confirm="confirmBulkDelete"
+    @cancel="showDeleteConfirm = false"
+  />
 </template>
 
 <script setup lang="ts">
@@ -61,6 +69,7 @@ import TransactionPagination from '@/components/transactions/TransactionPaginati
 import TransactionsEmptyState from '@/components/transactions/TransactionsEmptyState.vue'
 import BulkEditBar from '@/components/transactions/BulkEditBar.vue'
 import TransactionFilters from '@/components/transactions/TransactionFilters.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import type { TransactionFilters as TFilters } from '@/types'
 import { useTransactionsStore } from '@/stores/transactions'
 
@@ -68,6 +77,7 @@ const store = useTransactionsStore()
 const showImporter = ref(false)
 const selectedIds = ref<string[]>([])
 const currentFilters = ref<TFilters>({})
+const showDeleteConfirm = ref(false)
 
 const visiblePages = computed(() => {
   const { page, pages } = store
@@ -128,6 +138,11 @@ async function onBulkCategory(category: string): Promise<void> {
 }
 
 async function onBulkDelete(): Promise<void> {
+  showDeleteConfirm.value = true
+}
+
+async function confirmBulkDelete(): Promise<void> {
+  showDeleteConfirm.value = false
   const ids = [...selectedIds.value]
   selectedIds.value = []
   await store.bulkRemove(ids)
