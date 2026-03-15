@@ -1,9 +1,7 @@
 <template>
   <div class="filters-bar">
     <div class="filter-search">
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
-        <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-      </svg>
+      <Search :size="14" class="search-icon" />
       <input
         v-model="search"
         type="text"
@@ -16,9 +14,7 @@
     <div ref="catDropdownEl" class="filter-dropdown">
       <button class="filter-btn" :class="{ active: selectedCategories.length }" @click.stop="catOpen = !catOpen">
         {{ selectedCategories.length ? `Categories (${selectedCategories.length})` : 'Categories' }}
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
+        <ChevronDown :size="12" />
       </button>
       <div v-if="catOpen" class="dropdown-menu">
         <label v-for="cat in categories" :key="cat" class="dropdown-item">
@@ -42,9 +38,7 @@
     </div>
 
     <button v-if="activeCount > 0" class="btn-clear-filters" @click="clearAll">
-      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-      </svg>
+      <X :size="12" />
       Clear
     </button>
   </div>
@@ -52,6 +46,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { Search, X, ChevronDown } from 'lucide-vue-next'
 import type { TransactionFilters } from '@/types'
 
 const props = defineProps<{

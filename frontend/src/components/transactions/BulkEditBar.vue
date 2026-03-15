@@ -20,19 +20,12 @@
           <option v-for="cat in categories" :key="cat" :value="cat" />
         </datalist>
         <button class="btn-apply" title="Apply category" @click="applyCategory">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
+          <Check :size="15" />
         </button>
       </div>
 
       <button class="btn-danger" title="Delete selected" @click="emit('delete-selected')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="3 6 5 6 21 6" />
-          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-          <path d="M10 11v6M14 11v6" />
-          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-        </svg>
+        <Trash2 :size="15" />
       </button>
       <button class="btn-clear" @click="emit('clear-selection')">✕</button>
     </div>
@@ -42,6 +35,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Check, Trash2 } from 'lucide-vue-next'
 
 function onEnter(el: Element): void {
   const div = el as HTMLElement
