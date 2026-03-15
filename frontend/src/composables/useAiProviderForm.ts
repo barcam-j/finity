@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useAiStore } from '@/stores/ai'
 import { aiConfigService } from '@/services/ai-config'
 import { useSavedFeedback } from './useSavedFeedback'
@@ -7,7 +7,7 @@ export function useAiProviderForm() {
   const aiStore = useAiStore()
   const { saved, markSaved } = useSavedFeedback()
 
-  const form = ref({ provider: 'gemini', model: '', apiKey: '' })
+  const form = ref({ provider: 'gemini', model: '', apiKey: '', analysisEnabled: false })
   const currentModels = ref<string[]>([])
   const modelsLoading = ref(false)
   const initializing = ref(true)
@@ -23,6 +23,7 @@ export function useAiProviderForm() {
       await aiStore.fetchConfig()
       if (aiStore.config) {
         form.value.provider = aiStore.config.provider
+        form.value.analysisEnabled = aiStore.config.analysis_enabled
         const savedModel = aiStore.config.model
         await onProviderChange()
         // Restore saved model after onProviderChange resets it
@@ -55,6 +56,7 @@ export function useAiProviderForm() {
     const payload = {
       provider: form.value.provider,
       model: form.value.model,
+      analysis_enabled: form.value.analysisEnabled,
       ...(form.value.apiKey ? { api_key: form.value.apiKey } : {}),
     }
     try {
@@ -66,6 +68,29 @@ export function useAiProviderForm() {
     }
   }
 
+  watch(
+    () => form.value.apiKey,
+    (key) => { if (key) form.value.analysisEnabled = true },
+  )
+
+  const togglingAnalysis = ref(false)
+
+  async function toggleAnalysis(): Promise<void> {
+    if (!hasExistingConfig.value) {
+      form.value.analysisEnabled = !form.value.analysisEnabled
+      return
+    }
+    const next = !form.value.analysisEnabled
+    togglingAnalysis.value = true
+    try {
+      await aiConfigService.setAnalysisEnabled(next)
+      form.value.analysisEnabled = next
+      if (aiStore.config) aiStore.config.analysis_enabled = next
+    } finally {
+      togglingAnalysis.value = false
+    }
+  }
+
   const loading = computed(() => aiStore.loading)
   const error = computed(() => aiStore.error)
 
@@ -73,6 +98,7 @@ export function useAiProviderForm() {
     loading,
     error,
     initializing,
+    togglingAnalysis,
     form,
     currentModels,
     modelsLoading,
@@ -82,5 +108,6 @@ export function useAiProviderForm() {
     init,
     onProviderChange,
     save,
+    toggleAnalysis,
   }
 }

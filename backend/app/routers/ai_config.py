@@ -48,6 +48,19 @@ async def get_config(current_user: User = Depends(get_current_user)):
     )
 
 
+@router.patch('/analysis-enabled')
+async def toggle_analysis(
+    body: dict,
+    current_user: User = Depends(get_current_user),
+):
+    config = await AiConfig.find_one(AiConfig.user_id == current_user.id)
+    if not config:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No AI config found')
+    config.analysis_enabled = bool(body.get('enabled', False))
+    await config.replace()
+    return {'analysis_enabled': config.analysis_enabled}
+
+
 @router.put('/')
 async def save_config(body: AiConfigRequest, current_user: User = Depends(get_current_user)):
     config = await AiConfig.find_one(AiConfig.user_id == current_user.id)
@@ -55,9 +68,11 @@ async def save_config(body: AiConfigRequest, current_user: User = Depends(get_cu
         config.provider = body.provider
         if body.api_key:
             config.api_key_encrypted = encrypt(body.api_key)
+            config.analysis_enabled = True
+        else:
+            config.analysis_enabled = body.analysis_enabled
         config.model = body.model
         config.params = body.params
-        config.analysis_enabled = body.analysis_enabled
     else:
         if not body.api_key:
             raise HTTPException(
@@ -70,11 +85,11 @@ async def save_config(body: AiConfigRequest, current_user: User = Depends(get_cu
             api_key_encrypted=encrypt(body.api_key),
             model=body.model,
             params=body.params,
-            analysis_enabled=body.analysis_enabled,
+            analysis_enabled=True,
         )
 
     if config.id:
-        await config.save()
+        await config.replace()
     else:
         await config.insert()
 

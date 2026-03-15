@@ -9,10 +9,11 @@ from app.models.transaction import Transaction
 from app.models.ai_config import AiConfig
 from app.models.alert import Alert
 from app.models.user_preferences import UserPreferences
+from app.models.analysis_cache import AnalysisCache
 from app.routers import auth, transactions, ai_config, alerts, preferences, dashboard
 from app.importers.registry import register_importers
 
-DOCUMENT_MODELS = [User, Transaction, AiConfig, Alert, UserPreferences]
+DOCUMENT_MODELS = [User, Transaction, AiConfig, Alert, UserPreferences, AnalysisCache]
 
 
 @asynccontextmanager

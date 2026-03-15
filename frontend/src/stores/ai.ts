@@ -25,7 +25,7 @@ export const useAiStore = defineStore('ai', () => {
     error.value = null
     try {
       await aiConfigService.save(data)
-      config.value = { provider: data.provider, model: data.model, has_key: !!data.api_key }
+      await fetchConfig()
     } catch (e) {
       error.value = (e as Error).message
       throw e

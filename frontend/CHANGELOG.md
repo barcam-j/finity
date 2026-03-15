@@ -43,12 +43,23 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[z1k2]` Extracted `CURRENCIES` and `AI_PROVIDERS` constants to `src/constants/`; extracted `useSavedFeedback`, `useCurrencyForm` and `useAiProviderForm` composables to `src/composables/`
 - `[a1b3]` Centralised shared form styles into `src/styles/forms.css` — eliminates CSS duplication across settings components
 
+- `[f6a1]` Dashboard view with KPI overview (balance, income, expenses, top category) and AI analysis panel
+- `[g8b4]` `KpiCard` and `DashboardKpis` components under `src/components/dashboard/` — KPI grid with month navigator (`‹ Month YYYY ›`) and All time toggle
+- `[h2c7]` `AiAnalysisPanel` component — always shows basic spending summary and category breakdown; AI-generated text shown above when enabled
+- `[i5d3]` Month navigation in dashboard — browse all months with recorded transactions via prev/next arrows; defaults to most recent month
+- `[j9e6]` Period metadata line under KPIs — shows active month name and last import date derived from MongoDB ObjectId timestamp
+- `[k1f2]` `dashboard` Pinia store with `fetchKpis`, `fetchAnalysis`, `fetchAvailableMonths` actions
+- `[l4g8]` `dashboard` service — `getKpis`, `getAnalysis`, `getAvailableMonths` API calls
+- `[m7h5]` AI analysis toggle auto-saves immediately on click via `PATCH /ai-config/analysis-enabled` — no need to press Save
+- `[n3i1]` Enabling AI auto-activates when API key is entered in the form — toggle turns on as soon as a key is typed
+
 ### Fixed
 
 - `[b2c4]` AI provider loading spinner never showed on settings page — replaced broken `aiLoading && !form.provider` condition with dedicated `initializing` ref
 - `[c3d5]` Saved AI model overwritten on page load — `onProviderChange` reset the model before the saved value could be restored; now preserved via `savedModel` after models are fetched
 - `[d4e6]` Currency save button showed "Saving…" during initial data fetch — `saving` ref now tracks only the save operation, separate from the fetch
 - `[e5f7]` Calling `onProviderChange` with empty provider triggered a spurious API call — guarded with early return when provider is blank
+- `[o6j9]` AI config save used stale local state after PUT — store now re-fetches config from backend after saving
 
 ---
 
