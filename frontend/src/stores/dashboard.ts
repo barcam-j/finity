@@ -38,11 +38,13 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   }
 
-  async function fetchAnalysis(): Promise<void> {
+  async function fetchAnalysis(month?: string): Promise<void> {
+    const target = month ?? period.value
+    if (!target || target === 'all') return
     loadingAnalysis.value = true
     errorAnalysis.value = null
     try {
-      const result = await dashboardService.getAnalysis()
+      const result = await dashboardService.getAnalysis(target)
       analysis.value = result.analysis
       analysisEnabled.value = result.enabled
     } catch (e) {

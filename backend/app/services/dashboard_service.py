@@ -1,9 +1,16 @@
+import hashlib
 from calendar import monthrange
 from datetime import date
 from beanie import PydanticObjectId
 
 from app.models.transaction import Transaction
+from app.models.analysis_cache import AnalysisCache
 from app.ai.adapter import get_ai_response
+
+
+def _transactions_hash(transactions: list) -> str:
+    ids = sorted(str(t.id) for t in transactions)
+    return hashlib.md5(''.join(ids).encode()).hexdigest()
 
 
 async def get_available_months(user_id: PydanticObjectId) -> list[str]:
@@ -97,16 +104,33 @@ async def get_kpis(user_id: PydanticObjectId, period: str) -> dict:
     }
 
 
-async def get_ai_analysis(user_id: PydanticObjectId) -> str:
+async def get_ai_analysis(user_id: PydanticObjectId, month: str) -> str:
+    year, mon = int(month[:4]), int(month[5:])
+    _, last_day = monthrange(year, mon)
+    start = date(year, mon, 1)
+    end = date(year, mon, last_day)
+
     transactions = (
-        await Transaction.find(Transaction.user_id == user_id)
+        await Transaction.find(
+            Transaction.user_id == user_id,
+            Transaction.date >= start,
+            Transaction.date <= end,
+        )
         .sort(-Transaction.date)
-        .limit(100)
         .to_list()
     )
 
     if not transactions:
         raise ValueError('No transactions available to analyze')
+
+    current_hash = _transactions_hash(transactions)
+
+    cached = await AnalysisCache.find_one(
+        AnalysisCache.user_id == user_id,
+        AnalysisCache.month == month,
+    )
+    if cached and cached.transactions_hash == current_hash:
+        return cached.analysis
 
     lines = [
         f'{t.date} | {t.category or "Uncategorized"} | {t.amount:+.2f}'
@@ -124,4 +148,18 @@ Transactions (date | category | amount):
 
 Respond in a clear, friendly tone. Be specific with numbers where relevant. Keep the total response under 300 words."""
 
-    return await get_ai_response(user_id, prompt)
+    analysis = await get_ai_response(user_id, prompt)
+
+    if cached:
+        cached.analysis = analysis
+        cached.transactions_hash = current_hash
+        await cached.replace()
+    else:
+        await AnalysisCache(
+            user_id=user_id,
+            month=month,
+            analysis=analysis,
+            transactions_hash=current_hash,
+        ).insert()
+
+    return analysis

@@ -22,14 +22,17 @@ async def get_kpis(
 
 
 @router.get('/analysis')
-async def get_analysis(current_user: User = Depends(get_current_user)):
+async def get_analysis(
+    month: str = Query(..., pattern=r'^\d{4}-\d{2}$'),
+    current_user: User = Depends(get_current_user),
+):
     config = await AiConfig.find_one(AiConfig.user_id == current_user.id)
 
     if not config or not config.analysis_enabled:
         return {'analysis': None, 'enabled': False}
 
     try:
-        analysis = await dashboard_service.get_ai_analysis(current_user.id)
+        analysis = await dashboard_service.get_ai_analysis(current_user.id, month)
         return {'analysis': analysis, 'enabled': True}
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

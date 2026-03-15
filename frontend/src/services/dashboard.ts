@@ -23,8 +23,8 @@ export const dashboardService = {
     return res.json() as Promise<DashboardKpis>
   },
 
-  async getAnalysis(): Promise<DashboardAnalysis> {
-    const res = await fetch(`${BASE_URL}/dashboard/analysis`, { headers: authHeaders() })
+  async getAnalysis(month: string): Promise<DashboardAnalysis> {
+    const res = await fetch(`${BASE_URL}/dashboard/analysis?month=${month}`, { headers: authHeaders() })
     if (!res.ok) throw new Error((await res.json()).detail || 'Failed to load analysis')
     return res.json() as Promise<DashboardAnalysis>
   },
