@@ -15,7 +15,7 @@
         @keydown.enter.prevent="save('date')"
         @keydown.esc.prevent="cancel"
       />
-      <span v-else>{{ tx.date }}</span>
+      <span v-else>{{ formatDate(tx.date) }}</span>
     </td>
 
     <td @click.stop="startEdit('description')">
@@ -84,7 +84,15 @@ import { useCurrency } from '@/composables/useCurrency'
 
 type EditableField = 'date' | 'description' | 'categories'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+
+function formatDate(iso: string): string {
+  return new Date(iso + 'T00:00:00').toLocaleDateString(locale.value, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
 
 const props = defineProps<{
   tx: Transaction
