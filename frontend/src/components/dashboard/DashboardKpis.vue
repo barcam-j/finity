@@ -34,6 +34,8 @@
         :label="t('dashboard.income')"
         :value="formatAmount(kpis.total_income, 0)"
         variant="positive"
+        clickable
+        @click="goToIncome"
       />
       <KpiCard
         :label="t('dashboard.expenses')"
@@ -85,6 +87,10 @@ function periodQuery(): Record<string, string> {
     date_from: `${ym}-01`,
     date_to: `${ym}-${String(lastDay).padStart(2, '0')}`,
   }
+}
+
+function goToIncome(): void {
+  router.push({ name: 'Transactions', query: { amount_min: '0.01', ...periodQuery() } })
 }
 
 function goToExpenses(): void {

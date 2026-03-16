@@ -7,6 +7,14 @@
         <button class="btn-primary" @click="toggleImporter">
           {{ showImporter ? t('transactions.cancel') : t('transactions.import') }}
         </button>
+        <div class="view-header-actions">
+          <span v-if="deduplicateResult !== null" class="deduplicate-result">
+            {{ t('transactions.deduplicateResult', { count: deduplicateResult }) }}
+          </span>
+          <button v-if="!showImporter && store.items.length" class="btn-secondary" @click="showDeduplicateConfirm = true">
+            {{ t('transactions.deduplicate') }}
+          </button>
+        </div>
       </div>
 
       <div v-if="showImporter" class="importer-panel">
@@ -58,6 +66,14 @@
     @confirm="confirmBulkDelete"
     @cancel="showDeleteConfirm = false"
   />
+
+  <ConfirmDialog
+    :open="showDeduplicateConfirm"
+    :message="t('transactions.deduplicateConfirm')"
+    :confirm-label="t('transactions.deduplicateRun')"
+    @confirm="confirmDeduplicate"
+    @cancel="showDeduplicateConfirm = false"
+  />
 </template>
 
 <script setup lang="ts">
@@ -100,6 +116,8 @@ function filtersFromQuery(): TFilters {
 
 const currentFilters = ref<TFilters>(filtersFromQuery())
 const showDeleteConfirm = ref(false)
+const showDeduplicateConfirm = ref(false)
+const deduplicateResult = ref<number | null>(null)
 
 const visiblePages = computed(() => {
   const { page, pages } = store
@@ -170,6 +188,11 @@ async function confirmBulkDelete(): Promise<void> {
   await store.bulkRemove(ids)
 }
 
+async function confirmDeduplicate(): Promise<void> {
+  showDeduplicateConfirm.value = false
+  deduplicateResult.value = await store.deduplicate()
+}
+
 onMounted(() => Promise.all([store.fetch(1, currentFilters.value), store.fetchCategories()]))
 </script>
 
@@ -184,6 +207,17 @@ onMounted(() => Promise.all([store.fetch(1, currentFilters.value), store.fetchCa
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.view-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.deduplicate-result {
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
 .view-header h1 { margin: 0; }
@@ -215,4 +249,21 @@ onMounted(() => Promise.all([store.fetch(1, currentFilters.value), store.fetchCa
 }
 
 .btn-primary:hover { background: var(--btn-hover); }
+
+.btn-secondary {
+  padding: 0.6rem 1.25rem;
+  background: none;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-secondary:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
 </style>

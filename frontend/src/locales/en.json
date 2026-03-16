@@ -73,7 +73,11 @@
     "paginationInfo": "{from}–{to} of {total} transactions",
     "deleteConfirm": "Delete {count} transaction? This action cannot be undone. | Delete {count} transactions? This action cannot be undone.",
     "applyCategory": "Apply category",
-    "deleteSelected": "Delete selected"
+    "deleteSelected": "Delete selected",
+    "deduplicate": "Remove duplicates",
+    "deduplicateConfirm": "This will remove transactions with the same date, amount and description, keeping one copy of each. This action cannot be undone.",
+    "deduplicateRun": "Remove duplicates",
+    "deduplicateResult": "{count} duplicate(s) removed"
   },
   "filters": {
     "searchPlaceholder": "Search description…",

@@ -30,6 +30,7 @@
         @keydown.esc.prevent="cancel"
       />
       <span v-else>{{ tx.description || '—' }}</span>
+      <span class="tx-id">{{ tx.id }}</span>
     </td>
 
     <td @click.stop="startEdit('categories')">
@@ -227,6 +228,15 @@ td {
 }
 
 .text-muted { color: var(--text-muted); }
+
+.tx-id {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  opacity: 0.5;
+  font-family: monospace;
+  margin-top: 0.1rem;
+}
 
 .tags-editor {
   display: flex;

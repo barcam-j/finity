@@ -21,4 +21,5 @@ export const transactionsService = {
   bulkUpdateCategory: (ids: string[], category: string | null) =>
     api.post<{ updated: number }>('/transactions/bulk-category', { ids, category }),
   delete: (id: string) => api.delete(`/transactions/${id}`),
+  deduplicate: () => api.post<{ deleted: number }>('/transactions/deduplicate', {}),
 }
