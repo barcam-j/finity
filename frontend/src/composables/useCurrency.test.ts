@@ -5,7 +5,10 @@ import { usePreferencesStore } from '@/stores/preferences'
 
 // preferencesService and setLocale make network/localStorage calls we don't need here
 vi.mock('@/services/preferences')
-vi.mock('@/i18n', () => ({ setLocale: vi.fn() }))
+vi.mock('@/i18n', () => ({
+  setLocale: vi.fn(),
+  i18n: { global: { locale: { value: 'en' } } },
+}))
 
 function setup(currency: string) {
   setActivePinia(createPinia())

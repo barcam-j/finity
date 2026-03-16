@@ -1,10 +1,11 @@
 import { usePreferencesStore } from '@/stores/preferences'
+import { i18n } from '@/i18n'
 
 export function useCurrency() {
   const prefs = usePreferencesStore()
 
   function formatAmount(amount: number): string {
-    const parts = new Intl.NumberFormat('en-US', {
+    const parts = new Intl.NumberFormat(i18n.global.locale.value, {
       style: 'currency',
       currency: prefs.currency,
       currencyDisplay: 'symbol',
