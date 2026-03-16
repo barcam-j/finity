@@ -9,6 +9,8 @@ const STORAGE_KEY = 'finity_lang'
 function resolveInitialLocale(): string {
   const stored = localStorage.getItem(STORAGE_KEY)
   if (stored && SUPPORTED.includes(stored)) return stored
+  const browser = navigator.language?.slice(0, 2)
+  if (browser && SUPPORTED.includes(browser)) return browser
   return 'en'
 }
 
