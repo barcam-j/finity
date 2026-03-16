@@ -28,6 +28,7 @@
         :label="t('dashboard.balance')"
         :value="formatAmount(kpis.balance)"
         :variant="kpis.balance >= 0 ? 'positive' : 'negative'"
+        :subtitle="kpis.total_investments > 0 ? t('dashboard.balanceWithInv', { amount: formatAmount(kpis.balance_with_investments) }) : undefined"
       />
       <KpiCard
         :label="t('dashboard.income')"
@@ -38,6 +39,11 @@
         :label="t('dashboard.expenses')"
         :value="formatAmount(kpis.total_expenses)"
         variant="negative"
+      />
+      <KpiCard
+        v-if="kpis.total_investments > 0"
+        :label="t('dashboard.investments')"
+        :value="formatAmount(kpis.total_investments)"
       />
       <KpiCard
         :label="t('dashboard.topCategory')"

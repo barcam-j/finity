@@ -40,7 +40,9 @@ export interface DashboardCategory {
 export interface DashboardKpis {
   total_income: number
   total_expenses: number
+  total_investments: number
   balance: number
+  balance_with_investments: number
   top_category: string | null
   transaction_count: number
   categories: DashboardCategory[]

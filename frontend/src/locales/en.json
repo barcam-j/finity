@@ -39,7 +39,9 @@
     "income": "Income",
     "expenses": "Expenses",
     "topCategory": "Top category",
-    "transactionCount": "{count} transactions"
+    "transactionCount": "{count} transactions",
+    "investments": "Investments",
+    "balanceWithInv": "Real balance: {amount}"
   },
   "analysis": {
     "title": "Analysis",

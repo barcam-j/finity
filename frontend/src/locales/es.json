@@ -39,7 +39,9 @@
     "income": "Ingresos",
     "expenses": "Gastos",
     "topCategory": "Categoría principal",
-    "transactionCount": "{count} transacciones"
+    "transactionCount": "{count} transacciones",
+    "investments": "Inversiones",
+    "balanceWithInv": "Saldo real: {amount}"
   },
   "analysis": {
     "title": "Análisis",
