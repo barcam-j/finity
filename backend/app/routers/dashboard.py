@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from app.core.deps import get_current_user
 from app.models.user import User
 from app.models.ai_config import AiConfig
+from app.models.user_preferences import UserPreferences
 from app.services import dashboard_service
 
 router = APIRouter(prefix='/dashboard', tags=['dashboard'])
@@ -31,8 +32,11 @@ async def get_analysis(
     if not config or not config.analysis_enabled:
         return {'analysis': None, 'enabled': False}
 
+    prefs = await UserPreferences.find_one(UserPreferences.user_id == current_user.id)
+    language = prefs.language if prefs else 'en'
+
     try:
-        analysis = await dashboard_service.get_ai_analysis(current_user.id, month)
+        analysis = await dashboard_service.get_ai_analysis(current_user.id, month, language)
         return {'analysis': analysis, 'enabled': True}
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
