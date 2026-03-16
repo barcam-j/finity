@@ -26,23 +26,29 @@
     <div v-else-if="kpis" class="kpis-grid">
       <KpiCard
         :label="t('dashboard.balance')"
-        :value="formatAmount(kpis.balance)"
+        :value="formatAmount(kpis.balance, 0)"
         :variant="kpis.balance >= 0 ? 'positive' : 'negative'"
+        :subtitle="kpis.total_investments > 0 ? t('dashboard.balanceWithInv', { amount: formatAmount(kpis.balance_with_investments, 0) }) : undefined"
       />
       <KpiCard
         :label="t('dashboard.income')"
-        :value="formatAmount(kpis.total_income)"
+        :value="formatAmount(kpis.total_income, 0)"
         variant="positive"
+        clickable
+        @click="goToIncome"
       />
       <KpiCard
         :label="t('dashboard.expenses')"
-        :value="formatAmount(kpis.total_expenses)"
+        :value="formatAmount(kpis.total_expenses, 0)"
         variant="negative"
+        clickable
+        @click="goToExpenses"
       />
       <KpiCard
-        :label="t('dashboard.topCategory')"
-        :value="kpis.top_category ?? '—'"
-        :subtitle="t('dashboard.transactionCount', { count: kpis.transaction_count })"
+        :label="t('dashboard.investments')"
+        :value="formatAmount(kpis.total_investments, 0)"
+        :clickable="kpis.total_investments > 0"
+        @click="kpis.total_investments > 0 && goToInvestments()"
       />
     </div>
   </div>
@@ -51,6 +57,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import type { DashboardKpis } from '@/types'
 import { useCurrency } from '@/composables/useCurrency'
 import KpiCard from './KpiCard.vue'
@@ -69,6 +76,30 @@ const emit = defineEmits<{
 }>()
 
 const { formatAmount } = useCurrency()
+const router = useRouter()
+
+function periodQuery(): Record<string, string> {
+  const ym = props.period === 'month' ? props.availableMonths[0] : props.period
+  if (!ym || ym === 'all') return {}
+  const [year, month] = ym.split('-').map(Number)
+  const lastDay = new Date(year, month, 0).getDate()
+  return {
+    date_from: `${ym}-01`,
+    date_to: `${ym}-${String(lastDay).padStart(2, '0')}`,
+  }
+}
+
+function goToIncome(): void {
+  router.push({ name: 'Transactions', query: { amount_min: '0.01', ...periodQuery() } })
+}
+
+function goToExpenses(): void {
+  router.push({ name: 'Transactions', query: { amount_max: '-0.01', ...periodQuery() } })
+}
+
+function goToInvestments(): void {
+  router.push({ name: 'Transactions', query: { categories: 'inversión', ...periodQuery() } })
+}
 
 // Index of the currently selected month in availableMonths (sorted desc)
 const monthIndex = computed(() => {

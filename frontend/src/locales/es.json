@@ -39,7 +39,9 @@
     "income": "Ingresos",
     "expenses": "Gastos",
     "topCategory": "Categoría principal",
-    "transactionCount": "{count} transacciones"
+    "transactionCount": "{count} transacciones",
+    "investments": "Inversiones",
+    "balanceWithInv": "Saldo real: {amount}"
   },
   "analysis": {
     "title": "Análisis",
@@ -71,7 +73,11 @@
     "paginationInfo": "{from}–{to} de {total} transacciones",
     "deleteConfirm": "¿Eliminar {count} transacción? Esta acción no se puede deshacer. | ¿Eliminar {count} transacciones? Esta acción no se puede deshacer.",
     "applyCategory": "Aplicar categoría",
-    "deleteSelected": "Eliminar seleccionadas"
+    "deleteSelected": "Eliminar seleccionadas",
+    "deduplicate": "Eliminar duplicados",
+    "deduplicateConfirm": "Se eliminarán las transacciones con la misma fecha, importe y descripción, conservando una copia de cada una. Esta acción no se puede deshacer.",
+    "deduplicateRun": "Eliminar duplicados",
+    "deduplicateResult": "{count} duplicado(s) eliminado(s)"
   },
   "filters": {
     "searchPlaceholder": "Buscar descripción…",

@@ -54,18 +54,19 @@ const { t } = useI18n()
 
 const props = defineProps<{
   categories: string[]
+  initialFilters?: TransactionFilters
 }>()
 
 const emit = defineEmits<{
   filter: [filters: TransactionFilters]
 }>()
 
-const search = ref('')
-const selectedCategories = ref<string[]>([])
-const dateFrom = ref('')
-const dateTo = ref('')
-const amountMin = ref<number | ''>('')
-const amountMax = ref<number | ''>('')
+const search = ref(props.initialFilters?.search ?? '')
+const selectedCategories = ref<string[]>(props.initialFilters?.categories ?? [])
+const dateFrom = ref(props.initialFilters?.date_from ?? '')
+const dateTo = ref(props.initialFilters?.date_to ?? '')
+const amountMin = ref<number | ''>(props.initialFilters?.amount_min ?? '')
+const amountMax = ref<number | ''>(props.initialFilters?.amount_max ?? '')
 const catOpen = ref(false)
 const catDropdownEl = ref<HTMLElement | null>(null)
 

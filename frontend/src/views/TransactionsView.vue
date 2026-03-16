@@ -7,6 +7,14 @@
         <button class="btn-primary" @click="toggleImporter">
           {{ showImporter ? t('transactions.cancel') : t('transactions.import') }}
         </button>
+        <div class="view-header-actions">
+          <span v-if="deduplicateResult !== null" class="deduplicate-result">
+            {{ t('transactions.deduplicateResult', { count: deduplicateResult }) }}
+          </span>
+          <button v-if="!showImporter && store.items.length" class="btn-secondary" @click="showDeduplicateConfirm = true">
+            {{ t('transactions.deduplicate') }}
+          </button>
+        </div>
       </div>
 
       <div v-if="showImporter" class="importer-panel">
@@ -19,6 +27,7 @@
         <template v-else-if="store.items.length">
           <TransactionFilters
             :categories="store.categories"
+            :initial-filters="currentFilters"
             @filter="onFiltersChange"
           />
           <BulkEditBar
@@ -57,11 +66,20 @@
     @confirm="confirmBulkDelete"
     @cancel="showDeleteConfirm = false"
   />
+
+  <ConfirmDialog
+    :open="showDeduplicateConfirm"
+    :message="t('transactions.deduplicateConfirm')"
+    :confirm-label="t('transactions.deduplicateRun')"
+    @confirm="confirmDeduplicate"
+    @cancel="showDeduplicateConfirm = false"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import AppLayout from '@/components/AppLayout.vue'
 import ImporterSelector from '@/modules/importers/ImporterSelector.vue'
 import AiBanner from '@/components/AiBanner.vue'
@@ -75,11 +93,31 @@ import type { TransactionFilters as TFilters } from '@/types'
 import { useTransactionsStore } from '@/stores/transactions'
 
 const { t } = useI18n()
+const route = useRoute()
 const store = useTransactionsStore()
 const showImporter = ref(false)
 const selectedIds = ref<string[]>([])
-const currentFilters = ref<TFilters>({})
+
+function filtersFromQuery(): TFilters {
+  const q = route.query
+  const filters: TFilters = {}
+  if (q.amount_max) filters.amount_max = Number(q.amount_max)
+  if (q.amount_min) filters.amount_min = Number(q.amount_min)
+  if (q.date_from) filters.date_from = String(q.date_from)
+  if (q.date_to) filters.date_to = String(q.date_to)
+  if (q.search) filters.search = String(q.search)
+  if (q.categories) {
+    filters.categories = Array.isArray(q.categories)
+      ? q.categories.map(String)
+      : [String(q.categories)]
+  }
+  return filters
+}
+
+const currentFilters = ref<TFilters>(filtersFromQuery())
 const showDeleteConfirm = ref(false)
+const showDeduplicateConfirm = ref(false)
+const deduplicateResult = ref<number | null>(null)
 
 const visiblePages = computed(() => {
   const { page, pages } = store
@@ -150,7 +188,12 @@ async function confirmBulkDelete(): Promise<void> {
   await store.bulkRemove(ids)
 }
 
-onMounted(() => Promise.all([store.fetch(1), store.fetchCategories()]))
+async function confirmDeduplicate(): Promise<void> {
+  showDeduplicateConfirm.value = false
+  deduplicateResult.value = await store.deduplicate()
+}
+
+onMounted(() => Promise.all([store.fetch(1, currentFilters.value), store.fetchCategories()]))
 </script>
 
 <style scoped>
@@ -164,6 +207,17 @@ onMounted(() => Promise.all([store.fetch(1), store.fetchCategories()]))
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.view-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.deduplicate-result {
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
 .view-header h1 { margin: 0; }
@@ -195,4 +249,21 @@ onMounted(() => Promise.all([store.fetch(1), store.fetchCategories()]))
 }
 
 .btn-primary:hover { background: var(--btn-hover); }
+
+.btn-secondary {
+  padding: 0.6rem 1.25rem;
+  background: none;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-secondary:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
 </style>

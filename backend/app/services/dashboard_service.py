@@ -56,7 +56,9 @@ async def get_kpis(user_id: PydanticObjectId, period: str) -> dict:
         return {
             'total_income': 0.0,
             'total_expenses': 0.0,
+            'total_investments': 0.0,
             'balance': 0.0,
+            'balance_with_investments': 0.0,
             'top_category': None,
             'transaction_count': 0,
             'categories': [],
@@ -64,12 +66,16 @@ async def get_kpis(user_id: PydanticObjectId, period: str) -> dict:
             'last_import_date': None,
         }
 
+    _INVESTMENT_NAMES = {'inversión', 'inversion', 'inversiones', 'investment', 'investments'}
+
     def is_investment(t: Transaction) -> bool:
-        return any(c.strip().lower() == 'inversión' for c in t.categories)
+        return any(c.strip().lower() in _INVESTMENT_NAMES for c in t.categories)
 
     total_income = sum(t.amount for t in transactions if t.amount > 0)
     total_expenses = sum(t.amount for t in transactions if t.amount < 0 and not is_investment(t))
+    total_investment = sum(abs(t.amount) for t in transactions if t.amount < 0 and is_investment(t))
     balance = total_income + total_expenses
+    balance_with_investments = balance - total_investment
 
     category_totals: dict[str, float] = {}
     for t in transactions:
@@ -96,7 +102,9 @@ async def get_kpis(user_id: PydanticObjectId, period: str) -> dict:
     return {
         'total_income': round(total_income, 2),
         'total_expenses': round(abs(total_expenses), 2),
+        'total_investments': round(total_investment, 2),
         'balance': round(balance, 2),
+        'balance_with_investments': round(balance_with_investments, 2),
         'top_category': top_category,
         'transaction_count': len(transactions),
         'categories': categories,

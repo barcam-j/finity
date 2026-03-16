@@ -62,8 +62,14 @@ export const useTransactionsStore = defineStore('transactions', () => {
     await fetch(page.value)
   }
 
+  async function deduplicate(): Promise<number> {
+    const result = await transactionsService.deduplicate()
+    await Promise.all([fetch(1), fetchCategories()])
+    return result.deleted
+  }
+
   return {
     items, categories, total, page, pages, loading, error,
-    fetch, fetchCategories, updateTransaction, bulkUpdateCategory, remove, bulkRemove,
+    fetch, fetchCategories, updateTransaction, bulkUpdateCategory, remove, bulkRemove, deduplicate,
   }
 })

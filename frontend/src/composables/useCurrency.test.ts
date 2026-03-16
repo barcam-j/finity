@@ -5,7 +5,10 @@ import { usePreferencesStore } from '@/stores/preferences'
 
 // preferencesService and setLocale make network/localStorage calls we don't need here
 vi.mock('@/services/preferences')
-vi.mock('@/i18n', () => ({ setLocale: vi.fn() }))
+vi.mock('@/i18n', () => ({
+  setLocale: vi.fn(),
+  i18n: { global: { locale: { value: 'en' } } },
+}))
 
 function setup(currency: string) {
   setActivePinia(createPinia())
@@ -59,12 +62,32 @@ describe('formatAmount', () => {
   })
 
   describe('JPY', () => {
-    it('formats without decimal places', () => {
+    it('formats with 2 decimals by default', () => {
       const { formatAmount } = setup('JPY')
       const result = formatAmount(1000)
-      // JPY has no minor units — no decimal point expected
+      expect(result).toContain('1,000')
+    })
+
+    it('formats without decimals when decimals=0', () => {
+      const { formatAmount } = setup('JPY')
+      const result = formatAmount(1000, 0)
       expect(result).not.toContain('.')
       expect(result).toContain('1,000')
+    })
+  })
+
+  describe('decimals parameter', () => {
+    it('rounds to 0 decimals when decimals=0', () => {
+      const { formatAmount } = setup('EUR')
+      const result = formatAmount(1234.56, 0)
+      expect(result).not.toContain('.')
+      expect(result).not.toContain(',56')
+      expect(result).toContain('1,235')
+    })
+
+    it('defaults to 2 decimals', () => {
+      const { formatAmount } = setup('EUR')
+      expect(formatAmount(10)).toContain('10.00')
     })
   })
 })

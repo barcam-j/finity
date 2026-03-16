@@ -2,6 +2,7 @@ from datetime import date as DateType
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from beanie import PydanticObjectId
+from beanie.odm.enums import SortDirection
 from pydantic import BaseModel
 
 from app.core.deps import get_current_user
@@ -72,7 +73,9 @@ async def list_transactions(
 
     query = Transaction.find(*conditions)
     total = await query.count()
-    items = await query.sort(-Transaction.date).skip((page - 1) * limit).limit(limit).to_list()
+    items = await query.sort(
+        [('date', SortDirection.DESCENDING), ('_id', SortDirection.ASCENDING)]
+    ).skip((page - 1) * limit).limit(limit).to_list()
     return {
         'items': [_tx_out(t) for t in items],
         'total': total,
@@ -119,6 +122,64 @@ async def bulk_update_category(
         except Exception:
             continue
     return {'updated': updated}
+
+
+@router.get('/deduplicate/preview')
+async def preview_duplicates(
+    current_user: User = Depends(get_current_user),
+    search: str | None = Query(None),
+):
+    transactions = await Transaction.find(Transaction.user_id == current_user.id).to_list()
+
+    if search:
+        matches = [t for t in transactions if search.lower() in t.description.lower()]
+        return {
+            'matches': [
+                {
+                    'id': str(t.id),
+                    'date': t.date.isoformat(),
+                    'amount': t.amount,
+                    'amount_raw': repr(t.amount),
+                    'description': t.description,
+                    'description_repr': repr(t.description),
+                    'description_len': len(t.description),
+                }
+                for t in matches
+            ]
+        }
+
+    groups: dict[tuple, list] = {}
+    for t in transactions:
+        key = (t.date.isoformat(), round(t.amount, 2), t.description.strip().lower())
+        groups.setdefault(key, []).append({
+            'id': str(t.id),
+            'date': t.date.isoformat(),
+            'amount': t.amount,
+            'description': t.description,
+            'description_repr': repr(t.description),
+        })
+    duplicates = {str(k): v for k, v in groups.items() if len(v) > 1}
+    return {'total_transactions': len(transactions), 'duplicate_groups': len(duplicates), 'groups': duplicates}
+
+
+@router.post('/deduplicate')
+async def deduplicate_transactions(current_user: User = Depends(get_current_user)):
+    transactions = await Transaction.find(Transaction.user_id == current_user.id).to_list()
+
+    seen: set[tuple] = set()
+    to_delete: list[Transaction] = []
+
+    for t in sorted(transactions, key=lambda x: x.id.generation_time):
+        key = (t.date.isoformat(), round(t.amount, 2), t.description.strip().lower())
+        if key in seen:
+            to_delete.append(t)
+        else:
+            seen.add(key)
+
+    for t in to_delete:
+        await t.delete()
+
+    return {'deleted': len(to_delete)}
 
 
 @router.delete('/{transaction_id}', status_code=status.HTTP_204_NO_CONTENT)
