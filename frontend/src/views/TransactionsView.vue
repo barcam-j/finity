@@ -90,6 +90,11 @@ function filtersFromQuery(): TFilters {
   if (q.date_from) filters.date_from = String(q.date_from)
   if (q.date_to) filters.date_to = String(q.date_to)
   if (q.search) filters.search = String(q.search)
+  if (q.categories) {
+    filters.categories = Array.isArray(q.categories)
+      ? q.categories.map(String)
+      : [String(q.categories)]
+  }
   return filters
 }
 

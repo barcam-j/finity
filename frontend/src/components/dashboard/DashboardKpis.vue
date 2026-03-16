@@ -43,14 +43,10 @@
         @click="goToExpenses"
       />
       <KpiCard
-        v-if="kpis.total_investments > 0"
         :label="t('dashboard.investments')"
         :value="formatAmount(kpis.total_investments, 0)"
-      />
-      <KpiCard
-        :label="t('dashboard.topCategory')"
-        :value="kpis.top_category ?? '—'"
-        :subtitle="t('dashboard.transactionCount', { count: kpis.transaction_count })"
+        :clickable="kpis.total_investments > 0"
+        @click="kpis.total_investments > 0 && goToInvestments()"
       />
     </div>
   </div>
@@ -80,16 +76,23 @@ const emit = defineEmits<{
 const { formatAmount } = useCurrency()
 const router = useRouter()
 
-function goToExpenses(): void {
+function periodQuery(): Record<string, string> {
   const ym = props.period === 'month' ? props.availableMonths[0] : props.period
-  const query: Record<string, string> = { amount_max: '-0.01' }
-  if (ym && ym !== 'all') {
-    const [year, month] = ym.split('-').map(Number)
-    const lastDay = new Date(year, month, 0).getDate()
-    query.date_from = `${ym}-01`
-    query.date_to = `${ym}-${String(lastDay).padStart(2, '0')}`
+  if (!ym || ym === 'all') return {}
+  const [year, month] = ym.split('-').map(Number)
+  const lastDay = new Date(year, month, 0).getDate()
+  return {
+    date_from: `${ym}-01`,
+    date_to: `${ym}-${String(lastDay).padStart(2, '0')}`,
   }
-  router.push({ name: 'Transactions', query })
+}
+
+function goToExpenses(): void {
+  router.push({ name: 'Transactions', query: { amount_max: '-0.01', ...periodQuery() } })
+}
+
+function goToInvestments(): void {
+  router.push({ name: 'Transactions', query: { categories: 'inversión', ...periodQuery() } })
 }
 
 // Index of the currently selected month in availableMonths (sorted desc)
