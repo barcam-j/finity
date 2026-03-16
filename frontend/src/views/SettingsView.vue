@@ -1,59 +1,61 @@
 <template>
   <AppLayout>
     <div class="settings">
-      <h1>Settings</h1>
+      <h1>{{ t('settings.title') }}</h1>
 
       <SettingsSection
-        title="General"
-        description="Regional preferences for displaying your financial data."
+        :title="t('settings.generalTitle')"
+        :description="t('settings.generalDesc')"
       >
-        <form class="settings-form" @submit.prevent="saveCurrency">
+        <div class="settings-form">
           <div class="field">
-            <label for="currency">Currency</label>
-            <select id="currency" v-model="currencyForm">
+            <label for="currency">{{ t('settings.currency') }}</label>
+            <select id="currency" :value="currencyForm" @change="saveCurrencyOnChange(($event.target as HTMLSelectElement).value)">
               <option v-for="c in CURRENCIES" :key="c.code" :value="c.code">
                 {{ c.code }} — {{ c.label }}
               </option>
             </select>
           </div>
-          <div class="form-footer">
-            <span v-if="currencySaved" class="saved-badge">Saved</span>
-            <button class="btn-primary" type="submit" :disabled="currencySaving">
-              {{ currencySaving ? 'Saving…' : 'Save' }}
-            </button>
+          <div class="field">
+            <label for="language">{{ t('settings.language') }}</label>
+            <select id="language" :value="languageForm" @change="saveLanguage(($event.target as HTMLSelectElement).value)">
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="it">Italiano</option>
+            </select>
           </div>
-        </form>
+        </div>
       </SettingsSection>
 
       <SettingsSection
-        title="AI Provider"
-        description="Configure the AI provider used to read and categorize your transactions."
+        :title="t('settings.aiProviderTitle')"
+        :description="t('settings.aiProviderDesc')"
       >
-        <div v-if="aiInitializing" class="loading">Loading…</div>
+        <div v-if="aiInitializing" class="loading">{{ t('settings.loading') }}</div>
 
         <form v-else class="settings-form" @submit.prevent="save">
           <div class="field">
-            <label for="provider">Provider</label>
+            <label for="provider">{{ t('settings.provider') }}</label>
             <select id="provider" v-model="form.provider" @change="onProviderChange">
-              <option value="">— select a provider —</option>
+              <option value="">{{ t('settings.selectProvider') }}</option>
               <option v-for="p in AI_PROVIDERS" :key="p.value" :value="p.value">{{ p.label }}</option>
             </select>
           </div>
 
           <div class="field">
-            <label for="model">Model</label>
+            <label for="model">{{ t('settings.model') }}</label>
             <input
               id="model"
               v-model="form.model"
               type="text"
-              placeholder="e.g. claude-3-5-sonnet-20241022"
+              :placeholder="t('settings.modelPlaceholder')"
               list="model-suggestions"
             />
             <datalist id="model-suggestions">
               <option v-for="m in currentModels" :key="m" :value="m" />
             </datalist>
             <span class="field-hint">
-              {{ modelsLoading ? 'Loading models…' : 'You can type any model supported by your provider' }}
+              {{ modelsLoading ? t('settings.loadingModels') : t('settings.modelHint') }}
             </span>
           </div>
 
@@ -67,8 +69,8 @@
           <div class="field field--toggle">
             <label for="analysis-enabled" class="toggle-label">
               <span>
-                Enable AI analysis on dashboard
-                <span class="field-hint">Automatically analyze your transactions when you open the dashboard</span>
+                {{ t('settings.enableAnalysis') }}
+                <span class="field-hint">{{ t('settings.enableAnalysisHint') }}</span>
               </span>
               <button
                 id="analysis-enabled"
@@ -84,10 +86,10 @@
           </div>
 
           <div class="form-footer">
-            <span v-if="saved" class="saved-badge">Saved</span>
+            <span v-if="saved" class="saved-badge">{{ t('settings.saved') }}</span>
             <span v-if="aiError" class="error">{{ aiError }}</span>
             <button class="btn-primary" type="submit" :disabled="aiLoading || !canSave">
-              {{ aiLoading ? 'Saving…' : 'Save' }}
+              {{ aiLoading ? t('settings.saving') : t('settings.save') }}
             </button>
           </div>
         </form>
@@ -98,6 +100,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/AppLayout.vue'
 import SettingsSection from '@/components/settings/SettingsSection.vue'
 import ProviderGuide from '@/components/settings/ProviderGuide.vue'
@@ -107,7 +110,8 @@ import { AI_PROVIDERS, PROVIDERS_WITH_GUIDE } from '@/constants/ai-providers'
 import { useCurrencyForm } from '@/composables/useCurrencyForm'
 import { useAiProviderForm } from '@/composables/useAiProviderForm'
 
-const { saving: currencySaving, currencyForm, currencySaved, init: initCurrency, saveCurrency } = useCurrencyForm()
+const { t } = useI18n()
+const { currencyForm, languageForm, init: initCurrency, saveCurrencyOnChange, saveLanguage } = useCurrencyForm()
 const { loading: aiLoading, error: aiError, initializing: aiInitializing, togglingAnalysis, form, currentModels, modelsLoading, hasExistingConfig, canSave, saved, init: initAi, onProviderChange, save, toggleAnalysis } = useAiProviderForm()
 
 onMounted(() => Promise.all([initCurrency(), initAi()]))

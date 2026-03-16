@@ -2,11 +2,11 @@
   <div class="auth-page">
     <div class="auth-card">
       <h1 class="auth-logo">finity</h1>
-      <p class="auth-subtitle">{{ isLogin ? 'Sign in to your account' : 'Create your account' }}</p>
+      <p class="auth-subtitle">{{ isLogin ? t('auth.signIn') : t('auth.createAccount') }}</p>
 
       <form class="auth-form" @submit.prevent="submit">
         <div class="field">
-          <label for="email">Email</label>
+          <label for="email">{{ t('auth.email') }}</label>
           <input
             id="email"
             v-model="email"
@@ -18,7 +18,7 @@
         </div>
 
         <div class="field">
-          <label for="password">Password</label>
+          <label for="password">{{ t('auth.password') }}</label>
           <input
             id="password"
             v-model="password"
@@ -32,14 +32,14 @@
         <p v-if="error" class="error">{{ error }}</p>
 
         <button type="submit" :disabled="loading">
-          {{ loading ? 'Loading...' : isLogin ? 'Sign in' : 'Create account' }}
+          {{ loading ? t('auth.loading') : isLogin ? t('auth.loginBtn') : t('auth.registerBtn') }}
         </button>
       </form>
 
       <p class="auth-switch">
-        {{ isLogin ? "Don't have an account?" : 'Already have an account?' }}
+        {{ isLogin ? t('auth.noAccount') : t('auth.haveAccount') }}
         <a href="#" @click.prevent="isLogin = !isLogin">
-          {{ isLogin ? 'Register' : 'Sign in' }}
+          {{ isLogin ? t('auth.register') : t('auth.loginBtn') }}
         </a>
       </p>
     </div>
@@ -49,8 +49,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 
+const { t } = useI18n()
 const router = useRouter()
 const auth = useAuthStore()
 

@@ -55,6 +55,7 @@ export interface DashboardAnalysis {
 
 export interface UserPreferences {
   currency: string
+  language: string
 }
 
 export interface AuthUser {
@@ -69,8 +70,8 @@ export interface AuthTokenResponse {
 
 export interface ImporterDefinition {
   id: string
-  label: string
-  description: string
+  labelKey: string
+  descriptionKey: string
   accept: string
   component: Component
 }

@@ -5,7 +5,7 @@
         <div class="dialog" role="dialog" aria-modal="true">
           <p class="dialog-message">{{ message }}</p>
           <div class="dialog-actions">
-            <button class="btn-cancel" @click="emit('cancel')">Cancel</button>
+            <button class="btn-cancel" @click="emit('cancel')">{{ t('transactions.cancel') }}</button>
             <button class="btn-confirm" @click="emit('confirm')">{{ confirmLabel }}</button>
           </div>
         </div>
@@ -15,6 +15,10 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 defineProps<{
   open: boolean
   message: string

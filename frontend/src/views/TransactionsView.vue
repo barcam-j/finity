@@ -5,7 +5,7 @@
 
       <div class="view-header">
         <button class="btn-primary" @click="toggleImporter">
-          {{ showImporter ? 'Cancel' : 'Import' }}
+          {{ showImporter ? t('transactions.cancel') : t('transactions.import') }}
         </button>
       </div>
 
@@ -14,7 +14,7 @@
       </div>
 
       <template v-else>
-        <div v-if="store.loading && !store.items.length" class="state-msg">Loading…</div>
+        <div v-if="store.loading && !store.items.length" class="state-msg">{{ t('transactions.loading') }}</div>
 
         <template v-else-if="store.items.length">
           <TransactionFilters
@@ -52,8 +52,8 @@
 
   <ConfirmDialog
     :open="showDeleteConfirm"
-    :message="`Delete ${selectedIds.length} transaction${selectedIds.length !== 1 ? 's' : ''}? This action cannot be undone.`"
-    confirm-label="Delete"
+    :message="t('transactions.deleteConfirm', selectedIds.length, { named: { count: selectedIds.length } })"
+    :confirm-label="t('transactions.deleteSelected')"
     @confirm="confirmBulkDelete"
     @cancel="showDeleteConfirm = false"
   />
@@ -61,6 +61,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/AppLayout.vue'
 import ImporterSelector from '@/modules/importers/ImporterSelector.vue'
 import AiBanner from '@/components/AiBanner.vue'
@@ -73,6 +74,7 @@ import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import type { TransactionFilters as TFilters } from '@/types'
 import { useTransactionsStore } from '@/stores/transactions'
 
+const { t } = useI18n()
 const store = useTransactionsStore()
 const showImporter = ref(false)
 const selectedIds = ref<string[]>([])

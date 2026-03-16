@@ -1,12 +1,16 @@
 <template>
   <div class="state-msg">
-    No transactions yet.
-    <button class="link-btn" @click="emit('import')">Import a file</button>
-    to get started.
+    {{ t('transactions.empty') }}
+    <button class="link-btn" @click="emit('import')">{{ t('transactions.importFile') }}</button>
+    {{ t('transactions.toGetStarted') }}
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 const emit = defineEmits<{
   import: []
 }>()

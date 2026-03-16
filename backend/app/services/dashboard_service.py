@@ -105,7 +105,10 @@ async def get_kpis(user_id: PydanticObjectId, period: str) -> dict:
     }
 
 
-async def get_ai_analysis(user_id: PydanticObjectId, month: str) -> str:
+LANGUAGE_NAMES = {'en': 'English', 'es': 'Spanish', 'it': 'Italian'}
+
+
+async def get_ai_analysis(user_id: PydanticObjectId, month: str, language: str = 'en') -> str:
     year, mon = int(month[:4]), int(month[5:])
     _, last_day = monthrange(year, mon)
     start = date(year, mon, 1)
@@ -124,7 +127,7 @@ async def get_ai_analysis(user_id: PydanticObjectId, month: str) -> str:
     if not transactions:
         raise ValueError('No transactions available to analyze')
 
-    current_hash = _transactions_hash(transactions)
+    current_hash = _transactions_hash(transactions) + f'_{language}'
 
     cached = await AnalysisCache.find_one(
         AnalysisCache.user_id == user_id,
@@ -139,6 +142,7 @@ async def get_ai_analysis(user_id: PydanticObjectId, month: str) -> str:
     ]
     summary = '\n'.join(lines)
 
+    lang_name = LANGUAGE_NAMES.get(language, 'English')
     prompt = f"""You are a personal finance assistant. Analyze the following transactions and provide:
 1. A brief overall assessment (2-3 sentences)
 2. Top 3 key insights about spending patterns
@@ -147,7 +151,8 @@ async def get_ai_analysis(user_id: PydanticObjectId, month: str) -> str:
 Transactions (date | category | amount):
 {summary}
 
-Respond in a clear, friendly tone. Be specific with numbers where relevant. Keep the total response under 300 words."""
+Respond in a clear, friendly tone. Be specific with numbers where relevant. Keep the total response under 300 words.
+Respond in {lang_name}."""
 
     analysis = await get_ai_response(user_id, prompt)
 

@@ -1,7 +1,7 @@
 <template>
   <div class="importer-selector">
     <div v-if="!active">
-      <h3>Select import format</h3>
+      <h3>{{ t('importer.selectFormat') }}</h3>
       <div class="importer-grid">
         <button
           v-for="importer in importers"
@@ -9,15 +9,15 @@
           class="importer-card"
           @click="active = importer"
         >
-          <span class="importer-card__label">{{ importer.label }}</span>
-          <span class="importer-card__desc">{{ importer.description }}</span>
+          <span class="importer-card__label">{{ t(importer.labelKey) }}</span>
+          <span class="importer-card__desc">{{ t(importer.descriptionKey) }}</span>
         </button>
       </div>
     </div>
 
     <div v-else>
-      <button class="back-btn" @click="active = null">← Back</button>
-      <h3>{{ active.label }}</h3>
+      <button class="back-btn" @click="active = null">{{ t('importer.back') }}</button>
+      <h3>{{ t(active.labelKey) }}</h3>
       <component :is="active.component" @done="onDone" />
     </div>
   </div>
@@ -25,8 +25,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import importers from './index'
 import type { ImporterDefinition } from '@/types'
+
+const { t } = useI18n()
 
 const emit = defineEmits<{ done: [] }>()
 

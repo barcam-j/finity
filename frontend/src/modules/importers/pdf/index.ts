@@ -3,8 +3,8 @@ import type { ImporterDefinition } from '@/types'
 
 const definition: ImporterDefinition = {
   id: 'pdf',
-  label: 'PDF Statement',
-  description: 'Import transactions from a PDF bank statement.',
+  labelKey: 'importer.pdfLabel',
+  descriptionKey: 'importer.pdfDesc',
   accept: '.pdf',
   component: PdfImporter,
 }

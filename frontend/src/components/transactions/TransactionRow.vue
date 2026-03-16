@@ -45,7 +45,7 @@
             type="text"
             :list="`cats-${tx.id}`"
             class="tag-input"
-            placeholder="Add…"
+            :placeholder="t('transactions.addCategoryPlaceholder')"
             @keydown.enter.prevent="addCategory"
             @blur="addCategoryAndSave"
             @keydown.esc.prevent="cancel"
@@ -77,10 +77,13 @@
 
 <script setup lang="ts">
 import { reactive, ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { Transaction } from '@/types'
 import { useCurrency } from '@/composables/useCurrency'
 
 type EditableField = 'date' | 'description' | 'categories'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   tx: Transaction

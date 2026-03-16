@@ -3,15 +3,15 @@
 
     <!-- Step 0: Method selector -->
     <div v-if="step === 'method'" class="method-selector">
-      <h3>How do you want to import?</h3>
+      <h3>{{ t('importer.howToImport') }}</h3>
       <div class="method-cards">
         <button class="method-card" @click="selectMethod('ai')">
-          <strong>AI Import</strong>
-          <p>AI reads any CSV format automatically. Requires a configured AI provider.</p>
+          <strong>{{ t('importer.aiImport') }}</strong>
+          <p>{{ t('importer.aiImportDesc') }}</p>
         </button>
         <button class="method-card" @click="selectMethod('manual')">
-          <strong>Manual Import</strong>
-          <p>Map columns yourself. No AI or API key required.</p>
+          <strong>{{ t('importer.manualImport') }}</strong>
+          <p>{{ t('importer.manualImportDesc') }}</p>
         </button>
       </div>
     </div>
@@ -28,10 +28,10 @@
         @click="fileInput.click()"
       >
         <input ref="fileInput" type="file" accept=".csv,.xlsx,.xls" hidden @change="onFileChange" />
-        <p class="drop-zone__text">Drop your file here or <span>click to browse</span></p>
+        <p class="drop-zone__text">{{ t('importer.dropHere') }} <span>{{ t('importer.clickBrowse') }}</span></p>
         <p class="drop-zone__hint">
-          {{ method === 'ai' ? 'Any format — AI will read and extract the transactions' : 'The first row must contain column headers' }}
-          · CSV, XLSX or XLS
+          {{ method === 'ai' ? t('importer.hintAi') : t('importer.hintManual') }}
+          {{ t('importer.hintFormat') }}
         </p>
       </div>
       <p v-if="error" class="error">{{ error }}</p>
@@ -40,22 +40,22 @@
     <!-- Step 2: Parsing (loading) -->
     <div v-else-if="step === 'parsing'" class="parsing">
       <div class="spinner" />
-      <p>{{ method === 'ai' ? 'Reading transactions from' : 'Reading file' }} <strong>{{ fileName }}</strong>…</p>
-      <p v-if="method === 'ai'" class="parsing-hint">AI is interpreting the file, this may take a few seconds</p>
+      <p>{{ method === 'ai' ? t('importer.readingTransactionsFrom') : t('importer.readingFile') }} <strong>{{ fileName }}</strong>…</p>
+      <p v-if="method === 'ai'" class="parsing-hint">{{ t('importer.aiInterpreting') }}</p>
     </div>
 
     <!-- Step 3: Column mapping (manual only) -->
     <div v-else-if="step === 'mapping'">
       <div class="step-header">
         <div>
-          <h3>Map columns</h3>
-          <p class="step-subtitle">Tell us which column contains each field</p>
+          <h3>{{ t('importer.mapColumns') }}</h3>
+          <p class="step-subtitle">{{ t('importer.mapColumnsSubtitle') }}</p>
         </div>
-        <button class="btn-secondary" @click="resetToUpload">Change file</button>
+        <button class="btn-secondary" @click="resetToUpload">{{ t('importer.changeFile') }}</button>
       </div>
 
       <div v-if="hasHeaderWarning" class="warning-banner">
-        ⚠️ The first row looks like data, not headers. Make sure your CSV has a header row before importing.
+        {{ t('importer.headerWarning') }}
       </div>
 
       <div class="sample-table-wrapper">
@@ -75,14 +75,14 @@
 
       <div class="mapping-form">
         <div class="mapping-row">
-          <label>Date column <span class="required">*</span></label>
+          <label>{{ t('importer.dateColumn') }} <span class="required">*</span></label>
           <select v-model="mapping.date">
-            <option value="">— select —</option>
+            <option value="">{{ t('importer.selectOption') }}</option>
             <option v-for="h in parsedHeaders" :key="h" :value="h">{{ h }}</option>
           </select>
         </div>
         <div class="mapping-row">
-          <label>Date format <span class="required">*</span></label>
+          <label>{{ t('importer.dateFormat') }} <span class="required">*</span></label>
           <select v-model="mapping.dateFormat">
             <option value="YYYY-MM-DD">YYYY-MM-DD (e.g. 2024-03-15)</option>
             <option value="DD/MM/YYYY">DD/MM/YYYY (e.g. 15/03/2024)</option>
@@ -92,30 +92,30 @@
           </select>
         </div>
         <div class="mapping-row">
-          <label>Amount column <span class="required">*</span></label>
+          <label>{{ t('importer.amountColumn') }} <span class="required">*</span></label>
           <select v-model="mapping.amount">
-            <option value="">— select —</option>
+            <option value="">{{ t('importer.selectOption') }}</option>
             <option v-for="h in parsedHeaders" :key="h" :value="h">{{ h }}</option>
           </select>
         </div>
         <div class="mapping-row">
-          <label>Amount format <span class="required">*</span></label>
+          <label>{{ t('importer.amountFormat') }} <span class="required">*</span></label>
           <select v-model="mapping.amountFormat">
             <option value="dot">Period as decimal — 1,234.56</option>
             <option value="comma">Comma as decimal — 1.234,56</option>
           </select>
         </div>
         <div class="mapping-row">
-          <label>Description column <span class="text-muted">(optional)</span></label>
+          <label>{{ t('importer.descriptionColumn') }} <span class="text-muted">{{ t('importer.optional') }}</span></label>
           <select v-model="mapping.description">
-            <option value="">— none —</option>
+            <option value="">{{ t('importer.noneOption') }}</option>
             <option v-for="h in parsedHeaders" :key="h" :value="h">{{ h }}</option>
           </select>
         </div>
         <div class="mapping-row">
-          <label>Category column <span class="text-muted">(optional)</span></label>
+          <label>{{ t('importer.categoryColumn') }} <span class="text-muted">{{ t('importer.optional') }}</span></label>
           <select v-model="mapping.category">
-            <option value="">— none —</option>
+            <option value="">{{ t('importer.noneOption') }}</option>
             <option v-for="h in parsedHeaders" :key="h" :value="h">{{ h }}</option>
           </select>
         </div>
@@ -124,7 +124,7 @@
       <p v-if="mappingError" class="error">{{ mappingError }}</p>
 
       <div class="step-actions">
-        <button class="btn-primary" @click="applyMapping">Preview transactions</button>
+        <button class="btn-primary" @click="applyMapping">{{ t('importer.previewTransactions') }}</button>
       </div>
     </div>
 
@@ -132,16 +132,16 @@
     <div v-else-if="step === 'preview'">
       <div class="step-header">
         <div>
-          <h3>Preview</h3>
+          <h3>{{ t('importer.preview') }}</h3>
           <p class="step-subtitle">
-            {{ rows.length }} transactions found in <strong>{{ fileName }}</strong>
+            {{ t('importer.transactionsFound', { count: rows.length }) }} <strong>{{ fileName }}</strong>
             <span v-if="rows.length < totalParsed" class="removed-badge">
-              {{ totalParsed - rows.length }} removed
+              {{ t('importer.removed', { count: totalParsed - rows.length }) }}
             </span>
           </p>
         </div>
         <button class="btn-secondary" @click="method === 'manual' ? (step = 'mapping') : resetToUpload()">
-          {{ method === 'manual' ? 'Edit mapping' : 'Change file' }}
+          {{ method === 'manual' ? t('importer.editMapping') : t('importer.changeFile') }}
         </button>
       </div>
 
@@ -149,10 +149,10 @@
         <table>
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Category</th>
-              <th class="col-amount">Amount</th>
+              <th>{{ t('importer.date') }}</th>
+              <th>{{ t('importer.description') }}</th>
+              <th>{{ t('importer.category') }}</th>
+              <th class="col-amount">{{ t('importer.amount') }}</th>
               <th class="col-action"></th>
             </tr>
           </thead>
@@ -196,7 +196,7 @@
 
       <div class="step-actions">
         <button class="btn-primary" :disabled="importing || !rows.length" @click="confirmImport">
-          {{ importing ? 'Importing…' : `Import ${rows.length} transactions` }}
+          {{ importing ? t('importer.importing') : t('importer.importCount', { count: rows.length }) }}
         </button>
       </div>
     </div>
@@ -204,9 +204,9 @@
     <!-- Step 5: Success -->
     <div v-else-if="step === 'success'" class="success">
       <p class="success__icon">✓</p>
-      <h3>Import complete</h3>
-      <p>{{ importedCount }} transactions imported successfully.</p>
-      <button class="btn-primary" @click="reset">Import another file</button>
+      <h3>{{ t('importer.importComplete') }}</h3>
+      <p>{{ t('importer.importedSuccess', { count: importedCount }) }}</p>
+      <button class="btn-primary" @click="reset">{{ t('importer.importAnother') }}</button>
     </div>
 
   </div>
@@ -215,10 +215,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import * as XLSX from 'xlsx'
+import { useI18n } from 'vue-i18n'
 import { csvService } from './service'
 import AiBanner from '@/components/AiBanner.vue'
 import { useCurrency } from '@/composables/useCurrency'
 
+const { t } = useI18n()
 const { formatAmount } = useCurrency()
 const PAGE_SIZE = 20
 
@@ -355,11 +357,11 @@ function applyMapping() {
   mappingError.value = null
 
   if (!mapping.value.date) {
-    mappingError.value = 'Select the date column.'
+    mappingError.value = t('importer.errorSelectDate')
     return
   }
   if (!mapping.value.amount) {
-    mappingError.value = 'Select the amount column.'
+    mappingError.value = t('importer.errorSelectAmount')
     return
   }
 
@@ -382,8 +384,7 @@ function applyMapping() {
   }
 
   if (!transactions.length) {
-    mappingError.value =
-      'No valid transactions found with the selected mapping. Check the column and format settings.'
+    mappingError.value = t('importer.errorNoValidTransactions')
     return
   }
 
@@ -446,7 +447,7 @@ async function loadFile(rawFile) {
   try {
     const { transactions } = await csvService.preview(file)
     if (!transactions?.length) {
-      error.value = 'No transactions found in file'
+      error.value = t('importer.errorNoTransactions')
       step.value = 'upload'
       return
     }
@@ -457,7 +458,7 @@ async function loadFile(rawFile) {
   } catch (e) {
     error.value =
       e.status === 429
-        ? 'AI rate limit reached. Wait a moment and try again, or switch to a different model in Settings.'
+        ? t('importer.errorRateLimit')
         : e.message
     step.value = 'upload'
   }

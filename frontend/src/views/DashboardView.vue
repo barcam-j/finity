@@ -3,7 +3,7 @@
     <div class="dashboard">
       <AiBanner />
       <div class="view-header">
-        <h1>Dashboard</h1>
+        <h1>{{ t('dashboard.title') }}</h1>
       </div>
       <DashboardKpis
         :kpis="store.kpis"
@@ -25,12 +25,14 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/AppLayout.vue'
 import AiBanner from '@/components/AiBanner.vue'
 import DashboardKpis from '@/components/dashboard/DashboardKpis.vue'
 import AiAnalysisPanel from '@/components/dashboard/AiAnalysisPanel.vue'
 import { useDashboardStore } from '@/stores/dashboard'
 
+const { t } = useI18n()
 const store = useDashboardStore()
 
 onMounted(async () => {

@@ -10,10 +10,10 @@
               @click.prevent="emit('toggle-select-all')"
             />
           </th>
-          <th>Date</th>
-          <th>Description</th>
-          <th>Category</th>
-          <th class="col-amount">Amount</th>
+          <th>{{ t('transactions.date') }}</th>
+          <th>{{ t('transactions.description') }}</th>
+          <th>{{ t('transactions.category') }}</th>
+          <th class="col-amount">{{ t('transactions.amount') }}</th>
         </tr>
       </thead>
       <TransitionGroup tag="tbody" name="row">
@@ -33,8 +33,11 @@
 
 <script setup lang="ts">
 import { computed, useTemplateRef, watchEffect } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { Transaction } from '@/types'
 import TransactionRow from './TransactionRow.vue'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   transactions: Transaction[]

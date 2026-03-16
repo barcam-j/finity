@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-kpis">
     <div class="kpis-header">
-      <h2>Overview</h2>
+      <h2>{{ t('dashboard.overview') }}</h2>
       <div class="period-selector">
         <div v-if="availableMonths.length" class="month-nav">
           <button :disabled="monthIndex >= availableMonths.length - 1 || loading" @click="stepMonth(1)">‹</button>
@@ -9,40 +9,40 @@
           <button :disabled="monthIndex <= 0 || loading" @click="stepMonth(-1)">›</button>
         </div>
         <button :class="{ active: period === 'all' }" :disabled="loading" @click="emit('update:period', 'all')">
-          All time
+          {{ t('dashboard.allTime') }}
         </button>
       </div>
     </div>
 
-    <p v-if="!loading && kpis?.period_label" class="period-meta">
-      {{ kpis.period_label }}
-      <span v-if="kpis.last_import_date" class="period-import">
-        · Imported on {{ formatDate(kpis.last_import_date) }}
+    <p v-if="!loading && localePeriodLabel" class="period-meta">
+      {{ localePeriodLabel }}
+      <span v-if="kpis?.last_import_date" class="period-import">
+        {{ t('dashboard.importedOn', { date: formatDate(kpis.last_import_date) }) }}
       </span>
     </p>
 
-    <div v-if="loading" class="kpis-loading">Loading…</div>
+    <div v-if="loading" class="kpis-loading">{{ t('dashboard.loading') }}</div>
 
     <div v-else-if="kpis" class="kpis-grid">
       <KpiCard
-        label="Balance"
+        :label="t('dashboard.balance')"
         :value="formatAmount(kpis.balance)"
         :variant="kpis.balance >= 0 ? 'positive' : 'negative'"
       />
       <KpiCard
-        label="Income"
+        :label="t('dashboard.income')"
         :value="formatAmount(kpis.total_income)"
         variant="positive"
       />
       <KpiCard
-        label="Expenses"
+        :label="t('dashboard.expenses')"
         :value="formatAmount(kpis.total_expenses)"
         variant="negative"
       />
       <KpiCard
-        label="Top category"
+        :label="t('dashboard.topCategory')"
         :value="kpis.top_category ?? '—'"
-        :subtitle="`${kpis.transaction_count} transactions`"
+        :subtitle="t('dashboard.transactionCount', { count: kpis.transaction_count })"
       />
     </div>
   </div>
@@ -50,9 +50,12 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { DashboardKpis } from '@/types'
 import { useCurrency } from '@/composables/useCurrency'
 import KpiCard from './KpiCard.vue'
+
+const { t, locale } = useI18n()
 
 const props = defineProps<{
   kpis: DashboardKpis | null
@@ -74,11 +77,22 @@ const monthIndex = computed(() => {
   return idx === -1 ? 0 : idx
 })
 
+function formatMonth(ym: string): string {
+  const [year, month] = ym.split('-').map(Number)
+  return new Date(year, month - 1, 1).toLocaleDateString(locale.value, { month: 'long', year: 'numeric' })
+}
+
 const monthLabel = computed(() => {
   const m = props.availableMonths[monthIndex.value]
-  if (!m) return ''
-  const [year, month] = m.split('-').map(Number)
-  return new Date(year, month - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+  return m ? formatMonth(m) : ''
+})
+
+const localePeriodLabel = computed(() => {
+  if (props.period === 'all' || !props.kpis) return null
+  if (props.period === 'month') {
+    return props.availableMonths[0] ? formatMonth(props.availableMonths[0]) : null
+  }
+  return formatMonth(props.period)
 })
 
 function stepMonth(delta: number): void {
@@ -89,7 +103,7 @@ function stepMonth(delta: number): void {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso + 'T00:00:00').toLocaleDateString(undefined, {
+  return new Date(iso + 'T00:00:00').toLocaleDateString(locale.value, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
