@@ -47,6 +47,11 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 
 - `[v2w6]` `GET /transactions/` supports filter params: `search` (case-insensitive regex on description), `categories` (array `$in` match), `date_from`, `date_to`, `amount_min`, `amount_max` — all optional, combinable
 
+- `[w2x5]` `total_investments` and `balance_with_investments` added to `GET /dashboard/kpis` response — investments excluded from balance; both returned as separate fields; early-return dict for empty periods now includes these keys
+- `[x4y7]` `is_investment()` broadened to match `inversion`, `inversiones`, `investment`, `investments` in addition to `inversión` — handles transactions imported without accent
+- `[y6z9]` `POST /transactions/deduplicate` endpoint — groups user transactions by `(date, amount, description)`, keeps oldest of each group, deletes the rest; returns `{ deleted: N }`
+- `[z8a1]` `GET /transactions/` sort stabilised — secondary sort by `_id ASC` added after `date DESC` to prevent duplicate rows across pages when transactions share the same date
+
 ### Fixed
 
 - `[u9v3]` Transaction `id` serialized as `_id` by FastAPI's `jsonable_encoder` (uses `by_alias=True` by default) — all transaction endpoints now use `model_dump(mode='json', by_alias=False)` via a shared `_tx_out` helper
