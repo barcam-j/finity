@@ -52,7 +52,7 @@
 
   <ConfirmDialog
     :open="showDeleteConfirm"
-    :message="t('transactions.deleteConfirm', { count: selectedIds.length, suffix: selectedIds.length !== 1 ? 's' : '' })"
+    :message="t('transactions.deleteConfirm', selectedIds.length, { named: { count: selectedIds.length } })"
     :confirm-label="t('transactions.deleteSelected')"
     @confirm="confirmBulkDelete"
     @cancel="showDeleteConfirm = false"

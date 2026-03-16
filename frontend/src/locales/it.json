@@ -69,7 +69,7 @@
     "importFile": "Importa un file",
     "toGetStarted": "per iniziare.",
     "paginationInfo": "{from}–{to} di {total} transazioni",
-    "deleteConfirm": "Eliminare {count} transazion{suffix}? Questa azione non può essere annullata.",
+    "deleteConfirm": "Eliminare {count} transazione? Questa azione non può essere annullata. | Eliminare {count} transazioni? Questa azione non può essere annullata.",
     "applyCategory": "Applica categoria",
     "deleteSelected": "Elimina selezionate"
   },
