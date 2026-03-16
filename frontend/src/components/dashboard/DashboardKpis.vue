@@ -14,9 +14,9 @@
       </div>
     </div>
 
-    <p v-if="!loading && kpis?.period_label" class="period-meta">
-      {{ kpis.period_label }}
-      <span v-if="kpis.last_import_date" class="period-import">
+    <p v-if="!loading && localePeriodLabel" class="period-meta">
+      {{ localePeriodLabel }}
+      <span v-if="kpis?.last_import_date" class="period-import">
         {{ t('dashboard.importedOn', { date: formatDate(kpis.last_import_date) }) }}
       </span>
     </p>
@@ -55,7 +55,7 @@ import type { DashboardKpis } from '@/types'
 import { useCurrency } from '@/composables/useCurrency'
 import KpiCard from './KpiCard.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const props = defineProps<{
   kpis: DashboardKpis | null
@@ -77,11 +77,22 @@ const monthIndex = computed(() => {
   return idx === -1 ? 0 : idx
 })
 
+function formatMonth(ym: string): string {
+  const [year, month] = ym.split('-').map(Number)
+  return new Date(year, month - 1, 1).toLocaleDateString(locale.value, { month: 'long', year: 'numeric' })
+}
+
 const monthLabel = computed(() => {
   const m = props.availableMonths[monthIndex.value]
-  if (!m) return ''
-  const [year, month] = m.split('-').map(Number)
-  return new Date(year, month - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+  return m ? formatMonth(m) : ''
+})
+
+const localePeriodLabel = computed(() => {
+  if (props.period === 'all' || !props.kpis) return null
+  if (props.period === 'month') {
+    return props.availableMonths[0] ? formatMonth(props.availableMonths[0]) : null
+  }
+  return formatMonth(props.period)
 })
 
 function stepMonth(delta: number): void {
@@ -92,7 +103,7 @@ function stepMonth(delta: number): void {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso + 'T00:00:00').toLocaleDateString(undefined, {
+  return new Date(iso + 'T00:00:00').toLocaleDateString(locale.value, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
