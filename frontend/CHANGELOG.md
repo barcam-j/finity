@@ -72,8 +72,30 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[z4v1]` Confirmation dialog before bulk delete — shows count of affected transactions, animated backdrop with scale transition; reusable `ConfirmDialog` component via `<Teleport>`
 - `[a5w2]` `lucide-vue-next` installed as icon library — replaced all inline hardcoded SVGs (`Search`, `ChevronDown`, `X`, `Check`, `Trash2`) in `TransactionFilters` and `BulkEditBar` — shows count of affected transactions, animated backdrop with scale transition; reusable `ConfirmDialog` component via `<Teleport>`
 
+- `[a1c2]` Unit test infrastructure — Vitest 2 + Vue Test Utils + happy-dom configured in `vite.config.ts`; `test` and `test:coverage` scripts added to `package.json`; `vitest/globals` types added to `tsconfig.app.json`
+- `[b3d4]` Unit tests for `parseDate` / `parseAmount` CSV utilities — 26 cases covering date format variants, amount separators, edge cases and invalid inputs
+- `[c5e6]` Unit tests for `useCurrency` composable — 9 cases covering symbol position, decimals parameter, EUR/GBP/JPY formatting
+- `[d7f8]` Unit tests for `useSavedFeedback` composable — 4 cases with fake timers covering show/hide lifecycle
+- `[e9g1]` Unit tests for `transactions` store — 8 cases for `updateTransaction` and `bulkUpdateCategory` with mocked service
+- `[f2h3]` Unit tests for `auth` store — 11 cases for `isAuthenticated`, `login` and `logout`
+- `[g4i5]` Unit tests for `dashboard` store — 12 cases for `fetchAvailableMonths`, `fetchKpis` and `fetchAnalysis`
+- `[h6j7]` Unit tests for `api` service — 8 cases including 401 auto-logout and redirect
+- `[i8k9]` Unit tests for `i18n` locale resolution — 8 cases covering stored preference, browser language detection and fallback to `en`
+- `[j1l2]` Unit tests for `ApiError` class — 4 cases covering message and status code
+- `[k3m4]` `DashboardKpis` — Investments KPI card replacing Top Category; balance shows real balance (excluding investments) with secondary subtitle showing balance-with-investments
+- `[l5n6]` `KpiCard` — `clickable` prop with hover accent border and pointer cursor
+- `[m7o8]` KPI amounts rounded to 0 decimals — `formatAmount(value, 0)` applied to all dashboard indicators
+- `[n9p1]` Currency amounts use locale-aware decimal/thousand separators — `useCurrency` now reads `i18n.global.locale.value` instead of hardcoded `en-US`
+- `[o2q3]` Click on Expenses KPI navigates to Transactions filtered by `amount_max=-0.01` and active period date range
+- `[p4r5]` Click on Investments KPI navigates to Transactions filtered by `categories=inversión` and active period date range
+- `[q6s7]` Click on Income KPI navigates to Transactions filtered by `amount_min=0.01` and active period date range
+- `[r8t9]` `TransactionFilters` accepts `initialFilters` prop — refs initialized from prop so filters pre-populate when navigating from dashboard KPI cards
+- `[s1u2]` `TransactionsView` reads route query params on mount (`amount_max`, `amount_min`, `date_from`, `date_to`, `search`, `categories`) and passes them as initial filters
+- `[t3v4]` Deduplication feature — "Remove duplicates" button in Transactions view triggers `POST /transactions/deduplicate`; shows count of removed rows; confirmation dialog before executing
+
 ### Fixed
 
+- `[u5w6]` Pagination showing duplicate rows across pages — secondary sort by `_id ASC` added after `date DESC` to guarantee stable ordering when multiple transactions share the same date
 - `[v3r4]` Transaction `id` field was not reaching the frontend — Beanie serialized it as `_id` (alias) via `jsonable_encoder`; fixed with `model_dump(mode='json', by_alias=False)` in all transaction endpoints
 - `[w5s9]` Select-all triggered on single row click — `indeterminate` DOM property set via `watchEffect` could fire a spurious `change` event in Chrome; fixed by switching header checkbox to `@click.prevent` so only explicit user clicks trigger the handler
 
