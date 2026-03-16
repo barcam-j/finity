@@ -3,8 +3,8 @@ import type { ImporterDefinition } from '@/types'
 
 const definition: ImporterDefinition = {
   id: 'csv',
-  label: 'CSV / Excel File',
-  description: 'Import transactions from a CSV or Excel file exported from your bank.',
+  labelKey: 'importer.csvLabel',
+  descriptionKey: 'importer.csvDesc',
   accept: '.csv,.xlsx,.xls',
   component: CsvImporter,
 }

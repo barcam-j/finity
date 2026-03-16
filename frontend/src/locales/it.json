@@ -148,6 +148,10 @@
     "xaiNote": "Modello consigliato: {code} — più veloce ed economico di Grok-2."
   },
   "importer": {
+    "csvLabel": "File CSV / Excel",
+    "csvDesc": "Importa transazioni da un file CSV o Excel esportato dalla tua banca.",
+    "pdfLabel": "Estratto conto PDF",
+    "pdfDesc": "Importa transazioni da un estratto conto bancario in PDF.",
     "selectFormat": "Seleziona il formato di importazione",
     "back": "← Indietro",
     "howToImport": "Come vuoi importare?",

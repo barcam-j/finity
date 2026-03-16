@@ -70,8 +70,8 @@ export interface AuthTokenResponse {
 
 export interface ImporterDefinition {
   id: string
-  label: string
-  description: string
+  labelKey: string
+  descriptionKey: string
   accept: string
   component: Component
 }

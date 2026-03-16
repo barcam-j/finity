@@ -9,15 +9,15 @@
           class="importer-card"
           @click="active = importer"
         >
-          <span class="importer-card__label">{{ importer.label }}</span>
-          <span class="importer-card__desc">{{ importer.description }}</span>
+          <span class="importer-card__label">{{ t(importer.labelKey) }}</span>
+          <span class="importer-card__desc">{{ t(importer.descriptionKey) }}</span>
         </button>
       </div>
     </div>
 
     <div v-else>
       <button class="back-btn" @click="active = null">{{ t('importer.back') }}</button>
-      <h3>{{ active.label }}</h3>
+      <h3>{{ t(active.labelKey) }}</h3>
       <component :is="active.component" @done="onDone" />
     </div>
   </div>
