@@ -26,18 +26,18 @@
     <div v-else-if="kpis" class="kpis-grid">
       <KpiCard
         :label="t('dashboard.balance')"
-        :value="formatAmount(kpis.balance)"
+        :value="formatAmount(kpis.balance, 0)"
         :variant="kpis.balance >= 0 ? 'positive' : 'negative'"
-        :subtitle="kpis.total_investments > 0 ? t('dashboard.balanceWithInv', { amount: formatAmount(kpis.balance_with_investments) }) : undefined"
+        :subtitle="kpis.total_investments > 0 ? t('dashboard.balanceWithInv', { amount: formatAmount(kpis.balance_with_investments, 0) }) : undefined"
       />
       <KpiCard
         :label="t('dashboard.income')"
-        :value="formatAmount(kpis.total_income)"
+        :value="formatAmount(kpis.total_income, 0)"
         variant="positive"
       />
       <KpiCard
         :label="t('dashboard.expenses')"
-        :value="formatAmount(kpis.total_expenses)"
+        :value="formatAmount(kpis.total_expenses, 0)"
         variant="negative"
         clickable
         @click="goToExpenses"
@@ -45,7 +45,7 @@
       <KpiCard
         v-if="kpis.total_investments > 0"
         :label="t('dashboard.investments')"
-        :value="formatAmount(kpis.total_investments)"
+        :value="formatAmount(kpis.total_investments, 0)"
       />
       <KpiCard
         :label="t('dashboard.topCategory')"
