@@ -59,6 +59,7 @@ async def get_kpis(user_id: PydanticObjectId, period: str) -> dict:
             'total_investments': 0.0,
             'balance': 0.0,
             'balance_with_investments': 0.0,
+            'investment_categories': [],
             'top_category': None,
             'transaction_count': 0,
             'categories': [],
@@ -76,6 +77,10 @@ async def get_kpis(user_id: PydanticObjectId, period: str) -> dict:
     total_investment = sum(abs(t.amount) for t in transactions if t.amount < 0 and is_investment(t))
     balance = total_income + total_expenses
     balance_with_investments = balance - total_investment
+
+    investment_categories = sorted({
+        c for t in transactions if is_investment(t) for c in t.categories
+    })
 
     category_totals: dict[str, float] = {}
     for t in transactions:
@@ -105,6 +110,7 @@ async def get_kpis(user_id: PydanticObjectId, period: str) -> dict:
         'total_investments': round(total_investment, 2),
         'balance': round(balance, 2),
         'balance_with_investments': round(balance_with_investments, 2),
+        'investment_categories': investment_categories,
         'top_category': top_category,
         'transaction_count': len(transactions),
         'categories': categories,

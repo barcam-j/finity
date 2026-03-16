@@ -69,11 +69,6 @@ function onLeave(el: Element, done: () => void): void {
   div.addEventListener('transitionend', done, { once: true })
 }
 
-defineProps<{
-  count: number
-  categories: string[]
-}>()
-
 const emit = defineEmits<{
   'apply-category': [category: string]
   'delete-selected': []
@@ -82,10 +77,21 @@ const emit = defineEmits<{
 
 const categoryInput = ref('')
 
+const props = defineProps<{
+  count: number
+  categories: string[]
+}>()
+
+function catKey(s: string): string {
+  return s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ')
+}
+
 function applyCategory(): void {
-  const val = categoryInput.value.trim()
-  if (!val) return
-  emit('apply-category', val)
+  const raw = categoryInput.value.trim()
+  if (!raw) return
+  const key = catKey(raw)
+  const normalized = props.categories.find((c) => catKey(c) === key) ?? raw
+  emit('apply-category', normalized)
   categoryInput.value = ''
 }
 </script>

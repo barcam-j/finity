@@ -68,6 +68,7 @@
     "setCategoryPlaceholder": "Set category…",
     "addCategoryPlaceholder": "Add…",
     "empty": "No transactions yet.",
+    "noResults": "No transactions match the current filters.",
     "importFile": "Import a file",
     "toGetStarted": "to get started.",
     "paginationInfo": "{from}–{to} of {total} transactions",

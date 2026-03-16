@@ -117,11 +117,19 @@ function startEdit(field: EditableField): void {
   editingField.value = field
 }
 
+function catKey(s: string): string {
+  return s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ')
+}
+
+function normalizeCategory(val: string): string {
+  const key = catKey(val)
+  return props.categories.find((c) => catKey(c) === key) ?? val
+}
+
 function addCategory(): void {
-  const val = categoryInput.value.trim()
-  if (val && !draft.categories.includes(val)) {
-    draft.categories.push(val)
-  }
+  const val = normalizeCategory(categoryInput.value.trim())
+  const alreadyIn = draft.categories.some((c) => catKey(c) === catKey(val))
+  if (val && !alreadyIn) draft.categories.push(val)
   categoryInput.value = ''
 }
 

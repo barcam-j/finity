@@ -24,7 +24,7 @@
       <template v-else>
         <div v-if="store.loading && !store.items.length" class="state-msg">{{ t('transactions.loading') }}</div>
 
-        <template v-else-if="store.items.length">
+        <template v-else-if="store.items.length || hasActiveFilters">
           <TransactionFilters
             :categories="store.categories"
             :initial-filters="currentFilters"
@@ -37,21 +37,24 @@
             @delete-selected="onBulkDelete"
             @clear-selection="selectedIds = []"
           />
-          <TransactionTable
-            :transactions="store.items"
-            :selected-ids="selectedIds"
-            :categories="store.categories"
-            @toggle-select="toggleSelect"
-            @toggle-select-all="toggleSelectAll"
-            @update="onUpdate"
-          />
-          <TransactionPagination
-            :page="store.page"
-            :pages="store.pages"
-            :total="store.total"
-            :visible-pages="visiblePages"
-            @go-to="goTo"
-          />
+          <template v-if="store.items.length">
+            <TransactionTable
+              :transactions="store.items"
+              :selected-ids="selectedIds"
+              :categories="store.categories"
+              @toggle-select="toggleSelect"
+              @toggle-select-all="toggleSelectAll"
+              @update="onUpdate"
+            />
+            <TransactionPagination
+              :page="store.page"
+              :pages="store.pages"
+              :total="store.total"
+              :visible-pages="visiblePages"
+              @go-to="goTo"
+            />
+          </template>
+          <div v-else class="state-msg">{{ t('transactions.noResults') }}</div>
         </template>
 
         <TransactionsEmptyState v-else @import="toggleImporter" />
@@ -118,6 +121,11 @@ const currentFilters = ref<TFilters>(filtersFromQuery())
 const showDeleteConfirm = ref(false)
 const showDeduplicateConfirm = ref(false)
 const deduplicateResult = ref<number | null>(null)
+
+const hasActiveFilters = computed(() => {
+  const f = currentFilters.value
+  return !!(f.search || f.categories?.length || f.date_from || f.date_to || f.amount_min !== undefined || f.amount_max !== undefined)
+})
 
 const visiblePages = computed(() => {
   const { page, pages } = store

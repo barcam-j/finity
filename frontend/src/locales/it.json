@@ -68,6 +68,7 @@
     "setCategoryPlaceholder": "Imposta categoria…",
     "addCategoryPlaceholder": "Aggiungi…",
     "empty": "Nessuna transazione.",
+    "noResults": "Nessuna transazione corrisponde ai filtri applicati.",
     "importFile": "Importa un file",
     "toGetStarted": "per iniziare.",
     "paginationInfo": "{from}–{to} di {total} transazioni",

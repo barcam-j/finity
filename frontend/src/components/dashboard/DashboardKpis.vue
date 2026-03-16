@@ -98,7 +98,8 @@ function goToExpenses(): void {
 }
 
 function goToInvestments(): void {
-  router.push({ name: 'Transactions', query: { categories: 'inversión', ...periodQuery() } })
+  const cats = props.kpis?.investment_categories ?? []
+  router.push({ name: 'Transactions', query: { categories: cats, ...periodQuery() } })
 }
 
 // Index of the currently selected month in availableMonths (sorted desc)

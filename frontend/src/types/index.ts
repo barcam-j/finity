@@ -46,6 +46,7 @@ export interface DashboardKpis {
   top_category: string | null
   transaction_count: number
   categories: DashboardCategory[]
+  investment_categories: string[]
   period_label: string | null
   last_import_date: string | null
 }

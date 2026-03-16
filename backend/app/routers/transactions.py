@@ -1,3 +1,4 @@
+import unicodedata
 from datetime import date as DateType
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -24,8 +25,31 @@ class BulkCategoryUpdate(BaseModel):
     category: str | None = None
 
 
+def _cat_key(s: str) -> str:
+    """Normalize a category name for duplicate detection: strip, lowercase, remove accents."""
+    s = s.strip().lower()
+    s = unicodedata.normalize('NFKD', s)
+    return ''.join(c for c in s if not unicodedata.combining(c))
+
+
 def _tx_out(t: Transaction) -> dict:
     return t.model_dump(mode='json', by_alias=False)
+
+
+async def _normalize_categories(user_id: PydanticObjectId, new_cats: list[str]) -> list[str]:
+    """Map each category to an existing one with same key (no accent, no case), or keep as-is."""
+    all_txs = await Transaction.find(Transaction.user_id == user_id).to_list()
+    existing: set[str] = {c for t in all_txs for c in t.categories}
+    result = []
+    seen: set[str] = set()
+    for cat in new_cats:
+        key = _cat_key(cat)
+        if key in seen:
+            continue
+        seen.add(key)
+        match = next((e for e in existing if _cat_key(e) == key), cat)
+        result.append(match)
+    return result
 
 
 @router.get('/categories')
@@ -100,7 +124,7 @@ async def update_transaction(
     if body.amount is not None:
         transaction.amount = body.amount
     if body.categories is not None:
-        transaction.categories = body.categories
+        transaction.categories = await _normalize_categories(current_user.id, body.categories)
     await transaction.replace()
     return _tx_out(transaction)
 
@@ -115,8 +139,10 @@ async def bulk_update_category(
         try:
             transaction = await Transaction.get(PydanticObjectId(id_str))
             if transaction and transaction.user_id == current_user.id:
-                if body.category and body.category not in transaction.categories:
-                    transaction.categories = transaction.categories + [body.category]
+                if body.category:
+                    existing = next((c for c in transaction.categories if _cat_key(c) == _cat_key(body.category)), None)
+                    if not existing:
+                        transaction.categories = transaction.categories + [body.category]
                     await transaction.replace()
                 updated += 1
         except Exception:
