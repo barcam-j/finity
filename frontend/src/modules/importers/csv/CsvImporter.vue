@@ -219,6 +219,7 @@ import { useI18n } from 'vue-i18n'
 import { csvService } from './service'
 import AiBanner from '@/components/AiBanner.vue'
 import { useCurrency } from '@/composables/useCurrency'
+import { parseDate, parseAmount } from './utils'
 
 const { t } = useI18n()
 const { formatAmount } = useCurrency()
@@ -312,45 +313,6 @@ function resetToUpload() {
   if (fileInput.value) fileInput.value.value = ''
 }
 
-// ── Date parsing ──────────────────────────────────────────────────────────────
-function parseDate(raw, format) {
-  const s = raw.trim()
-  let day, month, year
-
-  if (format === 'YYYY-MM-DD') {
-    ;[year, month, day] = s.split('-').map(Number)
-  } else if (format === 'DD/MM/YYYY') {
-    ;[day, month, year] = s.split('/').map(Number)
-  } else if (format === 'MM/DD/YYYY') {
-    ;[month, day, year] = s.split('/').map(Number)
-  } else if (format === 'DD-MM-YYYY') {
-    ;[day, month, year] = s.split('-').map(Number)
-  } else if (format === 'MM-DD-YYYY') {
-    ;[month, day, year] = s.split('-').map(Number)
-  }
-
-  if (!day || !month || !year) return null
-  const mm = String(month).padStart(2, '0')
-  const dd = String(day).padStart(2, '0')
-  return `${year}-${mm}-${dd}`
-}
-
-// ── Amount parsing ────────────────────────────────────────────────────────────
-function parseAmount(raw, format) {
-  let s = raw.trim().replace(/\s/g, '')
-  const negative = s.startsWith('-') || (s.startsWith('(') && s.endsWith(')'))
-  s = s.replace(/^-/, '').replace(/^\(/, '').replace(/\)$/, '')
-
-  if (format === 'comma') {
-    s = s.replace(/\./g, '').replace(',', '.')
-  } else {
-    s = s.replace(/,/g, '')
-  }
-
-  const n = parseFloat(s)
-  if (isNaN(n)) return null
-  return negative ? -Math.abs(n) : n
-}
 
 // ── Apply mapping ─────────────────────────────────────────────────────────────
 function applyMapping() {
