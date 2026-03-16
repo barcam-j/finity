@@ -1,13 +1,13 @@
 <template>
   <div class="analysis-panel">
     <div class="analysis-header">
-      <h2>Analysis</h2>
+      <h2>{{ t('analysis.title') }}</h2>
       <span v-if="enabled" class="ai-badge">AI</span>
     </div>
 
     <div v-if="loading" class="analysis-loading">
       <span class="spinner" />
-      Analyzing your transactions…
+      {{ t('analysis.loading') }}
     </div>
 
     <template v-else-if="kpis && kpis.transaction_count > 0">
@@ -19,19 +19,19 @@
       <div class="basic-analysis">
         <p class="basic-summary">
           <template v-if="kpis.balance >= 0">
-            You're <strong class="positive">ahead by {{ formatAmount(kpis.balance) }}</strong> —
-            {{ formatAmount(kpis.total_income) }} in and {{ formatAmount(kpis.total_expenses) }} out
-            across {{ kpis.transaction_count }} transactions.
+            {{ t('analysis.youreAhead') }}
+            <strong class="positive">{{ t('analysis.aheadBy', { amount: formatAmount(kpis.balance) }) }}</strong>
+            {{ t('analysis.inAndOut', { income: formatAmount(kpis.total_income), expenses: formatAmount(kpis.total_expenses), count: kpis.transaction_count }) }}
           </template>
           <template v-else>
-            You're <strong class="negative">{{ formatAmount(Math.abs(kpis.balance)) }} over budget</strong> —
-            {{ formatAmount(kpis.total_income) }} in and {{ formatAmount(kpis.total_expenses) }} out
-            across {{ kpis.transaction_count }} transactions.
+            {{ t('analysis.youreAhead') }}
+            <strong class="negative">{{ t('analysis.overBudget', { amount: formatAmount(Math.abs(kpis.balance)) }) }}</strong>
+            {{ t('analysis.inAndOut', { income: formatAmount(kpis.total_income), expenses: formatAmount(kpis.total_expenses), count: kpis.transaction_count }) }}
           </template>
         </p>
 
         <div v-if="kpis.categories.length" class="categories">
-          <p class="categories-title">Spending by category</p>
+          <p class="categories-title">{{ t('analysis.spendingByCategory') }}</p>
           <div
             v-for="cat in kpis.categories"
             :key="cat.name"
@@ -47,23 +47,26 @@
         </div>
 
         <p v-if="!enabled" class="ai-hint">
-          Enable
-          <RouterLink to="/settings" class="link">AI analysis in Settings</RouterLink>
-          for personalised insights.
+          {{ t('analysis.enableAiPrefix') }}
+          <RouterLink to="/settings" class="link">{{ t('analysis.enableAiLink') }}</RouterLink>
+          {{ t('analysis.enableAiSuffix') }}
         </p>
       </div>
     </template>
 
     <div v-else class="analysis-empty">
-      No transactions yet. Import a file to see your analysis.
+      {{ t('analysis.empty') }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import type { DashboardKpis } from '@/types'
 import { useCurrency } from '@/composables/useCurrency'
+
+const { t } = useI18n()
 
 defineProps<{
   kpis: DashboardKpis | null

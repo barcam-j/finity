@@ -5,7 +5,7 @@
     @leave="onLeave"
   >
   <div v-if="count > 0" class="bulk-bar">
-    <span class="bulk-count">{{ count }} selected</span>
+    <span class="bulk-count">{{ t('transactions.selected', { count }) }}</span>
 
     <div class="bulk-actions">
       <div class="bulk-category">
@@ -14,17 +14,17 @@
           type="text"
           :list="'bulk-cats'"
           class="bulk-input"
-          placeholder="Set category…"
+          :placeholder="t('transactions.setCategoryPlaceholder')"
         />
         <datalist id="bulk-cats">
           <option v-for="cat in categories" :key="cat" :value="cat" />
         </datalist>
-        <button class="btn-apply" title="Apply category" @click="applyCategory">
+        <button class="btn-apply" :title="t('transactions.applyCategory')" @click="applyCategory">
           <Check :size="15" />
         </button>
       </div>
 
-      <button class="btn-danger" title="Delete selected" @click="emit('delete-selected')">
+      <button class="btn-danger" :title="t('transactions.deleteSelected')" @click="emit('delete-selected')">
         <Trash2 :size="15" />
       </button>
       <button class="btn-clear" @click="emit('clear-selection')">✕</button>
@@ -35,7 +35,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Check, Trash2 } from 'lucide-vue-next'
+
+const { t } = useI18n()
 
 function onEnter(el: Element): void {
   const div = el as HTMLElement

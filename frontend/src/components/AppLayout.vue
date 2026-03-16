@@ -7,16 +7,16 @@
 
       <ul class="nav-links">
         <li>
-          <RouterLink :to="{ name: 'Dashboard' }">Dashboard</RouterLink>
+          <RouterLink :to="{ name: 'Dashboard' }">{{ t('nav.dashboard') }}</RouterLink>
         </li>
         <li>
-          <RouterLink :to="{ name: 'Transactions' }">Transactions</RouterLink>
+          <RouterLink :to="{ name: 'Transactions' }">{{ t('nav.transactions') }}</RouterLink>
         </li>
         <li>
-          <RouterLink :to="{ name: 'Analysis' }">Analysis</RouterLink>
+          <RouterLink :to="{ name: 'Analysis' }">{{ t('nav.analysis') }}</RouterLink>
         </li>
         <li>
-          <RouterLink :to="{ name: 'Settings' }">Settings</RouterLink>
+          <RouterLink :to="{ name: 'Settings' }">{{ t('nav.settings') }}</RouterLink>
         </li>
       </ul>
 
@@ -24,7 +24,7 @@
         <button class="theme-btn" @click="themeStore.cycle()" :title="themeLabel">
           {{ themeLabel }}
         </button>
-        <button class="logout-btn" @click="handleLogout">Sign out</button>
+        <button class="logout-btn" @click="handleLogout">{{ t('auth.signOut') }}</button>
       </div>
     </nav>
 
@@ -37,17 +37,19 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 
+const { t } = useI18n()
 const router = useRouter()
 const auth = useAuthStore()
 const themeStore = useThemeStore()
 
 const themeLabel = computed(() => {
-  if (themeStore.theme === 'light') return 'Light'
-  if (themeStore.theme === 'dark') return 'Dark'
-  return 'System'
+  if (themeStore.theme === 'light') return t('theme.light')
+  if (themeStore.theme === 'dark') return t('theme.dark')
+  return t('theme.system')
 })
 
 function handleLogout(): void {

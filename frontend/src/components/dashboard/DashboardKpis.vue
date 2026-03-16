@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-kpis">
     <div class="kpis-header">
-      <h2>Overview</h2>
+      <h2>{{ t('dashboard.overview') }}</h2>
       <div class="period-selector">
         <div v-if="availableMonths.length" class="month-nav">
           <button :disabled="monthIndex >= availableMonths.length - 1 || loading" @click="stepMonth(1)">‹</button>
@@ -9,7 +9,7 @@
           <button :disabled="monthIndex <= 0 || loading" @click="stepMonth(-1)">›</button>
         </div>
         <button :class="{ active: period === 'all' }" :disabled="loading" @click="emit('update:period', 'all')">
-          All time
+          {{ t('dashboard.allTime') }}
         </button>
       </div>
     </div>
@@ -17,32 +17,32 @@
     <p v-if="!loading && kpis?.period_label" class="period-meta">
       {{ kpis.period_label }}
       <span v-if="kpis.last_import_date" class="period-import">
-        · Imported on {{ formatDate(kpis.last_import_date) }}
+        {{ t('dashboard.importedOn', { date: formatDate(kpis.last_import_date) }) }}
       </span>
     </p>
 
-    <div v-if="loading" class="kpis-loading">Loading…</div>
+    <div v-if="loading" class="kpis-loading">{{ t('dashboard.loading') }}</div>
 
     <div v-else-if="kpis" class="kpis-grid">
       <KpiCard
-        label="Balance"
+        :label="t('dashboard.balance')"
         :value="formatAmount(kpis.balance)"
         :variant="kpis.balance >= 0 ? 'positive' : 'negative'"
       />
       <KpiCard
-        label="Income"
+        :label="t('dashboard.income')"
         :value="formatAmount(kpis.total_income)"
         variant="positive"
       />
       <KpiCard
-        label="Expenses"
+        :label="t('dashboard.expenses')"
         :value="formatAmount(kpis.total_expenses)"
         variant="negative"
       />
       <KpiCard
-        label="Top category"
+        :label="t('dashboard.topCategory')"
         :value="kpis.top_category ?? '—'"
-        :subtitle="`${kpis.transaction_count} transactions`"
+        :subtitle="t('dashboard.transactionCount', { count: kpis.transaction_count })"
       />
     </div>
   </div>
@@ -50,9 +50,12 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { DashboardKpis } from '@/types'
 import { useCurrency } from '@/composables/useCurrency'
 import KpiCard from './KpiCard.vue'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   kpis: DashboardKpis | null

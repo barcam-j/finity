@@ -13,8 +13,8 @@
       >
         <input ref="fileInput" type="file" accept=".pdf" hidden @change="onFileChange" />
         <p class="drop-zone__icon">📄</p>
-        <p class="drop-zone__text">Drop your PDF here or <span>click to browse</span></p>
-        <p class="drop-zone__hint">Any bank statement — AI will read and extract the transactions</p>
+        <p class="drop-zone__text">{{ t('importer.dropPdfHere') }} <span>{{ t('importer.clickBrowse') }}</span></p>
+        <p class="drop-zone__hint">{{ t('importer.hintPdf') }}</p>
       </div>
       <p v-if="error" class="error">{{ error }}</p>
     </div>
@@ -22,33 +22,33 @@
     <!-- Step 2: Parsing (loading) -->
     <div v-else-if="step === 'parsing'" class="parsing">
       <div class="spinner" />
-      <p>Reading transactions from <strong>{{ fileName }}</strong>…</p>
-      <p class="parsing-hint">AI is interpreting the file, this may take a few seconds</p>
+      <p>{{ t('importer.readingTransactionsFrom') }} <strong>{{ fileName }}</strong>…</p>
+      <p class="parsing-hint">{{ t('importer.aiInterpreting') }}</p>
     </div>
 
     <!-- Step 3: Preview -->
     <div v-else-if="step === 'preview'">
       <div class="step-header">
         <div>
-          <h3>Preview</h3>
+          <h3>{{ t('importer.preview') }}</h3>
           <p class="step-subtitle">
-            {{ rows.length }} transactions found in <strong>{{ fileName }}</strong>
+            {{ t('importer.transactionsFound', { count: rows.length }) }} <strong>{{ fileName }}</strong>
             <span v-if="rows.length < totalParsed" class="removed-badge">
-              {{ totalParsed - rows.length }} removed
+              {{ t('importer.removed', { count: totalParsed - rows.length }) }}
             </span>
           </p>
         </div>
-        <button class="btn-secondary" @click="reset">Change file</button>
+        <button class="btn-secondary" @click="reset">{{ t('importer.changeFile') }}</button>
       </div>
 
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Category</th>
-              <th class="col-amount">Amount</th>
+              <th>{{ t('importer.date') }}</th>
+              <th>{{ t('importer.description') }}</th>
+              <th>{{ t('importer.category') }}</th>
+              <th class="col-amount">{{ t('importer.amount') }}</th>
               <th class="col-action"></th>
             </tr>
           </thead>
@@ -92,7 +92,7 @@
 
       <div class="step-actions">
         <button class="btn-primary" :disabled="importing || !rows.length" @click="confirmImport">
-          {{ importing ? 'Importing…' : `Import ${rows.length} transactions` }}
+          {{ importing ? t('importer.importing') : t('importer.importCount', { count: rows.length }) }}
         </button>
       </div>
     </div>
@@ -100,19 +100,21 @@
     <!-- Step 4: Success -->
     <div v-else-if="step === 'success'" class="success">
       <p class="success__icon">✓</p>
-      <h3>Import complete</h3>
-      <p>{{ importedCount }} transactions imported successfully.</p>
-      <button class="btn-primary" @click="reset">Import another file</button>
+      <h3>{{ t('importer.importComplete') }}</h3>
+      <p>{{ t('importer.importedSuccess', { count: importedCount }) }}</p>
+      <button class="btn-primary" @click="reset">{{ t('importer.importAnother') }}</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { pdfService } from './service'
 import AiBanner from '@/components/AiBanner.vue'
 import { useCurrency } from '@/composables/useCurrency'
 
+const { t } = useI18n()
 const { formatAmount } = useCurrency()
 const PAGE_SIZE = 20
 
@@ -165,7 +167,7 @@ async function loadFile(file) {
   try {
     const { transactions } = await pdfService.preview(file)
     if (!transactions?.length) {
-      error.value = 'No transactions found in file'
+      error.value = t('importer.errorNoTransactions')
       step.value = 'upload'
       return
     }
@@ -175,7 +177,7 @@ async function loadFile(file) {
     step.value = 'preview'
   } catch (e) {
     error.value = e.status === 429
-      ? 'AI rate limit reached. Wait a moment and try again, or switch to a different model in Settings.'
+      ? t('importer.errorRateLimit')
       : e.message
     step.value = 'upload'
   }

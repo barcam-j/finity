@@ -3,24 +3,30 @@
     <div class="ai-banner__body">
       <span class="ai-banner__icon">⚡</span>
       <div>
-        <strong>AI provider not configured</strong>
+        <strong>{{ t('aiBanner.title') }}</strong>
         <p>
-          finity uses AI to read your transactions. Get a free API key from
-          <a href="https://aistudio.google.com" target="_blank" rel="noopener">Google AI Studio</a>
-          (no credit card required) and add it in
-          <RouterLink to="/settings">Settings</RouterLink>.
+          <i18n-t keypath="aiBanner.body" tag="span">
+            <template #0>
+              <a href="https://aistudio.google.com" target="_blank" rel="noopener">{{ t('aiBanner.googleAiStudio') }}</a>
+            </template>
+            <template #1>
+              <RouterLink to="/settings">{{ t('aiBanner.settings') }}</RouterLink>
+            </template>
+          </i18n-t>
         </p>
       </div>
     </div>
-    <button class="ai-banner__close" aria-label="Dismiss" @click="dismiss">✕</button>
+    <button class="ai-banner__close" :aria-label="t('aiBanner.title')" @click="dismiss">✕</button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAiStore } from '@/stores/ai'
 
+const { t } = useI18n()
 const DISMISSED_KEY = 'ai-banner-dismissed'
 
 const aiStore = useAiStore()

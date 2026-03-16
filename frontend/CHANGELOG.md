@@ -38,6 +38,7 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[u2e6]` CSV structure validation feedback — clear error shown when file has only one column or rows are not properly delimited
 - `[v4f3]` TypeScript migration — all source files converted from JavaScript to TypeScript; strict mode enabled; shared types centralised in `src/types/index.ts`; custom `ApiError` class with typed `status` field; all Vue components use `<script setup lang="ts">`
 - `[w6g8]` Auto-logout on expired session — any `401` response from the API clears the token and redirects to `/login`
+- `[b4c8]` Multi-language support (English, Spanish, Italian) — `vue-i18n` v9 integration; all UI strings extracted to locale files under `src/locales/`; language preference persisted via `GET/PUT /preferences/`; language selector added to Settings → General
 - `[x9i4]` `TransactionsView` atomized into four components under `src/components/transactions/`: `TransactionRow`, `TransactionTable`, `TransactionPagination`, `TransactionsEmptyState`
 - `[y3j7]` `SettingsView` atomized into three components under `src/components/settings/`: `SettingsSection` (slot-based section wrapper), `ProviderGuide` (per-provider API key instructions), `ApiKeyField` (password input with show/hide toggle)
 - `[z1k2]` Extracted `CURRENCIES` and `AI_PROVIDERS` constants to `src/constants/`; extracted `useSavedFeedback`, `useCurrencyForm` and `useAiProviderForm` composables to `src/composables/`

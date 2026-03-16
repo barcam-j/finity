@@ -6,14 +6,14 @@
         v-model="search"
         type="text"
         class="filter-input"
-        placeholder="Search description…"
+        :placeholder="t('filters.searchPlaceholder')"
         @input="scheduleEmit"
       />
     </div>
 
     <div ref="catDropdownEl" class="filter-dropdown">
       <button class="filter-btn" :class="{ active: selectedCategories.length }" @click.stop="catOpen = !catOpen">
-        {{ selectedCategories.length ? `Categories (${selectedCategories.length})` : 'Categories' }}
+        {{ selectedCategories.length ? t('filters.categoriesActive', { count: selectedCategories.length }) : t('filters.categories') }}
         <ChevronDown :size="12" />
       </button>
       <div v-if="catOpen" class="dropdown-menu">
@@ -21,7 +21,7 @@
           <input type="checkbox" :value="cat" v-model="selectedCategories" @change="scheduleEmit" />
           <span>{{ cat }}</span>
         </label>
-        <p v-if="!categories.length" class="dropdown-empty">No categories yet</p>
+        <p v-if="!categories.length" class="dropdown-empty">{{ t('filters.noCategories') }}</p>
       </div>
     </div>
 
@@ -39,15 +39,18 @@
 
     <button v-if="activeCount > 0" class="btn-clear-filters" @click="clearAll">
       <X :size="12" />
-      Clear
+      {{ t('filters.clear') }}
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Search, X, ChevronDown } from 'lucide-vue-next'
 import type { TransactionFilters } from '@/types'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   categories: string[]

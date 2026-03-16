@@ -55,6 +55,7 @@ export interface DashboardAnalysis {
 
 export interface UserPreferences {
   currency: string
+  language: string
 }
 
 export interface AuthUser {

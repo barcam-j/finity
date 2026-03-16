@@ -1,8 +1,7 @@
 <template>
   <div class="pagination">
     <span class="pagination-info">
-      {{ (page - 1) * 20 + 1 }}–{{ Math.min(page * 20, total) }}
-      of {{ total }} transactions
+      {{ t('transactions.paginationInfo', { from: (page - 1) * 20 + 1, to: Math.min(page * 20, total), total }) }}
     </span>
     <div class="pagination-controls">
       <button :disabled="page <= 1" @click="emit('go-to', page - 1)">←</button>
@@ -20,6 +19,10 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 defineProps<{
   page: number
   pages: number
