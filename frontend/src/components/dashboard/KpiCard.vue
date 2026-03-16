@@ -1,5 +1,5 @@
 <template>
-  <div class="kpi-card">
+  <div class="kpi-card" :class="{ 'kpi-card--clickable': clickable }">
     <span class="kpi-label">{{ label }}</span>
     <span class="kpi-value" :class="variant ? `kpi-value--${variant}` : ''">{{ value }}</span>
     <span v-if="subtitle" class="kpi-subtitle">{{ subtitle }}</span>
@@ -12,6 +12,7 @@ defineProps<{
   value: string | number
   subtitle?: string
   variant?: 'positive' | 'negative' | 'neutral'
+  clickable?: boolean
 }>()
 </script>
 
@@ -54,5 +55,15 @@ defineProps<{
 .kpi-subtitle {
   font-size: 0.8rem;
   color: var(--text-muted);
+}
+
+.kpi-card--clickable {
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.kpi-card--clickable:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
 }
 </style>

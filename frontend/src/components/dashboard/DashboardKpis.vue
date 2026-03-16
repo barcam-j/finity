@@ -39,6 +39,8 @@
         :label="t('dashboard.expenses')"
         :value="formatAmount(kpis.total_expenses)"
         variant="negative"
+        clickable
+        @click="goToExpenses"
       />
       <KpiCard
         v-if="kpis.total_investments > 0"
@@ -57,6 +59,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import type { DashboardKpis } from '@/types'
 import { useCurrency } from '@/composables/useCurrency'
 import KpiCard from './KpiCard.vue'
@@ -75,6 +78,19 @@ const emit = defineEmits<{
 }>()
 
 const { formatAmount } = useCurrency()
+const router = useRouter()
+
+function goToExpenses(): void {
+  const ym = props.period === 'month' ? props.availableMonths[0] : props.period
+  const query: Record<string, string> = { amount_max: '-0.01' }
+  if (ym && ym !== 'all') {
+    const [year, month] = ym.split('-').map(Number)
+    const lastDay = new Date(year, month, 0).getDate()
+    query.date_from = `${ym}-01`
+    query.date_to = `${ym}-${String(lastDay).padStart(2, '0')}`
+  }
+  router.push({ name: 'Transactions', query })
+}
 
 // Index of the currently selected month in availableMonths (sorted desc)
 const monthIndex = computed(() => {

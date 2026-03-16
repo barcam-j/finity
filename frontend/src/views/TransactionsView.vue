@@ -19,6 +19,7 @@
         <template v-else-if="store.items.length">
           <TransactionFilters
             :categories="store.categories"
+            :initial-filters="currentFilters"
             @filter="onFiltersChange"
           />
           <BulkEditBar
@@ -62,6 +63,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import AppLayout from '@/components/AppLayout.vue'
 import ImporterSelector from '@/modules/importers/ImporterSelector.vue'
 import AiBanner from '@/components/AiBanner.vue'
@@ -75,10 +77,23 @@ import type { TransactionFilters as TFilters } from '@/types'
 import { useTransactionsStore } from '@/stores/transactions'
 
 const { t } = useI18n()
+const route = useRoute()
 const store = useTransactionsStore()
 const showImporter = ref(false)
 const selectedIds = ref<string[]>([])
-const currentFilters = ref<TFilters>({})
+
+function filtersFromQuery(): TFilters {
+  const q = route.query
+  const filters: TFilters = {}
+  if (q.amount_max) filters.amount_max = Number(q.amount_max)
+  if (q.amount_min) filters.amount_min = Number(q.amount_min)
+  if (q.date_from) filters.date_from = String(q.date_from)
+  if (q.date_to) filters.date_to = String(q.date_to)
+  if (q.search) filters.search = String(q.search)
+  return filters
+}
+
+const currentFilters = ref<TFilters>(filtersFromQuery())
 const showDeleteConfirm = ref(false)
 
 const visiblePages = computed(() => {
@@ -150,7 +165,7 @@ async function confirmBulkDelete(): Promise<void> {
   await store.bulkRemove(ids)
 }
 
-onMounted(() => Promise.all([store.fetch(1), store.fetchCategories()]))
+onMounted(() => Promise.all([store.fetch(1, currentFilters.value), store.fetchCategories()]))
 </script>
 
 <style scoped>
