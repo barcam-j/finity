@@ -78,7 +78,8 @@
     "deduplicate": "Rimuovi duplicati",
     "deduplicateConfirm": "Verranno eliminate le transazioni con stessa data, importo e descrizione, conservando una copia di ciascuna. Questa azione non può essere annullata.",
     "deduplicateRun": "Rimuovi duplicati",
-    "deduplicateResult": "{count} duplicato/i rimosso/i"
+    "deduplicateResult": "{count} duplicato/i rimosso/i",
+    "autoCategorized": "{count} transazione/i categorizzate automaticamente per descrizione simile"
   },
   "filters": {
     "searchPlaceholder": "Cerca descrizione…",

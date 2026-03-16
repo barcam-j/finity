@@ -78,7 +78,8 @@
     "deduplicate": "Remove duplicates",
     "deduplicateConfirm": "This will remove transactions with the same date, amount and description, keeping one copy of each. This action cannot be undone.",
     "deduplicateRun": "Remove duplicates",
-    "deduplicateResult": "{count} duplicate(s) removed"
+    "deduplicateResult": "{count} duplicate(s) removed",
+    "autoCategorized": "{count} transaction(s) auto-categorized based on description match"
   },
   "filters": {
     "searchPlaceholder": "Search description…",

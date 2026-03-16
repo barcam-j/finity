@@ -17,9 +17,9 @@ export const transactionsService = {
   },
   getCategories: () => api.get<string[]>('/transactions/categories'),
   update: (id: string, data: Partial<Transaction>) =>
-    api.patch<Transaction>(`/transactions/${id}`, data),
+    api.patch<{ transaction: Transaction; auto_categorized: number }>(`/transactions/${id}`, data),
   bulkUpdateCategory: (ids: string[], category: string | null) =>
-    api.post<{ updated: number }>('/transactions/bulk-category', { ids, category }),
+    api.post<{ updated: number; auto_categorized: number }>('/transactions/bulk-category', { ids, category }),
   delete: (id: string) => api.delete(`/transactions/${id}`),
   deduplicate: () => api.post<{ deleted: number }>('/transactions/deduplicate', {}),
 }

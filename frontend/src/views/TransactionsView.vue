@@ -25,6 +25,9 @@
         <div v-if="store.loading && !store.items.length" class="state-msg">{{ t('transactions.loading') }}</div>
 
         <template v-else-if="store.items.length || hasActiveFilters">
+          <div v-if="autoCategorizedCount !== null" class="auto-cat-notice">
+            {{ t('transactions.autoCategorized', { count: autoCategorizedCount }) }}
+          </div>
           <TransactionFilters
             :categories="store.categories"
             :initial-filters="currentFilters"
@@ -121,6 +124,7 @@ const currentFilters = ref<TFilters>(filtersFromQuery())
 const showDeleteConfirm = ref(false)
 const showDeduplicateConfirm = ref(false)
 const deduplicateResult = ref<number | null>(null)
+const autoCategorizedCount = ref<number | null>(null)
 
 const hasActiveFilters = computed(() => {
   const f = currentFilters.value
@@ -177,12 +181,20 @@ function toggleSelectAll(): void {
 }
 
 async function onUpdate(id: string, field: string, value: string | string[]): Promise<void> {
-  await store.updateTransaction(id, { [field]: value })
+  const count = await store.updateTransaction(id, { [field]: value })
+  if (count > 0) {
+    autoCategorizedCount.value = count
+    setTimeout(() => { autoCategorizedCount.value = null }, 4000)
+  }
 }
 
 async function onBulkCategory(category: string): Promise<void> {
-  await store.bulkUpdateCategory(selectedIds.value, category)
+  const count = await store.bulkUpdateCategory(selectedIds.value, category)
   selectedIds.value = []
+  if (count > 0) {
+    autoCategorizedCount.value = count
+    setTimeout(() => { autoCategorizedCount.value = null }, 4000)
+  }
 }
 
 async function onBulkDelete(): Promise<void> {
@@ -226,6 +238,15 @@ onMounted(() => Promise.all([store.fetch(1, currentFilters.value), store.fetchCa
 .deduplicate-result {
   font-size: 0.85rem;
   color: var(--text-muted);
+}
+
+.auto-cat-notice {
+  padding: 0.6rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--text);
 }
 
 .view-header h1 { margin: 0; }

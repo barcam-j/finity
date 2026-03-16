@@ -11,6 +11,7 @@ from app.ai.adapter import get_ai_response
 from app.core.deps import get_current_user
 from app.models.user import User
 from app.models.transaction import Transaction
+from app.services.categorization import apply_rules_to_imported
 
 router = APIRouter(prefix='/importers/pdf', tags=['importers'])
 
@@ -119,6 +120,7 @@ async def import_pdf(
         )
 
     await Transaction.insert_many(transactions)
+    await apply_rules_to_imported(current_user.id, transactions)
 
     return {
         'imported': len(transactions),
