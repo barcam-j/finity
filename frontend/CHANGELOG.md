@@ -38,7 +38,12 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[u2e6]` CSV structure validation feedback — clear error shown when file has only one column or rows are not properly delimited
 - `[v4f3]` TypeScript migration — all source files converted from JavaScript to TypeScript; strict mode enabled; shared types centralised in `src/types/index.ts`; custom `ApiError` class with typed `status` field; all Vue components use `<script setup lang="ts">`
 - `[w6g8]` Auto-logout on expired session — any `401` response from the API clears the token and redirects to `/login`
-- `[b4c8]` Multi-language support (English, Spanish, Italian) — `vue-i18n` v9 integration; all UI strings extracted to locale files under `src/locales/`; language preference persisted via `GET/PUT /preferences/`; language selector added to Settings → General
+- `[b4c8]` Multi-language support (English, Spanish, Italian) — `vue-i18n` v9 integration; all UI strings extracted to locale files under `src/locales/`; language preference persisted via `GET/PUT /preferences/`; language selector added to Settings → General with auto-save on change (no Save button required)
+- `[c2d4]` AI analysis responds in the user's configured language — `language` field added to `UserPreferences`; backend passes it to the AI prompt; cache key includes language to avoid serving stale translations
+- `[e6f8]` Locale flash on reload eliminated — locale resolved from `localStorage` before app mounts; browser language auto-detected for new users via `navigator.language`
+- `[g1h5]` Importer format cards translated — `ImporterDefinition` type uses `labelKey`/`descriptionKey` instead of static strings; `ImporterSelector` resolves labels at render time via `t()`
+- `[i7j3]` Native pluralization for bulk-delete confirmation — replaced manual `{suffix}` workaround with vue-i18n pipe syntax (`singular | plural`) across all three locale files
+- `[k9l2]` Dashboard period label and dates rendered in active locale — replaced backend-generated English month name with `Intl.DateTimeFormat` using the reactive `locale` ref; changes apply immediately on language switch
 - `[x9i4]` `TransactionsView` atomized into four components under `src/components/transactions/`: `TransactionRow`, `TransactionTable`, `TransactionPagination`, `TransactionsEmptyState`
 - `[y3j7]` `SettingsView` atomized into three components under `src/components/settings/`: `SettingsSection` (slot-based section wrapper), `ProviderGuide` (per-provider API key instructions), `ApiKeyField` (password input with show/hide toggle)
 - `[z1k2]` Extracted `CURRENCIES` and `AI_PROVIDERS` constants to `src/constants/`; extracted `useSavedFeedback`, `useCurrencyForm` and `useAiProviderForm` composables to `src/composables/`
