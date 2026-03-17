@@ -113,6 +113,8 @@
     "apiKeyHint": "Leave blank to keep the current key",
     "showKey": "Show",
     "hideKey": "Hide",
+    "allowDateEdit": "Allow editing transaction dates",
+    "allowDateEditHint": "When disabled, transaction dates are locked and cannot be modified",
     "rulesTitle": "Auto-categorization rules",
     "rulesDesc": "Patterns learned when you manually assign a category to a transaction. Delete a rule to stop auto-assigning that category.",
     "rulesEmpty": "No rules yet. Assign a category to a transaction to create the first rule."

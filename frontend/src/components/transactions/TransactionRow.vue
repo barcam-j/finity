@@ -4,7 +4,7 @@
       <input type="checkbox" :checked="selected" @change="emit('toggle-select', tx.id!)" />
     </td>
 
-    <td class="col-date" @click.stop="startEdit('date')">
+    <td class="col-date" @click.stop="prefs.allowDateEdit && startEdit('date')">
       <input
         v-if="editingField === 'date'"
         v-autofocus
@@ -81,10 +81,12 @@ import { reactive, ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Transaction } from '@/types'
 import { useCurrency } from '@/composables/useCurrency'
+import { usePreferencesStore } from '@/stores/preferences'
 
 type EditableField = 'date' | 'description' | 'categories'
 
 const { t, locale } = useI18n()
+const prefs = usePreferencesStore()
 
 function formatDate(iso: string): string {
   return new Date(iso + 'T00:00:00').toLocaleDateString(locale.value, {

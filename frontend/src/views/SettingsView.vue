@@ -24,6 +24,22 @@
               <option value="it">Italiano</option>
             </select>
           </div>
+          <div class="field field--toggle">
+            <label class="toggle-label">
+              <span>
+                {{ t('settings.allowDateEdit') }}
+                <span class="field-hint">{{ t('settings.allowDateEditHint') }}</span>
+              </span>
+              <button
+                type="button"
+                role="switch"
+                :aria-checked="allowDateEditForm"
+                class="toggle"
+                :class="{ 'toggle--on': allowDateEditForm }"
+                @click="saveAllowDateEdit(!allowDateEditForm)"
+              />
+            </label>
+          </div>
         </div>
       </SettingsSection>
 
@@ -132,7 +148,7 @@ import { categoryRulesService } from '@/services/categoryRules'
 import type { CategoryRuleGroup } from '@/services/categoryRules'
 
 const { t } = useI18n()
-const { currencyForm, languageForm, init: initCurrency, saveCurrencyOnChange, saveLanguage } = useCurrencyForm()
+const { currencyForm, languageForm, allowDateEditForm, init: initCurrency, saveCurrencyOnChange, saveLanguage, saveAllowDateEdit } = useCurrencyForm()
 const { loading: aiLoading, error: aiError, initializing: aiInitializing, togglingAnalysis, form, currentModels, modelsLoading, hasExistingConfig, canSave, saved, init: initAi, onProviderChange, save, toggleAnalysis } = useAiProviderForm()
 
 const rules = ref<CategoryRuleGroup[]>([])
