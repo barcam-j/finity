@@ -29,5 +29,9 @@ export const useThemeStore = defineStore('theme', () => {
     theme.value = THEMES[(current + 1) % THEMES.length]
   }
 
-  return { theme, cycle }
+  function set(value: Theme): void {
+    theme.value = value
+  }
+
+  return { theme, cycle, set }
 })

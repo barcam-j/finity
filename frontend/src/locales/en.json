@@ -117,7 +117,15 @@
     "allowDateEditHint": "When disabled, transaction dates are locked and cannot be modified",
     "rulesTitle": "Auto-categorization rules",
     "rulesDesc": "Patterns learned when you manually assign a category to a transaction. Delete a rule to stop auto-assigning that category.",
-    "rulesEmpty": "No rules yet. Assign a category to a transaction to create the first rule."
+    "rulesEmpty": "No rules yet. Assign a category to a transaction to create the first rule.",
+    "tabGeneral": "General",
+    "tabAi": "AI Provider",
+    "tabCategorization": "Categorization",
+    "tabAccount": "Account",
+    "accountTitle": "Account",
+    "accountDesc": "Your account details and appearance preferences.",
+    "accountEmail": "Email address",
+    "theme": "Theme"
   },
   "guide": {
     "geminiTitle": "How to get your Gemini API key",

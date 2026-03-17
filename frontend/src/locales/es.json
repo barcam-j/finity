@@ -117,7 +117,15 @@
     "allowDateEditHint": "Cuando está desactivado, las fechas de las transacciones están bloqueadas y no se pueden modificar",
     "rulesTitle": "Reglas de auto-categorización",
     "rulesDesc": "Patrones aprendidos al asignar manualmente una categoría a una transacción. Elimina una regla para dejar de asignar esa categoría automáticamente.",
-    "rulesEmpty": "Aún no hay reglas. Asigna una categoría a una transacción para crear la primera regla."
+    "rulesEmpty": "Aún no hay reglas. Asigna una categoría a una transacción para crear la primera regla.",
+    "tabGeneral": "General",
+    "tabAi": "Proveedor IA",
+    "tabCategorization": "Categorización",
+    "tabAccount": "Cuenta",
+    "accountTitle": "Cuenta",
+    "accountDesc": "Detalles de tu cuenta y preferencias de apariencia.",
+    "accountEmail": "Dirección de correo",
+    "theme": "Tema"
   },
   "guide": {
     "geminiTitle": "Cómo obtener tu clave API de Gemini",
