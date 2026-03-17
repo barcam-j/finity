@@ -112,7 +112,10 @@
     "apiKeyPlaceholder": "Paste your API key",
     "apiKeyHint": "Leave blank to keep the current key",
     "showKey": "Show",
-    "hideKey": "Hide"
+    "hideKey": "Hide",
+    "rulesTitle": "Auto-categorization rules",
+    "rulesDesc": "Patterns learned when you manually assign a category to a transaction. Delete a rule to stop auto-assigning that category.",
+    "rulesEmpty": "No rules yet. Assign a category to a transaction to create the first rule."
   },
   "guide": {
     "geminiTitle": "How to get your Gemini API key",

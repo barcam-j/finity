@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from app.core.deps import get_current_user
 from app.models.user import User
 from app.models.transaction import Transaction
-from app.services.categorization import descriptions_match
+from app.services.categorization import descriptions_match, save_rule, _desc_key
 
 router = APIRouter(prefix='/transactions', tags=['transactions'])
 
@@ -157,8 +157,10 @@ async def update_transaction(
 
     auto_categorized = 0
     if categories_changed:
-        # Find newly added categories (not present before)
         added = [c for c in transaction.categories if not any(_cat_key(c) == _cat_key(o) for o in old_categories)]
+        pattern = _desc_key(transaction.description)
+        for cat in added:
+            await save_rule(current_user.id, cat, pattern)
         auto_categorized = await _auto_categorize(current_user.id, transaction, added)
 
     return {'transaction': _tx_out(transaction), 'auto_categorized': auto_categorized}
@@ -188,6 +190,7 @@ async def bulk_update_category(
     auto_categorized = 0
     if body.category:
         for tx in processed_txs:
+            await save_rule(current_user.id, body.category, _desc_key(tx.description))
             auto_categorized += await _auto_categorize(current_user.id, tx, [body.category])
 
     return {'updated': updated, 'auto_categorized': auto_categorized}

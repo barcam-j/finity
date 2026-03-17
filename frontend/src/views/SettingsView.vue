@@ -94,12 +94,31 @@
           </div>
         </form>
       </SettingsSection>
+
+      <SettingsSection
+        :title="t('settings.rulesTitle')"
+        :description="t('settings.rulesDesc')"
+      >
+        <div v-if="rulesLoading" class="loading">{{ t('settings.loading') }}</div>
+        <div v-else-if="!rules.length" class="rules-empty">{{ t('settings.rulesEmpty') }}</div>
+        <div v-else class="rules-list">
+          <div v-for="group in rules" :key="group.category" class="rule-group">
+            <span class="rule-category">{{ group.category }}</span>
+            <div class="rule-patterns">
+              <span v-for="rule in group.rules" :key="rule.id" class="rule-chip">
+                {{ rule.pattern }}
+                <button class="rule-remove" @click="deleteRule(rule.id, group.category)">×</button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </SettingsSection>
     </div>
   </AppLayout>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/AppLayout.vue'
 import SettingsSection from '@/components/settings/SettingsSection.vue'
@@ -109,12 +128,35 @@ import { CURRENCIES } from '@/constants/currencies'
 import { AI_PROVIDERS, PROVIDERS_WITH_GUIDE } from '@/constants/ai-providers'
 import { useCurrencyForm } from '@/composables/useCurrencyForm'
 import { useAiProviderForm } from '@/composables/useAiProviderForm'
+import { categoryRulesService } from '@/services/categoryRules'
+import type { CategoryRuleGroup } from '@/services/categoryRules'
 
 const { t } = useI18n()
 const { currencyForm, languageForm, init: initCurrency, saveCurrencyOnChange, saveLanguage } = useCurrencyForm()
 const { loading: aiLoading, error: aiError, initializing: aiInitializing, togglingAnalysis, form, currentModels, modelsLoading, hasExistingConfig, canSave, saved, init: initAi, onProviderChange, save, toggleAnalysis } = useAiProviderForm()
 
-onMounted(() => Promise.all([initCurrency(), initAi()]))
+const rules = ref<CategoryRuleGroup[]>([])
+const rulesLoading = ref(false)
+
+async function loadRules(): Promise<void> {
+  rulesLoading.value = true
+  try {
+    rules.value = await categoryRulesService.getAll()
+  } finally {
+    rulesLoading.value = false
+  }
+}
+
+async function deleteRule(id: string, category: string): Promise<void> {
+  await categoryRulesService.delete(id)
+  const group = rules.value.find((g) => g.category === category)
+  if (group) {
+    group.rules = group.rules.filter((r) => r.id !== id)
+    if (!group.rules.length) rules.value = rules.value.filter((g) => g.category !== category)
+  }
+}
+
+onMounted(() => Promise.all([initCurrency(), initAi(), loadRules()]))
 </script>
 
 <style scoped>
@@ -129,6 +171,66 @@ onMounted(() => Promise.all([initCurrency(), initAi()]))
 .loading {
   color: var(--text-muted);
   font-size: 0.9rem;
+}
+
+.rules-empty {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rule-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.rule-category {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: capitalize;
+  min-width: 8rem;
+  padding-top: 0.2rem;
+}
+
+.rule-patterns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.rule-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  font-size: 0.78rem;
+  color: var(--text);
+  font-family: monospace;
+}
+
+.rule-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0;
+  color: var(--text-muted);
+  transition: color 0.15s;
+}
+
+.rule-remove:hover {
+  color: var(--error);
 }
 
 .error {
