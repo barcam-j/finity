@@ -52,6 +52,16 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[y6z9]` `POST /transactions/deduplicate` endpoint — groups user transactions by `(date, amount, description)`, keeps oldest of each group, deletes the rest; returns `{ deleted: N }`
 - `[z8a1]` `GET /transactions/` sort stabilised — secondary sort by `_id ASC` added after `date DESC` to prevent duplicate rows across pages when transactions share the same date
 
+- `[a2b5]` `CategoryRule` model (`app/models/category_rule.py`) — stores per-user categorization rules with unique compound index on `(user_id, category, pattern)`
+- `[b4c8]` `app/services/categorization.py` — `_desc_key()` extracts merchant signature (first meaningful alphabetic token ≥4 letters, skipping generic banking tokens); `descriptions_match()` compares two descriptions by signature; `save_rule()` upserts a rule to MongoDB; `_get_rules_map()` loads rules grouped by pattern; `apply_rules_to_imported()` applies stored rules to newly inserted transactions
+- `[c6d1]` `GET /category-rules/` — returns all rules for the current user grouped by category
+- `[d8e4]` `DELETE /category-rules/{id}` — deletes a single rule by ID
+- `[e1f7]` `PATCH /transactions/{id}` auto-categorizes — on category assignment, saves a rule and applies it to all matching transactions; response extended with `auto_categorized: int`
+- `[f3g9]` `POST /transactions/bulk-category` auto-categorizes — saves rules and applies them for each processed transaction; response extended with `auto_categorized: int`
+- `[g5h2]` CSV and PDF importers apply learned rules after insert — `apply_rules_to_imported()` called with newly imported transactions so existing rules take effect immediately
+- `[h7i6]` `allow_date_edit: bool` added to `UserPreferences` model, `PreferencesRequest` and `PreferencesResponse` — persisted via `GET/PUT /preferences/`
+- `[i9j3]` `investment_categories: list[str]` added to `GET /dashboard/kpis` response — actual stored investment category names returned so the frontend can build correct filter URLs
+
 ### Fixed
 
 - `[u9v3]` Transaction `id` serialized as `_id` by FastAPI's `jsonable_encoder` (uses `by_alias=True` by default) — all transaction endpoints now use `model_dump(mode='json', by_alias=False)` via a shared `_tx_out` helper

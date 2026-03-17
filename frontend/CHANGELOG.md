@@ -92,6 +92,15 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[r8t9]` `TransactionFilters` accepts `initialFilters` prop — refs initialized from prop so filters pre-populate when navigating from dashboard KPI cards
 - `[s1u2]` `TransactionsView` reads route query params on mount (`amount_max`, `amount_min`, `date_from`, `date_to`, `search`, `categories`) and passes them as initial filters
 - `[t3v4]` Deduplication feature — "Remove duplicates" button in Transactions view triggers `POST /transactions/deduplicate`; shows count of removed rows; confirmation dialog before executing
+- `[u6v8]` Transaction dates formatted according to active locale using `toLocaleDateString` — reactive to language changes
+- `[v9w1]` Auto-categorization on category assign — when a category is added to a transaction, all other transactions with a matching description signature are auto-categorized; notice shown for 4 seconds with count
+- `[w2x4]` Auto-categorization on import — CSV and PDF importers apply learned rules to newly imported transactions immediately after insert
+- `[x5y7]` Category normalization — accent and case insensitive duplicate prevention in `TransactionRow`, `BulkEditBar` and backend; `_cat_key()` helper normalizes via NFKD + lowercase
+- `[y8z1]` Persistent categorization rules — `CategoryRule` model stored in MongoDB; rules saved automatically on manual category assignment; visible and deletable in Settings → Auto-categorization rules section
+- `[z2a4]` Transaction date editing locked by default — new toggle in Settings → General ("Allow editing transaction dates"); disabled by default; `TransactionRow` checks `prefs.allowDateEdit` before opening date editor
+- `[a5b7]` `investment_categories` added to dashboard KPIs response — Investments KPI navigates with actual stored category names instead of hardcoded `inversión`
+- `[b8c1]` Transactions view shows "no results" message when filters return empty — filters bar stays visible; `TransactionsEmptyState` only shown when no transactions exist at all
+- `[c2d5]` Category deduplication migration script (`scripts/merge_duplicate_categories.py`) — groups variants by normalized key, picks most-used as canonical, asks confirmation per user before applying
 
 ### Fixed
 
