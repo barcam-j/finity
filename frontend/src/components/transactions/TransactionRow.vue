@@ -4,7 +4,7 @@
       <input type="checkbox" :checked="selected" @change="emit('toggle-select', tx.id!)" />
     </td>
 
-    <td class="col-date" @click.stop="startEdit('date')">
+    <td class="col-date" @click.stop="prefs.allowDateEdit && startEdit('date')">
       <input
         v-if="editingField === 'date'"
         v-autofocus
@@ -15,7 +15,7 @@
         @keydown.enter.prevent="save('date')"
         @keydown.esc.prevent="cancel"
       />
-      <span v-else>{{ tx.date }}</span>
+      <span v-else>{{ formatDate(tx.date) }}</span>
     </td>
 
     <td @click.stop="startEdit('description')">
@@ -81,10 +81,20 @@ import { reactive, ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Transaction } from '@/types'
 import { useCurrency } from '@/composables/useCurrency'
+import { usePreferencesStore } from '@/stores/preferences'
 
 type EditableField = 'date' | 'description' | 'categories'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const prefs = usePreferencesStore()
+
+function formatDate(iso: string): string {
+  return new Date(iso + 'T00:00:00').toLocaleDateString(locale.value, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
 
 const props = defineProps<{
   tx: Transaction
@@ -117,11 +127,19 @@ function startEdit(field: EditableField): void {
   editingField.value = field
 }
 
+function catKey(s: string): string {
+  return s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ')
+}
+
+function normalizeCategory(val: string): string {
+  const key = catKey(val)
+  return props.categories.find((c) => catKey(c) === key) ?? val
+}
+
 function addCategory(): void {
-  const val = categoryInput.value.trim()
-  if (val && !draft.categories.includes(val)) {
-    draft.categories.push(val)
-  }
+  const val = normalizeCategory(categoryInput.value.trim())
+  const alreadyIn = draft.categories.some((c) => catKey(c) === catKey(val))
+  if (val && !alreadyIn) draft.categories.push(val)
   categoryInput.value = ''
 }
 

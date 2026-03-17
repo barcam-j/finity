@@ -11,6 +11,7 @@ from app.core.deps import get_current_user
 from app.models.user import User
 from app.models.transaction import Transaction
 from app.importers.csv.validators import CsvText, ParsedCsvFile, get_csv_text, get_parsed_csv
+from app.services.categorization import apply_rules_to_imported
 
 router = APIRouter(prefix='/importers/csv', tags=['importers'])
 
@@ -121,6 +122,7 @@ async def import_csv(
         )
 
     await Transaction.insert_many(transactions)
+    await apply_rules_to_imported(current_user.id, transactions)
 
     return {
         'imported': len(transactions),

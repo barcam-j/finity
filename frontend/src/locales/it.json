@@ -68,6 +68,7 @@
     "setCategoryPlaceholder": "Imposta categoria…",
     "addCategoryPlaceholder": "Aggiungi…",
     "empty": "Nessuna transazione.",
+    "noResults": "Nessuna transazione corrisponde ai filtri applicati.",
     "importFile": "Importa un file",
     "toGetStarted": "per iniziare.",
     "paginationInfo": "{from}–{to} di {total} transazioni",
@@ -77,7 +78,8 @@
     "deduplicate": "Rimuovi duplicati",
     "deduplicateConfirm": "Verranno eliminate le transazioni con stessa data, importo e descrizione, conservando una copia di ciascuna. Questa azione non può essere annullata.",
     "deduplicateRun": "Rimuovi duplicati",
-    "deduplicateResult": "{count} duplicato/i rimosso/i"
+    "deduplicateResult": "{count} duplicato/i rimosso/i",
+    "autoCategorized": "{count} transazione/i categorizzate automaticamente per descrizione simile"
   },
   "filters": {
     "searchPlaceholder": "Cerca descrizione…",
@@ -110,7 +112,12 @@
     "apiKeyPlaceholder": "Incolla la tua chiave API",
     "apiKeyHint": "Lascia vuoto per mantenere la chiave attuale",
     "showKey": "Mostra",
-    "hideKey": "Nascondi"
+    "hideKey": "Nascondi",
+    "allowDateEdit": "Consenti modifica delle date delle transazioni",
+    "allowDateEditHint": "Quando disattivato, le date delle transazioni sono bloccate e non possono essere modificate",
+    "rulesTitle": "Regole di categorizzazione automatica",
+    "rulesDesc": "Pattern appresi assegnando manualmente una categoria a una transazione. Elimina una regola per interrompere l'assegnazione automatica.",
+    "rulesEmpty": "Nessuna regola ancora. Assegna una categoria a una transazione per creare la prima regola."
   },
   "guide": {
     "geminiTitle": "Come ottenere la tua chiave API Gemini",

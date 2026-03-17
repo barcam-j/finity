@@ -68,6 +68,7 @@
     "setCategoryPlaceholder": "Set category…",
     "addCategoryPlaceholder": "Add…",
     "empty": "No transactions yet.",
+    "noResults": "No transactions match the current filters.",
     "importFile": "Import a file",
     "toGetStarted": "to get started.",
     "paginationInfo": "{from}–{to} of {total} transactions",
@@ -77,7 +78,8 @@
     "deduplicate": "Remove duplicates",
     "deduplicateConfirm": "This will remove transactions with the same date, amount and description, keeping one copy of each. This action cannot be undone.",
     "deduplicateRun": "Remove duplicates",
-    "deduplicateResult": "{count} duplicate(s) removed"
+    "deduplicateResult": "{count} duplicate(s) removed",
+    "autoCategorized": "{count} transaction(s) auto-categorized based on description match"
   },
   "filters": {
     "searchPlaceholder": "Search description…",
@@ -110,7 +112,12 @@
     "apiKeyPlaceholder": "Paste your API key",
     "apiKeyHint": "Leave blank to keep the current key",
     "showKey": "Show",
-    "hideKey": "Hide"
+    "hideKey": "Hide",
+    "allowDateEdit": "Allow editing transaction dates",
+    "allowDateEditHint": "When disabled, transaction dates are locked and cannot be modified",
+    "rulesTitle": "Auto-categorization rules",
+    "rulesDesc": "Patterns learned when you manually assign a category to a transaction. Delete a rule to stop auto-assigning that category.",
+    "rulesEmpty": "No rules yet. Assign a category to a transaction to create the first rule."
   },
   "guide": {
     "geminiTitle": "How to get your Gemini API key",

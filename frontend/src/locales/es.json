@@ -68,6 +68,7 @@
     "setCategoryPlaceholder": "Establecer categoría…",
     "addCategoryPlaceholder": "Añadir…",
     "empty": "Aún no hay transacciones.",
+    "noResults": "Ninguna transacción coincide con los filtros aplicados.",
     "importFile": "Importa un archivo",
     "toGetStarted": "para empezar.",
     "paginationInfo": "{from}–{to} de {total} transacciones",
@@ -77,7 +78,8 @@
     "deduplicate": "Eliminar duplicados",
     "deduplicateConfirm": "Se eliminarán las transacciones con la misma fecha, importe y descripción, conservando una copia de cada una. Esta acción no se puede deshacer.",
     "deduplicateRun": "Eliminar duplicados",
-    "deduplicateResult": "{count} duplicado(s) eliminado(s)"
+    "deduplicateResult": "{count} duplicado(s) eliminado(s)",
+    "autoCategorized": "{count} transacción(es) categorizadas automáticamente por descripción similar"
   },
   "filters": {
     "searchPlaceholder": "Buscar descripción…",
@@ -110,7 +112,12 @@
     "apiKeyPlaceholder": "Pega tu clave API",
     "apiKeyHint": "Deja en blanco para conservar la clave actual",
     "showKey": "Mostrar",
-    "hideKey": "Ocultar"
+    "hideKey": "Ocultar",
+    "allowDateEdit": "Permitir editar fechas de transacciones",
+    "allowDateEditHint": "Cuando está desactivado, las fechas de las transacciones están bloqueadas y no se pueden modificar",
+    "rulesTitle": "Reglas de auto-categorización",
+    "rulesDesc": "Patrones aprendidos al asignar manualmente una categoría a una transacción. Elimina una regla para dejar de asignar esa categoría automáticamente.",
+    "rulesEmpty": "Aún no hay reglas. Asigna una categoría a una transacción para crear la primera regla."
   },
   "guide": {
     "geminiTitle": "Cómo obtener tu clave API de Gemini",
