@@ -62,6 +62,12 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[h7i6]` `allow_date_edit: bool` added to `UserPreferences` model, `PreferencesRequest` and `PreferencesResponse` — persisted via `GET/PUT /preferences/`
 - `[i9j3]` `investment_categories: list[str]` added to `GET /dashboard/kpis` response — actual stored investment category names returned so the frontend can build correct filter URLs
 
+- `[j2k5]` `ImportLog` model (`app/models/import_log.py`) — stores per-user import events with `source`, `count`, `name` (optional bank/entity label) and `created_at` timestamp
+- `[k4l8]` `GET /data/export/csv` — streams all user transactions as a downloadable CSV file (`date`, `description`, `amount`, `categories`, `source`)
+- `[l6m1]` `GET /data/import-logs` — returns import history for the current user sorted by date descending, including `name` field
+- `[m8n4]` `DELETE /data/` — permanently deletes all user transactions, category rules, analysis cache and import logs (HTTP 204)
+- `[n1o7]` CSV and PDF `ImportRequest` bodies accept optional `name` field — stored in `ImportLog` to identify the bank or entity of each import
+
 ### Fixed
 
 - `[u9v3]` Transaction `id` serialized as `_id` by FastAPI's `jsonable_encoder` (uses `by_alias=True` by default) — all transaction endpoints now use `model_dump(mode='json', by_alias=False)` via a shared `_tx_out` helper
