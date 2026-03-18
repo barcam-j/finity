@@ -11,6 +11,7 @@ class ParsedCsvFile:
     headers: list[str]
     data_rows: list[list[str]]
     has_header_warning: bool
+    all_rows: list[list[str]]
 
 
 @dataclass
@@ -70,4 +71,4 @@ async def get_parsed_csv(file: UploadFile = File(...)) -> ParsedCsvFile:
     date_pattern = re.compile(r'^\d{1,4}[-/]\d{1,2}[-/]\d{2,4}$')
     has_header_warning = bool(headers and date_pattern.match(headers[0].strip()))
 
-    return ParsedCsvFile(headers=headers, data_rows=data_rows, has_header_warning=has_header_warning)
+    return ParsedCsvFile(headers=headers, data_rows=data_rows, has_header_warning=has_header_warning, all_rows=rows)

@@ -241,7 +241,8 @@
     "errorNoValidTransactions": "No valid transactions found with the selected mapping. Check the column and format settings.",
     "errorRateLimit": "AI rate limit reached. Wait a moment and try again, or switch to a different model in Settings.",
     "bankName": "Bank / Entity",
-    "bankNamePlaceholder": "e.g. Santander, ING, BBVA… (optional)"
+    "bankNamePlaceholder": "e.g. Santander, ING, BBVA… (optional)",
+    "headerRowHint": "Click the row that contains the column headers"
   },
   "analysisView": {
     "title": "Analysis",

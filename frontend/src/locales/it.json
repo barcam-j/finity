@@ -241,7 +241,8 @@
     "errorNoValidTransactions": "Nessuna transazione valida trovata con la mappatura selezionata. Controlla la colonna e il formato.",
     "errorRateLimit": "Limite di velocità AI raggiunto. Attendi un momento e riprova, o cambia il modello nelle Impostazioni.",
     "bankName": "Banca / Entità",
-    "bankNamePlaceholder": "es. Santander, ING, BBVA… (opzionale)"
+    "bankNamePlaceholder": "es. Santander, ING, BBVA… (opzionale)",
+    "headerRowHint": "Clicca sulla riga che contiene le intestazioni delle colonne"
   },
   "analysisView": {
     "title": "Analisi",
