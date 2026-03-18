@@ -1,7 +1,8 @@
 import csv
 import io
 
-from fastapi import APIRouter, Depends
+from beanie import PydanticObjectId
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 
 from app.core.deps import get_current_user
@@ -59,6 +60,14 @@ async def get_import_logs(current_user: User = Depends(get_current_user)):
         }
         for log in logs
     ]
+
+
+@router.delete('/import-logs/{log_id}', status_code=204)
+async def delete_import_log(log_id: PydanticObjectId, current_user: User = Depends(get_current_user)):
+    log = await ImportLog.find_one(ImportLog.id == log_id, ImportLog.user_id == current_user.id)
+    if not log:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Import log not found')
+    await log.delete()
 
 
 @router.delete('/', status_code=204)

@@ -31,6 +31,10 @@ export const dataService = {
     return api.get<ImportLogItem[]>('/data/import-logs')
   },
 
+  deleteImportLog(id: string): Promise<void> {
+    return api.delete(`/data/import-logs/${id}`)
+  },
+
   deleteAllData(): Promise<void> {
     return api.delete('/data/')
   },

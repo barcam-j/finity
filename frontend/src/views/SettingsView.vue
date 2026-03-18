@@ -163,6 +163,7 @@
                 <th>{{ t('settings.dataHistoryName') }}</th>
                 <th>{{ t('settings.dataHistorySource') }}</th>
                 <th class="col-count">{{ t('settings.dataHistoryCount') }}</th>
+                <th class="col-action"></th>
               </tr>
             </thead>
             <tbody>
@@ -171,6 +172,9 @@
                 <td class="col-name">{{ log.name || '—' }}</td>
                 <td><span class="source-badge" :class="`source-badge--${log.source}`">{{ log.source.toUpperCase() }}</span></td>
                 <td class="col-count">{{ log.count }}</td>
+                <td class="col-action">
+                  <button class="btn-row-delete" @click="deleteImportLog(log.id)">✕</button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -309,6 +313,11 @@ async function exportCsv(): Promise<void> {
   } finally {
     exporting.value = false
   }
+}
+
+async function deleteImportLog(id: string): Promise<void> {
+  await dataService.deleteImportLog(id)
+  importLogs.value = importLogs.value.filter((l) => l.id !== id)
 }
 
 async function confirmDeleteAll(): Promise<void> {
@@ -495,6 +504,27 @@ onMounted(() => Promise.all([initCurrency(), initAi(), loadRules(), loadImportLo
 .col-name {
   color: var(--text);
   font-size: 0.875rem;
+}
+
+.col-action {
+  width: 2rem;
+  text-align: center;
+}
+
+.btn-row-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 4px;
+  color: var(--text-muted);
+  transition: color 0.15s, background 0.15s;
+}
+
+.btn-row-delete:hover {
+  color: var(--error);
+  background: var(--accent-subtle);
 }
 
 .source-badge {
