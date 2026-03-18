@@ -12,6 +12,7 @@ from app.models.user import User
 from app.models.transaction import Transaction
 from app.importers.csv.validators import CsvText, ParsedCsvFile, get_csv_text, get_parsed_csv
 from app.services.categorization import apply_rules_to_imported
+from app.models.import_log import ImportLog
 
 router = APIRouter(prefix='/importers/csv', tags=['importers'])
 
@@ -25,6 +26,7 @@ class TransactionItem(BaseModel):
 
 class ImportRequest(BaseModel):
     transactions: list[TransactionItem]
+    name: str | None = None
 
 
 @router.post('/preview')
@@ -123,6 +125,7 @@ async def import_csv(
 
     await Transaction.insert_many(transactions)
     await apply_rules_to_imported(current_user.id, transactions)
+    await ImportLog(user_id=current_user.id, source='csv', count=len(transactions), name=body.name).insert()
 
     return {
         'imported': len(transactions),

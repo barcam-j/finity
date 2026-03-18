@@ -11,10 +11,11 @@ from app.models.alert import Alert
 from app.models.user_preferences import UserPreferences
 from app.models.analysis_cache import AnalysisCache
 from app.models.category_rule import CategoryRule
-from app.routers import auth, transactions, ai_config, alerts, preferences, dashboard, category_rules
+from app.models.import_log import ImportLog
+from app.routers import auth, transactions, ai_config, alerts, preferences, dashboard, category_rules, data
 from app.importers.registry import register_importers
 
-DOCUMENT_MODELS = [User, Transaction, AiConfig, Alert, UserPreferences, AnalysisCache, CategoryRule]
+DOCUMENT_MODELS = [User, Transaction, AiConfig, Alert, UserPreferences, AnalysisCache, CategoryRule, ImportLog]
 
 
 @asynccontextmanager
@@ -41,6 +42,7 @@ app.include_router(alerts.router)
 app.include_router(preferences.router)
 app.include_router(dashboard.router)
 app.include_router(category_rules.router)
+app.include_router(data.router)
 register_importers(app)
 
 

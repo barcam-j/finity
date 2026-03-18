@@ -145,6 +145,52 @@
         </SettingsSection>
       </div>
 
+      <!-- Data -->
+      <div v-show="activeTab === 'data'">
+        <SettingsSection :description="t('settings.dataExportDesc')">
+          <button class="btn-secondary" :disabled="exporting" @click="exportCsv">
+            {{ exporting ? t('settings.loading') : t('settings.dataExportBtn') }}
+          </button>
+        </SettingsSection>
+
+        <SettingsSection :description="t('settings.dataHistoryDesc')">
+          <div v-if="logsLoading" class="loading">{{ t('settings.loading') }}</div>
+          <div v-else-if="!importLogs.length" class="rules-empty">{{ t('settings.dataHistoryEmpty') }}</div>
+          <table v-else class="logs-table">
+            <thead>
+              <tr>
+                <th>{{ t('settings.dataHistoryDate') }}</th>
+                <th>{{ t('settings.dataHistoryName') }}</th>
+                <th>{{ t('settings.dataHistorySource') }}</th>
+                <th class="col-count">{{ t('settings.dataHistoryCount') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="log in importLogs" :key="log.id">
+                <td>{{ formatLogDate(log.created_at) }}</td>
+                <td class="col-name">{{ log.name || '—' }}</td>
+                <td><span class="source-badge" :class="`source-badge--${log.source}`">{{ log.source.toUpperCase() }}</span></td>
+                <td class="col-count">{{ log.count }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </SettingsSection>
+
+        <SettingsSection :description="t('settings.dataDangerDesc')">
+          <button class="btn-danger" @click="showDeleteConfirm = true">
+            {{ t('settings.dataDangerBtn') }}
+          </button>
+        </SettingsSection>
+
+        <ConfirmDialog
+          :open="showDeleteConfirm"
+          :message="t('settings.dataDangerConfirm')"
+          :confirm-label="t('settings.dataDangerConfirmBtn')"
+          @confirm="confirmDeleteAll"
+          @cancel="showDeleteConfirm = false"
+        />
+      </div>
+
       <!-- Account -->
       <div v-show="activeTab === 'account'">
         <SettingsSection :description="t('settings.accountDesc')"
@@ -189,10 +235,13 @@ import { useCurrencyForm } from '@/composables/useCurrencyForm'
 import { useAiProviderForm } from '@/composables/useAiProviderForm'
 import { categoryRulesService } from '@/services/categoryRules'
 import type { CategoryRuleGroup } from '@/services/categoryRules'
+import { dataService } from '@/services/data'
+import type { ImportLogItem } from '@/services/data'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
 
@@ -203,6 +252,7 @@ const tabs = computed(() => [
   { id: 'general', label: t('settings.tabGeneral') },
   { id: 'ai', label: t('settings.tabAi') },
   { id: 'categorization', label: t('settings.tabCategorization') },
+  { id: 'data', label: t('settings.tabData') },
   { id: 'account', label: t('settings.tabAccount') },
 ])
 
@@ -237,7 +287,47 @@ async function deleteRule(id: string, category: string): Promise<void> {
   }
 }
 
-onMounted(() => Promise.all([initCurrency(), initAi(), loadRules()]))
+// Data tab
+const importLogs = ref<ImportLogItem[]>([])
+const logsLoading = ref(false)
+const exporting = ref(false)
+const showDeleteConfirm = ref(false)
+
+async function loadImportLogs(): Promise<void> {
+  logsLoading.value = true
+  try {
+    importLogs.value = await dataService.getImportLogs()
+  } finally {
+    logsLoading.value = false
+  }
+}
+
+async function exportCsv(): Promise<void> {
+  exporting.value = true
+  try {
+    await dataService.exportCsv()
+  } finally {
+    exporting.value = false
+  }
+}
+
+async function confirmDeleteAll(): Promise<void> {
+  showDeleteConfirm.value = false
+  await dataService.deleteAllData()
+  importLogs.value = []
+}
+
+function formatLogDate(iso: string): string {
+  return new Date(iso).toLocaleString(locale.value, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+onMounted(() => Promise.all([initCurrency(), initAi(), loadRules(), loadImportLogs()]))
 </script>
 
 <style scoped>
@@ -372,6 +462,95 @@ onMounted(() => Promise.all([initCurrency(), initAi(), loadRules()]))
 
 .rule-remove:hover {
   color: var(--error);
+}
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.logs-table th {
+  text-align: left;
+  padding: 0.35rem 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+
+.logs-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+.logs-table tr:last-child td {
+  border-bottom: none;
+}
+
+.col-count {
+  text-align: right;
+}
+
+.col-name {
+  color: var(--text);
+  font-size: 0.875rem;
+}
+
+.source-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.source-badge--csv {
+  background: oklch(0.92 0.05 220);
+  color: oklch(0.35 0.1 220);
+}
+
+.source-badge--pdf {
+  background: oklch(0.92 0.05 30);
+  color: oklch(0.35 0.1 30);
+}
+
+.btn-secondary {
+  padding: 0.55rem 1.25rem;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  padding: 0.55rem 1.25rem;
+  background: none;
+  border: 1px solid var(--error);
+  border-radius: 8px;
+  color: var(--error);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-danger:hover {
+  background: var(--error);
+  color: #fff;
 }
 
 .error {

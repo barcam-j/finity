@@ -90,6 +90,16 @@
 
       <p v-if="error" class="error">{{ error }}</p>
 
+      <div class="bank-name-field">
+        <label for="bank-name">{{ t('importer.bankName') }}</label>
+        <input
+          id="bank-name"
+          v-model="bankName"
+          type="text"
+          :placeholder="t('importer.bankNamePlaceholder')"
+        />
+      </div>
+
       <div class="step-actions">
         <button class="btn-primary" :disabled="importing || !rows.length" @click="confirmImport">
           {{ importing ? t('importer.importing') : t('importer.importCount', { count: rows.length }) }}
@@ -128,6 +138,7 @@ const previewPage = ref(1)
 const importing = ref(false)
 const error = ref(null)
 const importedCount = ref(0)
+const bankName = ref('')
 
 const totalPages = computed(() => Math.max(1, Math.ceil(rows.value.length / PAGE_SIZE)))
 const pageRows = computed(() => {
@@ -156,6 +167,7 @@ function reset() {
   previewPage.value = 1
   error.value = null
   fileName.value = ''
+  bankName.value = ''
   if (fileInput.value) fileInput.value.value = ''
 }
 
@@ -198,7 +210,7 @@ async function confirmImport() {
   error.value = null
   importing.value = true
   try {
-    const data = await pdfService.import(rows.value)
+    const data = await pdfService.import(rows.value, bankName.value)
     importedCount.value = data.imported
     step.value = 'success'
   } catch (e) {
@@ -441,9 +453,39 @@ td {
   cursor: not-allowed;
 }
 
+/* Bank name */
+.bank-name-field {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.bank-name-field label {
+  font-size: 0.9rem;
+  color: var(--text);
+  white-space: nowrap;
+  min-width: 7rem;
+}
+
+.bank-name-field input {
+  flex: 1;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.bank-name-field input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
 /* Actions */
 .step-actions {
-  margin-top: 1.25rem;
+  margin-top: 1rem;
   display: flex;
   justify-content: flex-end;
 }
