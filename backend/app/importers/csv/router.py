@@ -123,12 +123,12 @@ async def import_csv(
             detail='No valid transactions found',
         )
 
+    await apply_rules_to_imported(current_user.id, transactions)
     log = ImportLog(user_id=current_user.id, source='csv', count=len(transactions), name=body.name)
     await log.insert()
     for t in transactions:
         t.import_log_id = log.id
     await Transaction.insert_many(transactions)
-    await apply_rules_to_imported(current_user.id, transactions)
 
     return {
         'imported': len(transactions),
@@ -138,7 +138,7 @@ async def import_csv(
                 'date': str(t.date),
                 'amount': t.amount,
                 'description': t.description,
-                'category': t.category,
+                'categories': t.categories,
             }
             for t in transactions
         ],
