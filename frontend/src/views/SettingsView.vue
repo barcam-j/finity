@@ -163,6 +163,7 @@
                 <th>{{ t('settings.dataHistoryName') }}</th>
                 <th>{{ t('settings.dataHistorySource') }}</th>
                 <th class="col-count">{{ t('settings.dataHistoryCount') }}</th>
+                <th class="col-action"></th>
               </tr>
             </thead>
             <tbody>
@@ -171,6 +172,9 @@
                 <td class="col-name">{{ log.name || '—' }}</td>
                 <td><span class="source-badge" :class="`source-badge--${log.source}`">{{ log.source.toUpperCase() }}</span></td>
                 <td class="col-count">{{ log.count }}</td>
+                <td class="col-action">
+                  <button class="btn-row-delete" @click="promptDeleteLog(log)">✕</button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -181,6 +185,27 @@
             {{ t('settings.dataDangerBtn') }}
           </button>
         </SettingsSection>
+
+        <Teleport to="body">
+          <Transition name="dialog">
+            <div v-if="pendingDeleteLog" class="backdrop" @mousedown.self="pendingDeleteLog = null">
+              <div class="dialog" role="dialog" aria-modal="true">
+                <p class="dialog-message">{{ t('settings.dataLogDeletePrompt', { count: pendingDeleteLog.count }) }}</p>
+                <div class="dialog-actions dialog-actions--col">
+                  <button class="btn-confirm-secondary" @click="confirmDeleteLog(false)">
+                    {{ t('settings.dataLogDeleteRecordOnly') }}
+                  </button>
+                  <button class="btn-confirm-danger" @click="confirmDeleteLog(true)">
+                    {{ t('settings.dataLogDeleteWithTransactions', { count: pendingDeleteLog.count }) }}
+                  </button>
+                  <button class="btn-cancel" @click="pendingDeleteLog = null">
+                    {{ t('transactions.cancel') }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Transition>
+        </Teleport>
 
         <ConfirmDialog
           :open="showDeleteConfirm"
@@ -309,6 +334,20 @@ async function exportCsv(): Promise<void> {
   } finally {
     exporting.value = false
   }
+}
+
+const pendingDeleteLog = ref<ImportLogItem | null>(null)
+
+function promptDeleteLog(log: ImportLogItem): void {
+  pendingDeleteLog.value = log
+}
+
+async function confirmDeleteLog(deleteTransactions: boolean): Promise<void> {
+  const log = pendingDeleteLog.value
+  if (!log) return
+  pendingDeleteLog.value = null
+  await dataService.deleteImportLog(log.id, deleteTransactions)
+  importLogs.value = importLogs.value.filter((l) => l.id !== log.id)
 }
 
 async function confirmDeleteAll(): Promise<void> {
@@ -497,6 +536,27 @@ onMounted(() => Promise.all([initCurrency(), initAi(), loadRules(), loadImportLo
   font-size: 0.875rem;
 }
 
+.col-action {
+  width: 2rem;
+  text-align: center;
+}
+
+.btn-row-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 4px;
+  color: var(--text-muted);
+  transition: color 0.15s, background 0.15s;
+}
+
+.btn-row-delete:hover {
+  color: var(--error);
+  background: var(--accent-subtle);
+}
+
 .source-badge {
   display: inline-block;
   padding: 0.15rem 0.5rem;
@@ -536,6 +596,91 @@ onMounted(() => Promise.all([initCurrency(), initAi(), loadRules(), loadImportLo
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: oklch(0 0 0 / 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: min(22rem, 90vw);
+  box-shadow: 0 8px 32px oklch(0 0 0 / 0.2);
+}
+
+.dialog-message {
+  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.dialog-actions--col {
+  flex-direction: column;
+}
+
+.btn-cancel {
+  padding: 0.45rem 1rem;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: color 0.15s;
+  text-align: center;
+}
+
+.btn-cancel:hover { color: var(--text); }
+
+.btn-confirm-secondary {
+  padding: 0.45rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: center;
+}
+
+.btn-confirm-secondary:hover { background: var(--border); }
+
+.btn-confirm-danger {
+  padding: 0.45rem 1rem;
+  background: var(--error);
+  border: none;
+  border-radius: 7px;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  text-align: center;
+}
+
+.btn-confirm-danger:hover { opacity: 0.85; }
+
+.dialog-enter-active,
+.dialog-leave-active { transition: opacity 0.2s ease; }
+.dialog-enter-from,
+.dialog-leave-to { opacity: 0; }
 
 .btn-danger {
   padding: 0.55rem 1.25rem;

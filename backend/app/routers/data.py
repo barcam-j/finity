@@ -1,13 +1,13 @@
 import csv
 import io
 
-from fastapi import APIRouter, Depends
+from beanie import PydanticObjectId
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 
 from app.core.deps import get_current_user
 from app.models.user import User
 from app.models.transaction import Transaction
-from app.models.category_rule import CategoryRule
 from app.models.analysis_cache import AnalysisCache
 from app.models.import_log import ImportLog
 
@@ -61,9 +61,25 @@ async def get_import_logs(current_user: User = Depends(get_current_user)):
     ]
 
 
+@router.delete('/import-logs/{log_id}', status_code=204)
+async def delete_import_log(
+    log_id: PydanticObjectId,
+    delete_transactions: bool = Query(False),
+    current_user: User = Depends(get_current_user),
+):
+    log = await ImportLog.find_one(ImportLog.id == log_id, ImportLog.user_id == current_user.id)
+    if not log:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Import log not found')
+    if delete_transactions:
+        await Transaction.find(
+            Transaction.user_id == current_user.id,
+            Transaction.import_log_id == log_id,
+        ).delete()
+    await log.delete()
+
+
 @router.delete('/', status_code=204)
 async def delete_all_data(current_user: User = Depends(get_current_user)):
     await Transaction.find(Transaction.user_id == current_user.id).delete()
-    await CategoryRule.find(CategoryRule.user_id == current_user.id).delete()
     await AnalysisCache.find(AnalysisCache.user_id == current_user.id).delete()
     await ImportLog.find(ImportLog.user_id == current_user.id).delete()

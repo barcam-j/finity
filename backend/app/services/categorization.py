@@ -61,12 +61,11 @@ async def _get_rules_map(user_id: PydanticObjectId) -> dict[str, set[str]]:
 
 
 async def apply_rules_to_imported(user_id: PydanticObjectId, new_transactions: list) -> int:
-    """After an import, apply learned categorization rules to newly inserted transactions.
+    """Apply learned categorization rules to a list of transactions before they are inserted.
 
+    Modifies the transaction objects in place. No database writes per transaction.
     Returns the number of transactions that were auto-categorized.
     """
-    from app.models.transaction import Transaction  # avoid circular import
-
     rules_map = await _get_rules_map(user_id)
     if not rules_map:
         return 0
@@ -79,7 +78,6 @@ async def apply_rules_to_imported(user_id: PydanticObjectId, new_transactions: l
         cats_to_add = [c for c in rules_map[key] if c not in t.categories]
         if cats_to_add:
             t.categories = list(t.categories) + cats_to_add
-            await t.replace()
             count += 1
 
     return count

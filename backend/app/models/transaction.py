@@ -11,6 +11,7 @@ class Transaction(Document):
     categories: list[str] = Field(default_factory=list)
     source: str = 'manual'
     tags: list[str] = Field(default_factory=list)
+    import_log_id: PydanticObjectId | None = None
 
     class Settings:
         name = 'transactions'
