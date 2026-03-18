@@ -241,7 +241,8 @@
     "errorNoValidTransactions": "No se encontraron transacciones válidas con el mapeo seleccionado. Comprueba la columna y el formato.",
     "errorRateLimit": "Límite de tasa de IA alcanzado. Espera un momento y vuelve a intentarlo, o cambia el modelo en Ajustes.",
     "bankName": "Banco / Entidad",
-    "bankNamePlaceholder": "ej. Santander, ING, BBVA… (opcional)"
+    "bankNamePlaceholder": "ej. Santander, ING, BBVA… (opcional)",
+    "headerRowHint": "Haz clic en la fila que contiene las cabeceras de columna"
   },
   "analysisView": {
     "title": "Análisis",

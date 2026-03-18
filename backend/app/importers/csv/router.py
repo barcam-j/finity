@@ -86,6 +86,7 @@ async def parse_csv_manual(
         'headers': parsed.headers,
         'rows': parsed.data_rows,
         'has_header_warning': parsed.has_header_warning,
+        'all_rows': parsed.all_rows,
     }
 
 

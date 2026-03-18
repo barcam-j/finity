@@ -54,19 +54,18 @@
         <button class="btn-secondary" @click="resetToUpload">{{ t('importer.changeFile') }}</button>
       </div>
 
-      <div v-if="hasHeaderWarning" class="warning-banner">
-        {{ t('importer.headerWarning') }}
-      </div>
+      <p class="header-row-hint">{{ t('importer.headerRowHint') }}</p>
 
-      <div class="sample-table-wrapper">
+      <div class="raw-table-wrapper">
         <table>
-          <thead>
-            <tr>
-              <th v-for="h in parsedHeaders" :key="h">{{ h }}</th>
-            </tr>
-          </thead>
           <tbody>
-            <tr v-for="(row, i) in sampleRows" :key="i">
+            <tr
+              v-for="(row, i) in allRawRows.slice(0, Math.min(allRawRows.length, headerRowIndex + 8))"
+              :key="i"
+              :class="{ 'row--header': i === headerRowIndex, 'row--data': i !== headerRowIndex }"
+              @click="headerRowIndex = i"
+            >
+              <td class="row-num">{{ i + 1 }}</td>
               <td v-for="(cell, j) in row" :key="j">{{ cell }}</td>
             </tr>
           </tbody>
@@ -223,7 +222,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import * as XLSX from 'xlsx'
 import { useI18n } from 'vue-i18n'
 import { csvService } from './service'
@@ -250,9 +249,21 @@ const importedCount = ref(0)
 const bankName = ref('')
 
 // Manual mapping state
-const parsedHeaders = ref([])
-const parsedRows = ref([])
-const sampleRows = ref([])
+const allRawRows = ref([])
+const headerRowIndex = ref(0)
+const parsedHeaders = computed(() =>
+  (allRawRows.value[headerRowIndex.value] ?? []).filter((h: string) => h.trim() !== '')
+)
+const parsedRows = computed(() => {
+  const rawHeader = allRawRows.value[headerRowIndex.value] ?? []
+  return allRawRows.value.slice(headerRowIndex.value + 1).map((row) => {
+    const obj: Record<string, string> = {}
+    rawHeader.forEach((h: string, i: number) => {
+      if (h.trim()) obj[h] = row[i] ?? ''
+    })
+    return obj
+  })
+})
 const hasHeaderWarning = ref(false)
 const mappingError = ref(null)
 const mapping = ref({
@@ -304,9 +315,8 @@ function reset() {
   mappingError.value = null
   fileName.value = ''
   bankName.value = ''
-  parsedHeaders.value = []
-  parsedRows.value = []
-  sampleRows.value = []
+  allRawRows.value = []
+  headerRowIndex.value = 0
   hasHeaderWarning.value = false
   mapping.value = {
     date: '',
@@ -325,6 +335,11 @@ function resetToUpload() {
   if (fileInput.value) fileInput.value.value = ''
 }
 
+
+watch(headerRowIndex, () => {
+  mapping.value = { date: '', dateFormat: mapping.value.dateFormat, amount: '', amountFormat: mapping.value.amountFormat, description: '', category: '' }
+  mappingError.value = null
+})
 
 // ── Apply mapping ─────────────────────────────────────────────────────────────
 function applyMapping() {
@@ -399,15 +414,8 @@ async function loadFile(rawFile) {
   if (method.value === 'manual') {
     try {
       const data = await csvService.parse(file)
-      parsedHeaders.value = data.headers
-      parsedRows.value = data.rows.map((row) => {
-        const obj = {}
-        data.headers.forEach((h, i) => {
-          obj[h] = row[i] ?? ''
-        })
-        return obj
-      })
-      sampleRows.value = data.rows.slice(0, 5)
+      allRawRows.value = data.all_rows ?? [data.headers, ...data.rows]
+      headerRowIndex.value = 0
       hasHeaderWarning.value = data.has_header_warning
       step.value = 'mapping'
     } catch (e) {
@@ -590,12 +598,57 @@ async function confirmImport() {
   margin-bottom: 1rem;
 }
 
-/* Sample table */
-.sample-table-wrapper {
+/* Header row selector */
+.header-row-hint {
+  margin: 0 0 0.6rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.raw-table-wrapper {
   overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: 8px;
   margin-bottom: 1.5rem;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.raw-table-wrapper table {
+  font-size: 0.82rem;
+}
+
+.raw-table-wrapper tr {
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.raw-table-wrapper tr:hover {
+  background: var(--accent-subtle);
+}
+
+.raw-table-wrapper tr.row--header {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.raw-table-wrapper tr.row--header td {
+  color: #fff;
+  border-top-color: transparent;
+}
+
+.raw-table-wrapper td.row-num {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  width: 2rem;
+  text-align: right;
+  padding-right: 0.5rem;
+  user-select: none;
+}
+
+.raw-table-wrapper tr.row--header td.row-num {
+  color: rgba(255,255,255,0.7);
 }
 
 /* Mapping form */
