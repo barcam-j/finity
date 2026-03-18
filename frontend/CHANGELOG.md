@@ -102,6 +102,12 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[b8c1]` Transactions view shows "no results" message when filters return empty — filters bar stays visible; `TransactionsEmptyState` only shown when no transactions exist at all
 - `[c2d5]` Category deduplication migration script (`scripts/merge_duplicate_categories.py`) — groups variants by normalized key, picks most-used as canonical, asks confirmation per user before applying
 
+- `[d4e6]` `SettingsView` reorganised into tabbed navigation — four tabs: General, AI Provider, Categorization, Account; `SettingsSection` title removed (tab label serves as heading); `SettingsSection` title prop dropped entirely
+- `[e7f1]` Account tab in Settings — displays user email and a three-way theme selector (Light / Dark / System) replacing the sidebar cycle button; `themeStore.set(value)` added to theme store
+- `[f9g4]` Data tab in Settings — Export CSV button downloads all transactions; import history table shows date, bank/entity name, source badge and transaction count; danger zone with confirmed "Delete all data" action
+- `[g2h7]` Bank/entity name field in CSV and PDF importers — optional text input shown at the preview step before confirming import; value stored in `ImportLog` and displayed in the import history table
+- `[h4i9]` API key reveal in Settings — "Show" button fetches and displays the stored key when the field is empty; "✓ Configured" badge shown next to the label; placeholder updated to clarify a new key replaces the current one
+
 ### Fixed
 
 - `[u5w6]` Pagination showing duplicate rows across pages — secondary sort by `_id ASC` added after `date DESC` to guarantee stable ordering when multiple transactions share the same date

@@ -12,6 +12,7 @@ from app.core.deps import get_current_user
 from app.models.user import User
 from app.models.transaction import Transaction
 from app.services.categorization import apply_rules_to_imported
+from app.models.import_log import ImportLog
 
 router = APIRouter(prefix='/importers/pdf', tags=['importers'])
 
@@ -25,6 +26,7 @@ class TransactionItem(BaseModel):
 
 class ImportRequest(BaseModel):
     transactions: list[TransactionItem]
+    name: str | None = None
 
 
 @router.post('/preview')
@@ -121,6 +123,7 @@ async def import_pdf(
 
     await Transaction.insert_many(transactions)
     await apply_rules_to_imported(current_user.id, transactions)
+    await ImportLog(user_id=current_user.id, source='pdf', count=len(transactions), name=body.name).insert()
 
     return {
         'imported': len(transactions),

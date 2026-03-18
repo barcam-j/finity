@@ -40,11 +40,11 @@ export const csvService = {
     return res.json() as Promise<PreviewResponse>
   },
 
-  async import(transactions: Transaction[]): Promise<ImportResponse> {
+  async import(transactions: Transaction[], name?: string): Promise<ImportResponse> {
     const res = await fetch(`${BASE_URL}/importers/csv/import`, {
       method: 'POST',
       headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transactions }),
+      body: JSON.stringify({ transactions, name: name || null }),
     })
     if (!res.ok) throw new Error((await res.json()).detail || 'Import failed')
     return res.json() as Promise<ImportResponse>
