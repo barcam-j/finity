@@ -67,6 +67,7 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[l6m1]` `GET /data/import-logs` — returns import history for the current user sorted by date descending, including `name` field
 - `[m8n4]` `DELETE /data/` — permanently deletes all user transactions, category rules, analysis cache and import logs (HTTP 204)
 - `[n1o7]` CSV and PDF `ImportRequest` bodies accept optional `name` field — stored in `ImportLog` to identify the bank or entity of each import
+- `[o3p6]` `GET /ai-config/api-key` — returns the decrypted API key for the current user; used by the frontend "Show" button to reveal the stored key
 
 ### Fixed
 

@@ -106,6 +106,7 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[e7f1]` Account tab in Settings — displays user email and a three-way theme selector (Light / Dark / System) replacing the sidebar cycle button; `themeStore.set(value)` added to theme store
 - `[f9g4]` Data tab in Settings — Export CSV button downloads all transactions; import history table shows date, bank/entity name, source badge and transaction count; danger zone with confirmed "Delete all data" action
 - `[g2h7]` Bank/entity name field in CSV and PDF importers — optional text input shown at the preview step before confirming import; value stored in `ImportLog` and displayed in the import history table
+- `[h4i9]` API key reveal in Settings — "Show" button fetches and displays the stored key when the field is empty; "✓ Configured" badge shown next to the label; placeholder updated to clarify a new key replaces the current one
 
 ### Fixed
 

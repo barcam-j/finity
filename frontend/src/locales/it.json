@@ -111,6 +111,8 @@
     "apiKey": "Chiave API",
     "apiKeyPlaceholder": "Incolla la tua chiave API",
     "apiKeyHint": "Lascia vuoto per mantenere la chiave attuale",
+    "apiKeyConfigured": "Configurata",
+    "apiKeyKeepPlaceholder": "Inserisci una nuova chiave per sostituire quella attuale",
     "showKey": "Mostra",
     "hideKey": "Nascondi",
     "allowDateEdit": "Consenti modifica delle date delle transazioni",

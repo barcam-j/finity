@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
 from app.core.deps import get_current_user
-from app.core.encryption import encrypt
+from app.core.encryption import encrypt, decrypt
 from app.models.user import User
 from app.models.ai_config import AiConfig
 from app.ai.models import fetch_models, DEFAULTS
@@ -23,6 +23,14 @@ class AiConfigResponse(BaseModel):
     model: str
     params: dict
     analysis_enabled: bool
+
+
+@router.get('/api-key')
+async def get_api_key(current_user: User = Depends(get_current_user)):
+    config = await AiConfig.find_one(AiConfig.user_id == current_user.id)
+    if not config:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No AI config found')
+    return {'api_key': decrypt(config.api_key_encrypted)}
 
 
 @router.get('/models/{provider}')
