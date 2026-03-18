@@ -121,9 +121,12 @@ async def import_pdf(
             detail='No valid transactions found',
         )
 
+    log = ImportLog(user_id=current_user.id, source='pdf', count=len(transactions), name=body.name)
+    await log.insert()
+    for t in transactions:
+        t.import_log_id = log.id
     await Transaction.insert_many(transactions)
     await apply_rules_to_imported(current_user.id, transactions)
-    await ImportLog(user_id=current_user.id, source='pdf', count=len(transactions), name=body.name).insert()
 
     return {
         'imported': len(transactions),
