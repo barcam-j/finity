@@ -252,6 +252,8 @@
     "reviewSkip": "Omitir",
     "reviewFinish": "Finalizar",
     "reviewAllDone": "Todas las transacciones categorizadas ✓",
+    "reviewSaveRule": "Aplicar a transacciones similares en el futuro",
+    "reviewRuleCreated": "· regla guardada",
     "pdfNoTableTitle": "No se encontró ninguna tabla en este PDF",
     "pdfNoTableBody": "Este PDF no parece contener una tabla estructurada que se pueda leer automáticamente. Suele ocurrir con extractos escaneados o PDFs en los que el banco incrusta las transacciones como imagen.",
     "pdfNoTableRetry": "Probar con otro archivo",

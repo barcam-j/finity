@@ -19,6 +19,7 @@ class TransactionUpdate(BaseModel):
     description: str | None = None
     categories: list[str] | None = None
     amount: float | None = None
+    save_rule: bool = True
 
 
 class BulkCategoryUpdate(BaseModel):
@@ -158,10 +159,11 @@ async def update_transaction(
     auto_categorized = 0
     if categories_changed:
         added = [c for c in transaction.categories if not any(_cat_key(c) == _cat_key(o) for o in old_categories)]
-        pattern = _desc_key(transaction.description)
-        for cat in added:
-            await save_rule(current_user.id, cat, pattern)
-        auto_categorized = await _auto_categorize(current_user.id, transaction, added)
+        if body.save_rule and added:
+            pattern = _desc_key(transaction.description)
+            for cat in added:
+                await save_rule(current_user.id, cat, pattern)
+            auto_categorized = await _auto_categorize(current_user.id, transaction, added)
 
     return {'transaction': _tx_out(transaction), 'auto_categorized': auto_categorized}
 

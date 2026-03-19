@@ -252,6 +252,8 @@
     "reviewSkip": "Skip",
     "reviewFinish": "Finish",
     "reviewAllDone": "All transactions categorized ✓",
+    "reviewSaveRule": "Apply to similar future transactions",
+    "reviewRuleCreated": "· rule saved",
     "pdfNoTableTitle": "No table found in this PDF",
     "pdfNoTableBody": "This PDF doesn't seem to contain a structured table that can be read automatically. This usually happens with scanned statements or PDFs where the bank embeds transactions as an image.",
     "pdfNoTableRetry": "Try another file",
