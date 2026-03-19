@@ -107,8 +107,14 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[f9g4]` Data tab in Settings — Export CSV button downloads all transactions; import history table shows date, bank/entity name, source badge and transaction count; danger zone with confirmed "Delete all data" action
 - `[g2h7]` Bank/entity name field in CSV and PDF importers — optional text input shown at the preview step before confirming import; value stored in `ImportLog` and displayed in the import history table
 - `[h4i9]` API key reveal in Settings — "Show" button fetches and displays the stored key when the field is empty; "✓ Configured" badge shown next to the label; placeholder updated to clarify a new key replaces the current one
+- `[i5j8]` Manual CSV importer header row selector — raw CSV rows shown as a clickable table; user selects which row contains the column headers; selects update reactively; empty cells filtered out of column options
+- `[j6k2]` PDF importer method selector — AI import (any layout) and Manual import (pdfplumber table extraction, no AI required) as two separate flows with independent upload and parsing steps
+- `[k8l4]` PDF manual import parse-error screen — shown when pdfplumber finds no table structure; explains why it failed, offers "Try another file" and "Try with AI (recommended)" which reuses the already-uploaded file directly
+- `[l1m6]` Post-import uncategorized review step — after every import (CSV and PDF), if any transaction has no category, a review screen lists them with an inline category input per row and datalist autocomplete; confirming a row calls `PATCH /transactions/{id}` and saves a categorization rule; skippable at any time
 
 ### Fixed
+
+- `[j6k1]` Manual CSV import response used `t.category` instead of `t.categories` causing an `AttributeError` after successful insert, which surfaced as "Failed to fetch" in the frontend
 
 - `[u5w6]` Pagination showing duplicate rows across pages — secondary sort by `_id ASC` added after `date DESC` to guarantee stable ordering when multiple transactions share the same date
 - `[v3r4]` Transaction `id` field was not reaching the frontend — Beanie serialized it as `_id` (alias) via `jsonable_encoder`; fixed with `model_dump(mode='json', by_alias=False)` in all transaction endpoints
