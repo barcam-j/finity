@@ -245,7 +245,12 @@
     "headerRowHint": "Clicca sulla riga che contiene le intestazioni delle colonne",
     "pdfAiImportDesc": "L'AI legge ed estrae le transazioni da qualsiasi formato PDF. Richiede un fornitore AI configurato.",
     "pdfManualImportDesc": "Mappa le colonne manualmente da una tabella strutturata nel PDF. Nessuna AI o chiave API necessaria.",
-    "hintPdfManual": "Il PDF deve contenere una tabella con le righe delle transazioni"
+    "hintPdfManual": "Il PDF deve contenere una tabella con le righe delle transazioni",
+    "pdfNoTableTitle": "Nessuna tabella trovata in questo PDF",
+    "pdfNoTableBody": "Questo PDF non sembra contenere una tabella strutturata leggibile automaticamente. Accade di solito con estratti scansionati o PDF in cui la banca incorpora le transazioni come immagine.",
+    "pdfNoTableRetry": "Prova con un altro file",
+    "pdfNoTableTryAi": "Prova con l'AI (consigliato)",
+    "pdfNoTableTip": "Il modo più affidabile per importare senza AI è scaricare le transazioni direttamente dalla tua banca in formato CSV o Excel, che produce sempre un file pulito e strutturato."
   },
   "analysisView": {
     "title": "Analisi",

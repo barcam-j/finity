@@ -245,7 +245,12 @@
     "headerRowHint": "Click the row that contains the column headers",
     "pdfAiImportDesc": "AI reads and extracts transactions from any PDF layout. Requires a configured AI provider.",
     "pdfManualImportDesc": "Map columns manually from a structured PDF table. No AI or API key required.",
-    "hintPdfManual": "The PDF must contain a table with transaction rows"
+    "hintPdfManual": "The PDF must contain a table with transaction rows",
+    "pdfNoTableTitle": "No table found in this PDF",
+    "pdfNoTableBody": "This PDF doesn't seem to contain a structured table that can be read automatically. This usually happens with scanned statements or PDFs where the bank embeds transactions as an image.",
+    "pdfNoTableRetry": "Try another file",
+    "pdfNoTableTryAi": "Try with AI (recommended)",
+    "pdfNoTableTip": "The most reliable way to import without AI is to download your transactions directly from your bank in CSV or Excel format, which always produces a clean, structured file."
   },
   "analysisView": {
     "title": "Analysis",

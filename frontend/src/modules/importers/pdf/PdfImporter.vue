@@ -35,6 +35,20 @@
       <p v-if="error" class="error">{{ error }}</p>
     </div>
 
+    <!-- Step: Parse error (manual — no table found) -->
+    <div v-else-if="step === 'parse-error'" class="parse-error">
+      <p class="parse-error__icon">⚠️</p>
+      <h3>{{ t('importer.pdfNoTableTitle') }}</h3>
+      <p class="parse-error__body">{{ t('importer.pdfNoTableBody') }}</p>
+
+      <div class="parse-error__actions">
+        <button class="btn-secondary" @click="resetToUpload">{{ t('importer.pdfNoTableRetry') }}</button>
+        <button class="btn-primary" @click="switchToAi">{{ t('importer.pdfNoTableTryAi') }}</button>
+      </div>
+
+      <p class="parse-error__tip">{{ t('importer.pdfNoTableTip') }}</p>
+    </div>
+
     <!-- Step 2: Parsing (loading) -->
     <div v-else-if="step === 'parsing'" class="parsing">
       <div class="spinner" />
@@ -243,6 +257,7 @@ const importing = ref(false)
 const error = ref(null)
 const importedCount = ref(0)
 const bankName = ref('')
+const lastFile = ref<File | null>(null)
 
 // Manual mapping state
 const allRawRows = ref<string[][]>([])
@@ -313,6 +328,7 @@ function reset() {
   bankName.value = ''
   allRawRows.value = []
   headerRowIndex.value = 0
+  lastFile.value = null
   mapping.value = { date: '', dateFormat: 'DD/MM/YYYY', amount: '', amountFormat: 'dot', description: '', category: '' }
   if (fileInput.value) fileInput.value.value = ''
 }
@@ -321,6 +337,16 @@ function resetToUpload() {
   step.value = 'upload'
   error.value = null
   if (fileInput.value) fileInput.value.value = ''
+}
+
+function switchToAi() {
+  method.value = 'ai'
+  error.value = null
+  if (lastFile.value) {
+    loadFile(lastFile.value)
+  } else {
+    step.value = 'upload'
+  }
 }
 
 // ── Apply mapping ─────────────────────────────────────────────────────────────
@@ -369,6 +395,7 @@ function applyMapping() {
 async function loadFile(file: File) {
   error.value = null
   fileName.value = file.name
+  lastFile.value = file
   step.value = 'parsing'
 
   if (method.value === 'manual') {
@@ -378,8 +405,7 @@ async function loadFile(file: File) {
       headerRowIndex.value = 0
       step.value = 'mapping'
     } catch (e) {
-      error.value = e.message
-      step.value = 'upload'
+      step.value = 'parse-error'
     }
     return
   }
@@ -437,6 +463,49 @@ async function confirmImport() {
 
 .banner {
   margin-bottom: 1rem;
+}
+
+/* Parse error */
+.parse-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1rem;
+  gap: 0.75rem;
+}
+
+.parse-error__icon {
+  font-size: 2.5rem;
+  margin: 0;
+}
+
+.parse-error h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.parse-error__body {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  max-width: 420px;
+  line-height: 1.5;
+}
+
+.parse-error__actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.parse-error__tip {
+  margin: 0.75rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  max-width: 420px;
+  line-height: 1.5;
+  opacity: 0.75;
 }
 
 /* Method selector */
