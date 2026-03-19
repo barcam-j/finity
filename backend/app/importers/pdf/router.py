@@ -3,6 +3,7 @@ import json
 import re
 from datetime import date as date_type
 
+import pdfplumber
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from pydantic import BaseModel
 from pypdf import PdfReader
@@ -85,6 +86,38 @@ async def preview_pdf(
         )
 
     return {'transactions': transactions}
+
+
+@router.post('/parse')
+async def parse_pdf_manual(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+):
+    content = await file.read()
+    all_rows: list[list[str]] = []
+
+    try:
+        with pdfplumber.open(io.BytesIO(content)) as pdf:
+            for page in pdf.pages:
+                tables = page.extract_tables()
+                for table in tables:
+                    for row in table:
+                        cleaned = [cell.strip() if cell else '' for cell in row]
+                        if any(c for c in cleaned):
+                            all_rows.append(cleaned)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f'Could not read PDF: {e}',
+        )
+
+    if not all_rows:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail='No table structure found in this PDF. Use AI import for unstructured statements.',
+        )
+
+    return {'all_rows': all_rows}
 
 
 @router.post('/import', status_code=status.HTTP_201_CREATED)

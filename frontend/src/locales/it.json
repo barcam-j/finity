@@ -242,7 +242,10 @@
     "errorRateLimit": "Limite di velocità AI raggiunto. Attendi un momento e riprova, o cambia il modello nelle Impostazioni.",
     "bankName": "Banca / Entità",
     "bankNamePlaceholder": "es. Santander, ING, BBVA… (opzionale)",
-    "headerRowHint": "Clicca sulla riga che contiene le intestazioni delle colonne"
+    "headerRowHint": "Clicca sulla riga che contiene le intestazioni delle colonne",
+    "pdfAiImportDesc": "L'AI legge ed estrae le transazioni da qualsiasi formato PDF. Richiede un fornitore AI configurato.",
+    "pdfManualImportDesc": "Mappa le colonne manualmente da una tabella strutturata nel PDF. Nessuna AI o chiave API necessaria.",
+    "hintPdfManual": "Il PDF deve contenere una tabella con le righe delle transazioni"
   },
   "analysisView": {
     "title": "Analisi",

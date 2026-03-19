@@ -242,7 +242,10 @@
     "errorRateLimit": "Límite de tasa de IA alcanzado. Espera un momento y vuelve a intentarlo, o cambia el modelo en Ajustes.",
     "bankName": "Banco / Entidad",
     "bankNamePlaceholder": "ej. Santander, ING, BBVA… (opcional)",
-    "headerRowHint": "Haz clic en la fila que contiene las cabeceras de columna"
+    "headerRowHint": "Haz clic en la fila que contiene las cabeceras de columna",
+    "pdfAiImportDesc": "La IA lee y extrae las transacciones de cualquier formato PDF. Requiere un proveedor de IA configurado.",
+    "pdfManualImportDesc": "Mapea las columnas manualmente desde una tabla estructurada en el PDF. Sin IA ni clave API.",
+    "hintPdfManual": "El PDF debe contener una tabla con las filas de transacciones"
   },
   "analysisView": {
     "title": "Análisis",

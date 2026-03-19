@@ -242,7 +242,10 @@
     "errorRateLimit": "AI rate limit reached. Wait a moment and try again, or switch to a different model in Settings.",
     "bankName": "Bank / Entity",
     "bankNamePlaceholder": "e.g. Santander, ING, BBVA… (optional)",
-    "headerRowHint": "Click the row that contains the column headers"
+    "headerRowHint": "Click the row that contains the column headers",
+    "pdfAiImportDesc": "AI reads and extracts transactions from any PDF layout. Requires a configured AI provider.",
+    "pdfManualImportDesc": "Map columns manually from a structured PDF table. No AI or API key required.",
+    "hintPdfManual": "The PDF must contain a table with transaction rows"
   },
   "analysisView": {
     "title": "Analysis",

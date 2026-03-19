@@ -4,12 +4,31 @@ import type { PreviewResponse, ImportResponse, Transaction } from '@/types'
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
+export interface ParsedPdfFile {
+  all_rows: string[][]
+}
+
 function authHeaders(): Record<string, string> {
   const auth = useAuthStore()
   return { Authorization: `Bearer ${auth.token ?? ''}` }
 }
 
 export const pdfService = {
+  async parse(file: File): Promise<ParsedPdfFile> {
+    const form = new FormData()
+    form.append('file', file)
+    const res = await fetch(`${BASE_URL}/importers/pdf/parse`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: form,
+    })
+    if (!res.ok) {
+      const body = await res.json()
+      throw new ApiError(body.detail || 'Parse failed', res.status)
+    }
+    return res.json() as Promise<ParsedPdfFile>
+  },
+
   async preview(file: File): Promise<PreviewResponse> {
     const form = new FormData()
     form.append('file', file)
