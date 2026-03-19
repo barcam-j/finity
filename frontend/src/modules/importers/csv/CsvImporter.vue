@@ -210,7 +210,12 @@
       </div>
     </div>
 
-    <!-- Step 5: Success -->
+    <!-- Step 5: Post-import review -->
+    <div v-else-if="step === 'review'">
+      <PostImportReview :transactions="importedTransactions" @done="step = 'success'" />
+    </div>
+
+    <!-- Step 6: Success -->
     <div v-else-if="step === 'success'" class="success">
       <p class="success__icon">✓</p>
       <h3>{{ t('importer.importComplete') }}</h3>
@@ -227,8 +232,10 @@ import * as XLSX from 'xlsx'
 import { useI18n } from 'vue-i18n'
 import { csvService } from './service'
 import AiBanner from '@/components/AiBanner.vue'
+import PostImportReview from '../PostImportReview.vue'
 import { useCurrency } from '@/composables/useCurrency'
 import { parseDate, parseAmount } from './utils'
+import type { Transaction } from '@/types'
 
 const { t } = useI18n()
 const { formatAmount } = useCurrency()
@@ -246,6 +253,7 @@ const previewPage = ref(1)
 const importing = ref(false)
 const error = ref(null)
 const importedCount = ref(0)
+const importedTransactions = ref<Transaction[]>([])
 const bankName = ref('')
 
 // Manual mapping state
@@ -315,6 +323,7 @@ function reset() {
   mappingError.value = null
   fileName.value = ''
   bankName.value = ''
+  importedTransactions.value = []
   allRawRows.value = []
   headerRowIndex.value = 0
   hasHeaderWarning.value = false
@@ -463,7 +472,9 @@ async function confirmImport() {
   try {
     const data = await csvService.import(rows.value, bankName.value)
     importedCount.value = data.imported
-    step.value = 'success'
+    importedTransactions.value = data.transactions ?? []
+    const hasUncategorized = importedTransactions.value.some(tx => !tx.categories?.length)
+    step.value = hasUncategorized ? 'review' : 'success'
   } catch (e) {
     error.value = e.message
   } finally {

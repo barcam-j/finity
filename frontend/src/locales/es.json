@@ -242,7 +242,21 @@
     "errorRateLimit": "Límite de tasa de IA alcanzado. Espera un momento y vuelve a intentarlo, o cambia el modelo en Ajustes.",
     "bankName": "Banco / Entidad",
     "bankNamePlaceholder": "ej. Santander, ING, BBVA… (opcional)",
-    "headerRowHint": "Haz clic en la fila que contiene las cabeceras de columna"
+    "headerRowHint": "Haz clic en la fila que contiene las cabeceras de columna",
+    "pdfAiImportDesc": "La IA lee y extrae las transacciones de cualquier formato PDF. Requiere un proveedor de IA configurado.",
+    "pdfManualImportDesc": "Mapea las columnas manualmente desde una tabla estructurada en el PDF. Sin IA ni clave API.",
+    "hintPdfManual": "El PDF debe contener una tabla con las filas de transacciones",
+    "reviewTitle": "Revisar transacciones sin categoría",
+    "reviewSubtitle": "{count} transacciones sin categoría — asígnalas ahora o sáltate este paso",
+    "reviewCategoryPlaceholder": "Categoría…",
+    "reviewSkip": "Omitir",
+    "reviewFinish": "Finalizar",
+    "reviewAllDone": "Todas las transacciones categorizadas ✓",
+    "pdfNoTableTitle": "No se encontró ninguna tabla en este PDF",
+    "pdfNoTableBody": "Este PDF no parece contener una tabla estructurada que se pueda leer automáticamente. Suele ocurrir con extractos escaneados o PDFs en los que el banco incrusta las transacciones como imagen.",
+    "pdfNoTableRetry": "Probar con otro archivo",
+    "pdfNoTableTryAi": "Intentar con IA (recomendado)",
+    "pdfNoTableTip": "La forma más fiable de importar sin IA es descargar tus transacciones directamente desde tu banco en formato CSV o Excel, que siempre genera un archivo limpio y estructurado."
   },
   "analysisView": {
     "title": "Análisis",

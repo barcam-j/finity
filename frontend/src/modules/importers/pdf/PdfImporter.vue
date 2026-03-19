@@ -1,8 +1,24 @@
 <template>
   <div class="pdf-importer">
+
+    <!-- Step 0: Method selector -->
+    <div v-if="step === 'method'" class="method-selector">
+      <h3>{{ t('importer.howToImport') }}</h3>
+      <div class="method-cards">
+        <button class="method-card" @click="selectMethod('ai')">
+          <strong>{{ t('importer.aiImport') }}</strong>
+          <p>{{ t('importer.pdfAiImportDesc') }}</p>
+        </button>
+        <button class="method-card" @click="selectMethod('manual')">
+          <strong>{{ t('importer.manualImport') }}</strong>
+          <p>{{ t('importer.pdfManualImportDesc') }}</p>
+        </button>
+      </div>
+    </div>
+
     <!-- Step 1: Upload -->
-    <div v-if="step === 'upload'">
-      <AiBanner class="banner" />
+    <div v-else-if="step === 'upload'">
+      <AiBanner v-if="method === 'ai'" class="banner" />
       <div
         class="drop-zone"
         :class="{ 'drop-zone--active': isDragging }"
@@ -14,19 +30,116 @@
         <input ref="fileInput" type="file" accept=".pdf" hidden @change="onFileChange" />
         <p class="drop-zone__icon">📄</p>
         <p class="drop-zone__text">{{ t('importer.dropPdfHere') }} <span>{{ t('importer.clickBrowse') }}</span></p>
-        <p class="drop-zone__hint">{{ t('importer.hintPdf') }}</p>
+        <p class="drop-zone__hint">{{ method === 'ai' ? t('importer.hintPdf') : t('importer.hintPdfManual') }}</p>
       </div>
       <p v-if="error" class="error">{{ error }}</p>
+    </div>
+
+    <!-- Step: Parse error (manual — no table found) -->
+    <div v-else-if="step === 'parse-error'" class="parse-error">
+      <p class="parse-error__icon">⚠️</p>
+      <h3>{{ t('importer.pdfNoTableTitle') }}</h3>
+      <p class="parse-error__body">{{ t('importer.pdfNoTableBody') }}</p>
+
+      <div class="parse-error__actions">
+        <button class="btn-secondary" @click="resetToUpload">{{ t('importer.pdfNoTableRetry') }}</button>
+        <button class="btn-primary" @click="switchToAi">{{ t('importer.pdfNoTableTryAi') }}</button>
+      </div>
+
+      <p class="parse-error__tip">{{ t('importer.pdfNoTableTip') }}</p>
     </div>
 
     <!-- Step 2: Parsing (loading) -->
     <div v-else-if="step === 'parsing'" class="parsing">
       <div class="spinner" />
-      <p>{{ t('importer.readingTransactionsFrom') }} <strong>{{ fileName }}</strong>…</p>
-      <p class="parsing-hint">{{ t('importer.aiInterpreting') }}</p>
+      <p>{{ method === 'ai' ? t('importer.readingTransactionsFrom') : t('importer.readingFile') }} <strong>{{ fileName }}</strong>…</p>
+      <p v-if="method === 'ai'" class="parsing-hint">{{ t('importer.aiInterpreting') }}</p>
     </div>
 
-    <!-- Step 3: Preview -->
+    <!-- Step 3: Column mapping (manual only) -->
+    <div v-else-if="step === 'mapping'">
+      <div class="step-header">
+        <div>
+          <h3>{{ t('importer.mapColumns') }}</h3>
+          <p class="step-subtitle">{{ t('importer.mapColumnsSubtitle') }}</p>
+        </div>
+        <button class="btn-secondary" @click="resetToUpload">{{ t('importer.changeFile') }}</button>
+      </div>
+
+      <p class="header-row-hint">{{ t('importer.headerRowHint') }}</p>
+
+      <div class="raw-table-wrapper">
+        <table>
+          <tbody>
+            <tr
+              v-for="(row, i) in allRawRows.slice(0, Math.min(allRawRows.length, headerRowIndex + 8))"
+              :key="i"
+              :class="{ 'row--header': i === headerRowIndex, 'row--data': i !== headerRowIndex }"
+              @click="headerRowIndex = i"
+            >
+              <td class="row-num">{{ i + 1 }}</td>
+              <td v-for="(cell, j) in row" :key="j">{{ cell }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mapping-form">
+        <div class="mapping-row">
+          <label>{{ t('importer.dateColumn') }} <span class="required">*</span></label>
+          <select v-model="mapping.date">
+            <option value="">{{ t('importer.selectOption') }}</option>
+            <option v-for="h in parsedHeaders" :key="h" :value="h">{{ h }}</option>
+          </select>
+        </div>
+        <div class="mapping-row">
+          <label>{{ t('importer.dateFormat') }} <span class="required">*</span></label>
+          <select v-model="mapping.dateFormat">
+            <option value="YYYY-MM-DD">YYYY-MM-DD (e.g. 2024-03-15)</option>
+            <option value="DD/MM/YYYY">DD/MM/YYYY (e.g. 15/03/2024)</option>
+            <option value="MM/DD/YYYY">MM/DD/YYYY (e.g. 03/15/2024)</option>
+            <option value="DD-MM-YYYY">DD-MM-YYYY (e.g. 15-03-2024)</option>
+            <option value="MM-DD-YYYY">MM-DD-YYYY (e.g. 03-15-2024)</option>
+          </select>
+        </div>
+        <div class="mapping-row">
+          <label>{{ t('importer.amountColumn') }} <span class="required">*</span></label>
+          <select v-model="mapping.amount">
+            <option value="">{{ t('importer.selectOption') }}</option>
+            <option v-for="h in parsedHeaders" :key="h" :value="h">{{ h }}</option>
+          </select>
+        </div>
+        <div class="mapping-row">
+          <label>{{ t('importer.amountFormat') }} <span class="required">*</span></label>
+          <select v-model="mapping.amountFormat">
+            <option value="dot">Period as decimal — 1,234.56</option>
+            <option value="comma">Comma as decimal — 1.234,56</option>
+          </select>
+        </div>
+        <div class="mapping-row">
+          <label>{{ t('importer.descriptionColumn') }} <span class="text-muted">{{ t('importer.optional') }}</span></label>
+          <select v-model="mapping.description">
+            <option value="">{{ t('importer.noneOption') }}</option>
+            <option v-for="h in parsedHeaders" :key="h" :value="h">{{ h }}</option>
+          </select>
+        </div>
+        <div class="mapping-row">
+          <label>{{ t('importer.categoryColumn') }} <span class="text-muted">{{ t('importer.optional') }}</span></label>
+          <select v-model="mapping.category">
+            <option value="">{{ t('importer.noneOption') }}</option>
+            <option v-for="h in parsedHeaders" :key="h" :value="h">{{ h }}</option>
+          </select>
+        </div>
+      </div>
+
+      <p v-if="mappingError" class="error">{{ mappingError }}</p>
+
+      <div class="step-actions">
+        <button class="btn-primary" @click="applyMapping">{{ t('importer.previewTransactions') }}</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Preview -->
     <div v-else-if="step === 'preview'">
       <div class="step-header">
         <div>
@@ -38,7 +151,9 @@
             </span>
           </p>
         </div>
-        <button class="btn-secondary" @click="reset">{{ t('importer.changeFile') }}</button>
+        <button class="btn-secondary" @click="method === 'manual' ? (step = 'mapping') : resetToUpload()">
+          {{ method === 'manual' ? t('importer.editMapping') : t('importer.changeFile') }}
+        </button>
       </div>
 
       <div class="table-wrapper">
@@ -107,7 +222,12 @@
       </div>
     </div>
 
-    <!-- Step 4: Success -->
+    <!-- Step 5: Post-import review -->
+    <div v-else-if="step === 'review'">
+      <PostImportReview :transactions="importedTransactions" @done="step = 'success'" />
+    </div>
+
+    <!-- Step 6: Success -->
     <div v-else-if="step === 'success'" class="success">
       <p class="success__icon">✓</p>
       <h3>{{ t('importer.importComplete') }}</h3>
@@ -118,17 +238,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { pdfService } from './service'
 import AiBanner from '@/components/AiBanner.vue'
+import PostImportReview from '../PostImportReview.vue'
 import { useCurrency } from '@/composables/useCurrency'
+import { parseDate, parseAmount } from '../csv/utils'
+import type { Transaction } from '@/types'
 
 const { t } = useI18n()
 const { formatAmount } = useCurrency()
 const PAGE_SIZE = 20
 
-const step = ref('upload')
+// State
+const step = ref('method')
+const method = ref<'ai' | 'manual' | null>(null)
 const isDragging = ref(false)
 const fileInput = ref(null)
 const fileName = ref('')
@@ -138,8 +263,42 @@ const previewPage = ref(1)
 const importing = ref(false)
 const error = ref(null)
 const importedCount = ref(0)
+const importedTransactions = ref<Transaction[]>([])
 const bankName = ref('')
+const lastFile = ref<File | null>(null)
 
+// Manual mapping state
+const allRawRows = ref<string[][]>([])
+const headerRowIndex = ref(0)
+const parsedHeaders = computed(() =>
+  (allRawRows.value[headerRowIndex.value] ?? []).filter((h: string) => h.trim() !== '')
+)
+const parsedRows = computed(() => {
+  const rawHeader = allRawRows.value[headerRowIndex.value] ?? []
+  return allRawRows.value.slice(headerRowIndex.value + 1).map((row) => {
+    const obj: Record<string, string> = {}
+    rawHeader.forEach((h: string, i: number) => {
+      if (h.trim()) obj[h] = row[i] ?? ''
+    })
+    return obj
+  })
+})
+const mappingError = ref(null)
+const mapping = ref({
+  date: '',
+  dateFormat: 'DD/MM/YYYY',
+  amount: '',
+  amountFormat: 'dot',
+  description: '',
+  category: '',
+})
+
+watch(headerRowIndex, () => {
+  mapping.value = { date: '', dateFormat: mapping.value.dateFormat, amount: '', amountFormat: mapping.value.amountFormat, description: '', category: '' }
+  mappingError.value = null
+})
+
+// Pagination
 const totalPages = computed(() => Math.max(1, Math.ceil(rows.value.length / PAGE_SIZE)))
 const pageRows = computed(() => {
   const start = (previewPage.value - 1) * PAGE_SIZE
@@ -154,6 +313,11 @@ const visiblePages = computed(() => {
   return range
 })
 
+function selectMethod(m: 'ai' | 'manual') {
+  method.value = m
+  step.value = 'upload'
+}
+
 function removeRow(page, indexInPage) {
   const globalIndex = (page - 1) * PAGE_SIZE + indexInPage
   rows.value.splice(globalIndex, 1)
@@ -161,21 +325,101 @@ function removeRow(page, indexInPage) {
 }
 
 function reset() {
-  step.value = 'upload'
+  step.value = 'method'
+  method.value = null
   rows.value = []
   totalParsed.value = 0
   previewPage.value = 1
   error.value = null
+  mappingError.value = null
   fileName.value = ''
   bankName.value = ''
+  allRawRows.value = []
+  headerRowIndex.value = 0
+  lastFile.value = null
+  importedTransactions.value = []
+  mapping.value = { date: '', dateFormat: 'DD/MM/YYYY', amount: '', amountFormat: 'dot', description: '', category: '' }
   if (fileInput.value) fileInput.value.value = ''
 }
 
-async function loadFile(file) {
+function resetToUpload() {
+  step.value = 'upload'
+  error.value = null
+  if (fileInput.value) fileInput.value.value = ''
+}
+
+function switchToAi() {
+  method.value = 'ai'
+  error.value = null
+  if (lastFile.value) {
+    loadFile(lastFile.value)
+  } else {
+    step.value = 'upload'
+  }
+}
+
+// ── Apply mapping ─────────────────────────────────────────────────────────────
+function applyMapping() {
+  mappingError.value = null
+
+  if (!mapping.value.date) {
+    mappingError.value = t('importer.errorSelectDate')
+    return
+  }
+  if (!mapping.value.amount) {
+    mappingError.value = t('importer.errorSelectAmount')
+    return
+  }
+
+  const transactions = []
+  for (const row of parsedRows.value) {
+    const dateRaw = row[mapping.value.date]
+    const amountRaw = row[mapping.value.amount]
+    if (!dateRaw || !amountRaw) continue
+
+    const date = parseDate(dateRaw, mapping.value.dateFormat)
+    const amount = parseAmount(amountRaw, mapping.value.amountFormat)
+    if (!date || amount === null) continue
+
+    transactions.push({
+      date,
+      amount,
+      description: mapping.value.description ? (row[mapping.value.description] ?? '') : '',
+      category: mapping.value.category ? (row[mapping.value.category] || null) : null,
+    })
+  }
+
+  if (!transactions.length) {
+    mappingError.value = t('importer.errorNoValidTransactions')
+    return
+  }
+
+  rows.value = transactions
+  totalParsed.value = transactions.length
+  previewPage.value = 1
+  step.value = 'preview'
+}
+
+// ── File loading ──────────────────────────────────────────────────────────────
+async function loadFile(file: File) {
   error.value = null
   fileName.value = file.name
+  lastFile.value = file
   step.value = 'parsing'
 
+  if (method.value === 'manual') {
+    try {
+      const data = await pdfService.parse(file)
+      allRawRows.value = data.all_rows
+      headerRowIndex.value = 0
+      step.value = 'mapping'
+    } catch (e) {
+      step.value = 'parse-error'
+    }
+    return
+  }
+
+  // AI mode
   try {
     const { transactions } = await pdfService.preview(file)
     if (!transactions?.length) {
@@ -212,7 +456,9 @@ async function confirmImport() {
   try {
     const data = await pdfService.import(rows.value, bankName.value)
     importedCount.value = data.imported
-    step.value = 'success'
+    importedTransactions.value = data.transactions ?? []
+    const hasUncategorized = importedTransactions.value.some(tx => !tx.categories?.length)
+    step.value = hasUncategorized ? 'review' : 'success'
   } catch (e) {
     error.value = e.message
   } finally {
@@ -228,6 +474,90 @@ async function confirmImport() {
 
 .banner {
   margin-bottom: 1rem;
+}
+
+/* Parse error */
+.parse-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1rem;
+  gap: 0.75rem;
+}
+
+.parse-error__icon {
+  font-size: 2.5rem;
+  margin: 0;
+}
+
+.parse-error h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.parse-error__body {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  max-width: 420px;
+  line-height: 1.5;
+}
+
+.parse-error__actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.parse-error__tip {
+  margin: 0.75rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  max-width: 420px;
+  line-height: 1.5;
+  opacity: 0.75;
+}
+
+/* Method selector */
+.method-selector h3 {
+  margin: 0 0 1.25rem;
+}
+
+.method-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.method-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 1.25rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.method-card:hover {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.method-card strong {
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.method-card p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
 /* Drop zone */
@@ -295,9 +625,60 @@ async function confirmImport() {
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
+}
+
+/* Header row selector */
+.header-row-hint {
+  margin: 0 0 0.6rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.raw-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.raw-table-wrapper table {
+  font-size: 0.82rem;
+}
+
+.raw-table-wrapper tr {
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.raw-table-wrapper tr:hover {
+  background: var(--accent-subtle);
+}
+
+.raw-table-wrapper tr.row--header {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.raw-table-wrapper tr.row--header td {
+  color: #fff;
+  border-top-color: transparent;
+}
+
+.raw-table-wrapper td.row-num {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  width: 2rem;
+  text-align: right;
+  padding-right: 0.5rem;
+  user-select: none;
+}
+
+.raw-table-wrapper tr.row--header td.row-num {
+  color: rgba(255,255,255,0.7);
 }
 
 /* Step header */
@@ -316,6 +697,43 @@ async function confirmImport() {
   margin: 0;
   color: var(--text-muted);
   font-size: 0.9rem;
+}
+
+/* Mapping form */
+.mapping-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mapping-row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  align-items: center;
+  gap: 1rem;
+}
+
+.mapping-row label {
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.mapping-row select {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.mapping-row select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.required {
+  color: var(--error);
 }
 
 /* Table */
@@ -365,13 +783,8 @@ td {
   text-align: center;
 }
 
-.amount--positive {
-  color: oklch(0.55 0.15 145);
-}
-
-.amount--negative {
-  color: var(--error);
-}
+.amount--positive { color: oklch(0.55 0.15 145); }
+.amount--negative { color: var(--error); }
 
 .badge {
   display: inline-block;
@@ -383,9 +796,7 @@ td {
   color: var(--text-muted);
 }
 
-.text-muted {
-  color: var(--text-muted);
-}
+.text-muted { color: var(--text-muted); }
 
 .removed-badge {
   margin-left: 0.5rem;
@@ -502,9 +913,7 @@ td {
   margin: 0 0 0.5rem;
 }
 
-.success h3 {
-  margin: 0 0 0.5rem;
-}
+.success h3 { margin: 0 0 0.5rem; }
 
 .success p {
   color: var(--text-muted);
@@ -524,14 +933,8 @@ td {
   transition: background 0.2s;
 }
 
-.btn-primary:hover:not(:disabled) {
-  background: var(--btn-hover);
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+.btn-primary:hover:not(:disabled) { background: var(--btn-hover); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn-secondary {
   padding: 0.6rem 1rem;

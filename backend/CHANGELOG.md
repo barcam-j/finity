@@ -68,9 +68,12 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[m8n4]` `DELETE /data/` — permanently deletes all user transactions, category rules, analysis cache and import logs (HTTP 204)
 - `[n1o7]` CSV and PDF `ImportRequest` bodies accept optional `name` field — stored in `ImportLog` to identify the bank or entity of each import
 - `[o3p6]` `GET /ai-config/api-key` — returns the decrypted API key for the current user; used by the frontend "Show" button to reveal the stored key
+- `[p5q8]` `POST /importers/csv/parse` returns `all_rows` — all non-empty CSV rows without header assumption, enabling the frontend header row selector
+- `[q7r3]` `POST /importers/pdf/parse` — extracts tables from digitally-generated PDFs using `pdfplumber`; returns `all_rows` for manual column mapping; no AI involved; returns 422 with actionable message if no table is detected
 
 ### Fixed
 
+- `[r9s1]` CSV and PDF import response referenced `t.category` (non-existent field) instead of `t.categories`, causing an `AttributeError` after `insert_many` and returning a 500 to the client
 - `[u9v3]` Transaction `id` serialized as `_id` by FastAPI's `jsonable_encoder` (uses `by_alias=True` by default) — all transaction endpoints now use `model_dump(mode='json', by_alias=False)` via a shared `_tx_out` helper
 
 ---
