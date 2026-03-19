@@ -27,6 +27,16 @@ class BulkCategoryUpdate(BaseModel):
     category: str | None = None
 
 
+class DuplicateCheckItem(BaseModel):
+    date: DateType
+    amount: float
+    description: str
+
+
+class DuplicateCheckRequest(BaseModel):
+    transactions: list[DuplicateCheckItem]
+
+
 def _cat_key(s: str) -> str:
     """Normalize a category name for duplicate detection: strip, lowercase, remove accents."""
     s = s.strip().lower()
@@ -254,6 +264,33 @@ async def deduplicate_transactions(current_user: User = Depends(get_current_user
         await t.delete()
 
     return {'deleted': len(to_delete)}
+
+
+@router.post('/check-duplicates')
+async def check_duplicates(
+    body: DuplicateCheckRequest,
+    current_user: User = Depends(get_current_user),
+):
+    if not body.transactions:
+        return {'duplicate_indices': []}
+
+    dates = list({t.date for t in body.transactions})
+    existing = await Transaction.find(
+        Transaction.user_id == current_user.id,
+        {'date': {'$in': dates}},
+    ).to_list()
+
+    existing_keys: set[tuple] = {
+        (t.date.isoformat(), round(t.amount, 2), t.description.strip().lower())
+        for t in existing
+    }
+
+    duplicate_indices = [
+        i for i, t in enumerate(body.transactions)
+        if (t.date.isoformat(), round(t.amount, 2), t.description.strip().lower()) in existing_keys
+    ]
+
+    return {'duplicate_indices': duplicate_indices}
 
 
 @router.delete('/{transaction_id}', status_code=status.HTTP_204_NO_CONTENT)
