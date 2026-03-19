@@ -222,7 +222,12 @@
       </div>
     </div>
 
-    <!-- Step 5: Success -->
+    <!-- Step 5: Post-import review -->
+    <div v-else-if="step === 'review'">
+      <PostImportReview :transactions="importedTransactions" @done="step = 'success'" />
+    </div>
+
+    <!-- Step 6: Success -->
     <div v-else-if="step === 'success'" class="success">
       <p class="success__icon">✓</p>
       <h3>{{ t('importer.importComplete') }}</h3>
@@ -237,8 +242,10 @@ import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { pdfService } from './service'
 import AiBanner from '@/components/AiBanner.vue'
+import PostImportReview from '../PostImportReview.vue'
 import { useCurrency } from '@/composables/useCurrency'
 import { parseDate, parseAmount } from '../csv/utils'
+import type { Transaction } from '@/types'
 
 const { t } = useI18n()
 const { formatAmount } = useCurrency()
@@ -256,6 +263,7 @@ const previewPage = ref(1)
 const importing = ref(false)
 const error = ref(null)
 const importedCount = ref(0)
+const importedTransactions = ref<Transaction[]>([])
 const bankName = ref('')
 const lastFile = ref<File | null>(null)
 
@@ -329,6 +337,7 @@ function reset() {
   allRawRows.value = []
   headerRowIndex.value = 0
   lastFile.value = null
+  importedTransactions.value = []
   mapping.value = { date: '', dateFormat: 'DD/MM/YYYY', amount: '', amountFormat: 'dot', description: '', category: '' }
   if (fileInput.value) fileInput.value.value = ''
 }
@@ -447,7 +456,9 @@ async function confirmImport() {
   try {
     const data = await pdfService.import(rows.value, bankName.value)
     importedCount.value = data.imported
-    step.value = 'success'
+    importedTransactions.value = data.transactions ?? []
+    const hasUncategorized = importedTransactions.value.some(tx => !tx.categories?.length)
+    step.value = hasUncategorized ? 'review' : 'success'
   } catch (e) {
     error.value = e.message
   } finally {
