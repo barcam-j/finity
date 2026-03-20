@@ -4,6 +4,9 @@
    ============================================================= */
 
 :root {
+  /* Typography */
+  --font-sans: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+
   /* Orange scale */
   --orange-300: oklch(0.82 0.14 46);
   --orange-400: oklch(0.76 0.17 46);

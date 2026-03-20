@@ -29,12 +29,8 @@
               </select>
             </div>
             <div class="field">
-              <label for="language">{{ t('settings.language') }}</label>
-              <select id="language" :value="languageForm" @change="saveLanguage(($event.target as HTMLSelectElement).value)">
-                <option value="en">English</option>
-                <option value="es">Español</option>
-                <option value="it">Italiano</option>
-              </select>
+              <label>{{ t('settings.language') }}</label>
+              <LangSwitcher @change="saveLanguage" />
             </div>
             <div class="field field--toggle">
               <label class="toggle-label">
@@ -250,6 +246,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import LangSwitcher from '@/components/LangSwitcher.vue'
 import AppLayout from '@/components/AppLayout.vue'
 import SettingsSection from '@/components/settings/SettingsSection.vue'
 import ProviderGuide from '@/components/settings/ProviderGuide.vue'
@@ -270,7 +267,7 @@ const { t, locale } = useI18n()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
 
-const { currencyForm, languageForm, allowDateEditForm, init: initCurrency, saveCurrencyOnChange, saveLanguage, saveAllowDateEdit } = useCurrencyForm()
+const { currencyForm, allowDateEditForm, init: initCurrency, saveCurrencyOnChange, saveLanguage, saveAllowDateEdit } = useCurrencyForm()
 const { loading: aiLoading, error: aiError, initializing: aiInitializing, togglingAnalysis, form, currentModels, modelsLoading, hasExistingConfig, canSave, saved, init: initAi, onProviderChange, save, toggleAnalysis } = useAiProviderForm()
 
 const tabs = computed(() => [

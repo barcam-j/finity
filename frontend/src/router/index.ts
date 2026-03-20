@@ -10,28 +10,40 @@ declare module 'vue-router' {
 
 const routes = [
   {
+    path: '/',
+    name: 'Landing',
+    component: () => import('@/views/LandingView.vue'),
+    meta: { public: true },
+  },
+  {
     path: '/login',
     name: 'Login',
     component: () => import('@/views/LoginView.vue'),
     meta: { public: true },
   },
   {
-    path: '/',
+    path: '/register',
+    name: 'Register',
+    component: () => import('@/views/LoginView.vue'),
+    meta: { public: true },
+  },
+  {
+    path: '/app',
     name: 'Dashboard',
     component: () => import('@/views/DashboardView.vue'),
   },
   {
-    path: '/transactions',
+    path: '/app/transactions',
     name: 'Transactions',
     component: () => import('@/views/TransactionsView.vue'),
   },
   {
-    path: '/analysis',
+    path: '/app/analysis',
     name: 'Analysis',
     component: () => import('@/views/AnalysisView.vue'),
   },
   {
-    path: '/settings',
+    path: '/app/settings',
     name: 'Settings',
     component: () => import('@/views/SettingsView.vue'),
   },
@@ -51,7 +63,7 @@ router.beforeEach(async (to) => {
     prefsLoaded = false
     return { name: 'Login' }
   }
-  if (to.meta.public && auth.isAuthenticated) {
+  if (to.meta.public && to.name !== 'Landing' && auth.isAuthenticated) {
     return { name: 'Dashboard' }
   }
   if (auth.isAuthenticated && !prefsLoaded) {
