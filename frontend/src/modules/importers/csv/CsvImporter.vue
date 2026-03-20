@@ -229,6 +229,22 @@
       <p class="success__icon">✓</p>
       <h3>{{ t('importer.importComplete') }}</h3>
       <p>{{ t('importer.importedSuccess', { count: importedCount }) }}</p>
+      <div class="import-summary">
+        <div class="import-summary__item">
+          <span class="import-summary__label">{{ t('importer.importSummaryIncome') }}</span>
+          <span class="import-summary__value amount--positive">{{ formatAmount(importSummary.income) }}</span>
+        </div>
+        <div class="import-summary__item">
+          <span class="import-summary__label">{{ t('importer.importSummaryExpenses') }}</span>
+          <span class="import-summary__value amount--negative">{{ formatAmount(importSummary.expenses) }}</span>
+        </div>
+        <div class="import-summary__item import-summary__item--balance">
+          <span class="import-summary__label">{{ t('importer.importSummaryBalance') }}</span>
+          <span class="import-summary__value" :class="importSummary.balance >= 0 ? 'amount--positive' : 'amount--negative'">
+            {{ formatAmount(importSummary.balance) }}
+          </span>
+        </div>
+      </div>
       <button class="btn-primary" @click="reset">{{ t('importer.importAnother') }}</button>
     </div>
 
@@ -365,6 +381,12 @@ function resetToUpload() {
 const duplicateCount = computed(() =>
   rows.value.filter(r => isDuplicate(r)).length
 )
+
+const importSummary = computed(() => {
+  const income = importedTransactions.value.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0)
+  const expenses = importedTransactions.value.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0)
+  return { income, expenses, balance: income + expenses }
+})
 
 watch(step, (s) => {
   if (s === 'preview') checkDuplicates(rows.value)
@@ -932,7 +954,50 @@ td {
 
 .success p {
   color: var(--text-muted);
-  margin: 0 0 1.5rem;
+  margin: 0 0 1.25rem;
+}
+
+.import-summary {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0 auto 1.5rem;
+  max-width: 360px;
+}
+
+.import-summary__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 0.5rem;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+}
+
+.import-summary__item:last-child {
+  border-right: none;
+}
+
+.import-summary__item--balance {
+  background: var(--bg);
+}
+
+.import-summary__label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.25rem;
+}
+
+.import-summary__value {
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Buttons */
