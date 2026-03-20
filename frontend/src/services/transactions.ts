@@ -22,4 +22,6 @@ export const transactionsService = {
     api.post<{ updated: number; auto_categorized: number }>('/transactions/bulk-category', { ids, category }),
   delete: (id: string) => api.delete(`/transactions/${id}`),
   deduplicate: () => api.post<{ deleted: number }>('/transactions/deduplicate', {}),
+  checkDuplicates: (transactions: Array<{ date: string; amount: number; description: string }>) =>
+    api.post<{ duplicate_indices: number[] }>('/transactions/check-duplicates', { transactions }),
 }

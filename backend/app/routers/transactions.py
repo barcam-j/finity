@@ -19,11 +19,23 @@ class TransactionUpdate(BaseModel):
     description: str | None = None
     categories: list[str] | None = None
     amount: float | None = None
+    note: str | None = None
+    save_rule: bool = True
 
 
 class BulkCategoryUpdate(BaseModel):
     ids: list[str]
     category: str | None = None
+
+
+class DuplicateCheckItem(BaseModel):
+    date: DateType
+    amount: float
+    description: str
+
+
+class DuplicateCheckRequest(BaseModel):
+    transactions: list[DuplicateCheckItem]
 
 
 def _cat_key(s: str) -> str:
@@ -153,15 +165,18 @@ async def update_transaction(
         transaction.amount = body.amount
     if body.categories is not None:
         transaction.categories = await _normalize_categories(current_user.id, body.categories)
+    if body.note is not None:
+        transaction.note = body.note if body.note.strip() else None
     await transaction.replace()
 
     auto_categorized = 0
     if categories_changed:
         added = [c for c in transaction.categories if not any(_cat_key(c) == _cat_key(o) for o in old_categories)]
-        pattern = _desc_key(transaction.description)
-        for cat in added:
-            await save_rule(current_user.id, cat, pattern)
-        auto_categorized = await _auto_categorize(current_user.id, transaction, added)
+        if body.save_rule and added:
+            pattern = _desc_key(transaction.description)
+            for cat in added:
+                await save_rule(current_user.id, cat, pattern)
+            auto_categorized = await _auto_categorize(current_user.id, transaction, added)
 
     return {'transaction': _tx_out(transaction), 'auto_categorized': auto_categorized}
 
@@ -252,6 +267,33 @@ async def deduplicate_transactions(current_user: User = Depends(get_current_user
         await t.delete()
 
     return {'deleted': len(to_delete)}
+
+
+@router.post('/check-duplicates')
+async def check_duplicates(
+    body: DuplicateCheckRequest,
+    current_user: User = Depends(get_current_user),
+):
+    if not body.transactions:
+        return {'duplicate_indices': []}
+
+    dates = list({t.date for t in body.transactions})
+    existing = await Transaction.find(
+        Transaction.user_id == current_user.id,
+        {'date': {'$in': dates}},
+    ).to_list()
+
+    existing_keys: set[tuple] = {
+        (t.date.isoformat(), round(t.amount, 2), t.description.strip().lower())
+        for t in existing
+    }
+
+    duplicate_indices = [
+        i for i, t in enumerate(body.transactions)
+        if (t.date.isoformat(), round(t.amount, 2), t.description.strip().lower()) in existing_keys
+    ]
+
+    return {'duplicate_indices': duplicate_indices}
 
 
 @router.delete('/{transaction_id}', status_code=status.HTTP_204_NO_CONTENT)

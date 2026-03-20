@@ -180,7 +180,7 @@ function toggleSelectAll(): void {
   }
 }
 
-async function onUpdate(id: string, field: string, value: string | string[]): Promise<void> {
+async function onUpdate(id: string, field: string, value: string | string[] | null): Promise<void> {
   const count = await store.updateTransaction(id, { [field]: value })
   if (count > 0) {
     autoCategorizedCount.value = count

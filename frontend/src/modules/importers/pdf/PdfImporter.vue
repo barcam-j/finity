@@ -156,6 +156,11 @@
         </button>
       </div>
 
+      <div v-if="duplicateCount > 0" class="duplicate-banner">
+        <span>⚠️ {{ t('importer.duplicateBanner', { count: duplicateCount }) }}</span>
+        <button class="btn-remove-dupes" @click="removeDuplicates">{{ t('importer.duplicateRemoveAll') }}</button>
+      </div>
+
       <div class="table-wrapper">
         <table>
           <thead>
@@ -168,9 +173,12 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(row, i) in pageRows" :key="i">
+            <tr v-for="(row, i) in pageRows" :key="i" :class="{ 'row--duplicate': isDuplicate(row) }">
               <td class="col-date">{{ row.date }}</td>
-              <td>{{ row.description || '—' }}</td>
+              <td>
+                {{ row.description || '—' }}
+                <span v-if="isDuplicate(row)" class="badge-duplicate">{{ t('importer.duplicateBadge') }}</span>
+              </td>
               <td>
                 <span v-if="row.category" class="badge">{{ row.category }}</span>
                 <span v-else class="text-muted">—</span>
@@ -216,7 +224,8 @@
       </div>
 
       <div class="step-actions">
-        <button class="btn-primary" :disabled="importing || !rows.length" @click="confirmImport">
+        <button v-if="!rows.length" class="btn-secondary" @click="reset">{{ t('importer.cancelAllRemoved') }}</button>
+        <button v-else class="btn-primary" :disabled="importing" @click="confirmImport">
           {{ importing ? t('importer.importing') : t('importer.importCount', { count: rows.length }) }}
         </button>
       </div>
@@ -232,6 +241,22 @@
       <p class="success__icon">✓</p>
       <h3>{{ t('importer.importComplete') }}</h3>
       <p>{{ t('importer.importedSuccess', { count: importedCount }) }}</p>
+      <div class="import-summary">
+        <div class="import-summary__item">
+          <span class="import-summary__label">{{ t('importer.importSummaryIncome') }}</span>
+          <span class="import-summary__value amount--positive">{{ formatAmount(importSummary.income) }}</span>
+        </div>
+        <div class="import-summary__item">
+          <span class="import-summary__label">{{ t('importer.importSummaryExpenses') }}</span>
+          <span class="import-summary__value amount--negative">{{ formatAmount(importSummary.expenses) }}</span>
+        </div>
+        <div class="import-summary__item import-summary__item--balance">
+          <span class="import-summary__label">{{ t('importer.importSummaryBalance') }}</span>
+          <span class="import-summary__value" :class="importSummary.balance >= 0 ? 'amount--positive' : 'amount--negative'">
+            {{ formatAmount(importSummary.balance) }}
+          </span>
+        </div>
+      </div>
       <button class="btn-primary" @click="reset">{{ t('importer.importAnother') }}</button>
     </div>
   </div>
@@ -243,12 +268,14 @@ import { useI18n } from 'vue-i18n'
 import { pdfService } from './service'
 import AiBanner from '@/components/AiBanner.vue'
 import PostImportReview from '../PostImportReview.vue'
+import { useImportDuplicateCheck } from '../useImportDuplicateCheck'
 import { useCurrency } from '@/composables/useCurrency'
 import { parseDate, parseAmount } from '../csv/utils'
 import type { Transaction } from '@/types'
 
 const { t } = useI18n()
 const { formatAmount } = useCurrency()
+const { checking: checkingDuplicates, checkDuplicates, isDuplicate, removeAllDuplicates, reset: resetDuplicates } = useImportDuplicateCheck()
 const PAGE_SIZE = 20
 
 // State
@@ -293,6 +320,18 @@ const mapping = ref({
   category: '',
 })
 
+const duplicateCount = computed(() => rows.value.filter(r => isDuplicate(r)).length)
+
+const importSummary = computed(() => {
+  const income = importedTransactions.value.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0)
+  const expenses = importedTransactions.value.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0)
+  return { income, expenses, balance: income + expenses }
+})
+
+watch(step, (s) => {
+  if (s === 'preview') checkDuplicates(rows.value)
+})
+
 watch(headerRowIndex, () => {
   mapping.value = { date: '', dateFormat: mapping.value.dateFormat, amount: '', amountFormat: mapping.value.amountFormat, description: '', category: '' }
   mappingError.value = null
@@ -324,6 +363,11 @@ function removeRow(page, indexInPage) {
   if (previewPage.value > totalPages.value) previewPage.value = totalPages.value
 }
 
+function removeDuplicates() {
+  rows.value = removeAllDuplicates(rows.value)
+  if (previewPage.value > totalPages.value) previewPage.value = totalPages.value
+}
+
 function reset() {
   step.value = 'method'
   method.value = null
@@ -338,6 +382,7 @@ function reset() {
   headerRowIndex.value = 0
   lastFile.value = null
   importedTransactions.value = []
+  resetDuplicates()
   mapping.value = { date: '', dateFormat: 'DD/MM/YYYY', amount: '', amountFormat: 'dot', description: '', category: '' }
   if (fileInput.value) fileInput.value.value = ''
 }
@@ -917,7 +962,50 @@ td {
 
 .success p {
   color: var(--text-muted);
-  margin: 0 0 1.5rem;
+  margin: 0 0 1.25rem;
+}
+
+.import-summary {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0 auto 1.5rem;
+  max-width: 360px;
+}
+
+.import-summary__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 0.5rem;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+}
+
+.import-summary__item:last-child {
+  border-right: none;
+}
+
+.import-summary__item--balance {
+  background: var(--bg);
+}
+
+.import-summary__label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.25rem;
+}
+
+.import-summary__value {
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Buttons */
@@ -956,5 +1044,50 @@ td {
   color: var(--error);
   font-size: 0.875rem;
   margin-top: 0.75rem;
+}
+
+/* Duplicates */
+.duplicate-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: oklch(0.97 0.05 85);
+  border: 1px solid oklch(0.85 0.1 85);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.875rem;
+  color: oklch(0.45 0.1 60);
+  margin-bottom: 0.75rem;
+}
+
+.btn-remove-dupes {
+  background: none;
+  border: 1px solid oklch(0.75 0.1 60);
+  border-radius: 6px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.8rem;
+  color: oklch(0.45 0.1 60);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-remove-dupes:hover {
+  background: oklch(0.92 0.06 85);
+}
+
+tr.row--duplicate {
+  background: oklch(0.98 0.03 85);
+}
+
+.badge-duplicate {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.4rem;
+  background: oklch(0.92 0.08 85);
+  border: 1px solid oklch(0.80 0.1 75);
+  border-radius: 99px;
+  font-size: 0.7rem;
+  color: oklch(0.45 0.1 60);
+  vertical-align: middle;
 }
 </style>
