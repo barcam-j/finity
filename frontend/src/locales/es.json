@@ -79,7 +79,9 @@
     "deduplicateConfirm": "Se eliminarán las transacciones con la misma fecha, importe y descripción, conservando una copia de cada una. Esta acción no se puede deshacer.",
     "deduplicateRun": "Eliminar duplicados",
     "deduplicateResult": "{count} duplicado(s) eliminado(s)",
-    "autoCategorized": "{count} transacción(es) categorizadas automáticamente por descripción similar"
+    "autoCategorized": "{count} transacción(es) categorizadas automáticamente por descripción similar",
+    "addNote": "Añadir nota…",
+    "notePlaceholder": "Añadir una nota…"
   },
   "filters": {
     "searchPlaceholder": "Buscar descripción…",

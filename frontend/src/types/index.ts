@@ -6,6 +6,7 @@ export interface Transaction {
   amount: number
   description: string
   categories: string[]
+  note?: string | null
   source?: string
   user_id?: string
 }

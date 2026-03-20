@@ -31,6 +31,23 @@
       />
       <span v-else>{{ tx.description || '—' }}</span>
       <span class="tx-id">{{ tx.id }}</span>
+      <span
+        v-if="editingField !== 'note'"
+        class="tx-note"
+        :class="{ 'tx-note--empty': !tx.note }"
+        @click.stop="startEdit('note')"
+      >{{ tx.note || t('transactions.addNote') }}</span>
+      <textarea
+        v-if="editingField === 'note'"
+        v-autofocus
+        v-model="draft.note"
+        class="note-input"
+        rows="2"
+        :placeholder="t('transactions.notePlaceholder')"
+        @blur="save('note')"
+        @keydown.esc.prevent="cancel"
+        @click.stop
+      />
     </td>
 
     <td @click.stop="startEdit('categories')">
@@ -83,7 +100,7 @@ import type { Transaction } from '@/types'
 import { useCurrency } from '@/composables/useCurrency'
 import { usePreferencesStore } from '@/stores/preferences'
 
-type EditableField = 'date' | 'description' | 'categories'
+type EditableField = 'date' | 'description' | 'categories' | 'note'
 
 const { t, locale } = useI18n()
 const prefs = usePreferencesStore()
@@ -104,13 +121,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'toggle-select': [id: string]
-  update: [id: string, field: EditableField, value: string | string[]]
+  update: [id: string, field: EditableField, value: string | string[] | null]
 }>()
 
 const { formatAmount } = useCurrency()
 
 const editingField = ref<EditableField | null>(null)
-const draft = reactive({ date: '', description: '', categories: [] as string[] })
+const draft = reactive({ date: '', description: '', categories: [] as string[], note: '' })
 const categoryInput = ref('')
 
 const vAutofocus = { mounted: (el: HTMLElement) => el.focus() }
@@ -123,6 +140,7 @@ function startEdit(field: EditableField): void {
   draft.date = props.tx.date
   draft.description = props.tx.description || ''
   draft.categories = [...(props.tx.categories || [])]
+  draft.note = props.tx.note || ''
   categoryInput.value = ''
   editingField.value = field
 }
@@ -163,6 +181,12 @@ function save(field: EditableField): void {
     const original = JSON.stringify([...(props.tx.categories || [])].sort())
     const updated = JSON.stringify([...draft.categories].sort())
     if (original !== updated) emit('update', props.tx.id!, 'categories', draft.categories)
+    return
+  }
+  if (field === 'note') {
+    const newNote = draft.note.trim() || null
+    const oldNote = props.tx.note || null
+    if (newNote !== oldNote) emit('update', props.tx.id!, 'note', newNote)
     return
   }
   const value = draft[field]
@@ -310,5 +334,39 @@ td {
   font-size: inherit;
   font-family: inherit;
   outline: none;
+}
+
+.tx-note {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+  cursor: pointer;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.tx-note--empty {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+td:hover .tx-note--empty {
+  opacity: 0.4;
+}
+
+.note-input {
+  display: block;
+  width: 100%;
+  margin-top: 0.2rem;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--card-bg);
+  color: var(--text);
+  font-size: 0.78rem;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
 }
 </style>

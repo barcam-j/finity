@@ -19,6 +19,7 @@ class TransactionUpdate(BaseModel):
     description: str | None = None
     categories: list[str] | None = None
     amount: float | None = None
+    note: str | None = None
     save_rule: bool = True
 
 
@@ -164,6 +165,8 @@ async def update_transaction(
         transaction.amount = body.amount
     if body.categories is not None:
         transaction.categories = await _normalize_categories(current_user.id, body.categories)
+    if body.note is not None:
+        transaction.note = body.note if body.note.strip() else None
     await transaction.replace()
 
     auto_categorized = 0
