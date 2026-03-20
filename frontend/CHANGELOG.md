@@ -111,6 +111,11 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[j6k2]` PDF importer method selector — AI import (any layout) and Manual import (pdfplumber table extraction, no AI required) as two separate flows with independent upload and parsing steps
 - `[k8l4]` PDF manual import parse-error screen — shown when pdfplumber finds no table structure; explains why it failed, offers "Try another file" and "Try with AI (recommended)" which reuses the already-uploaded file directly
 - `[l1m6]` Post-import uncategorized review step — after every import (CSV and PDF), if any transaction has no category, a review screen lists them with an inline category input per row and datalist autocomplete; confirming a row calls `PATCH /transactions/{id}` and saves a categorization rule; skippable at any time
+- `[m2n8]` Explicit rule creation in post-import review — checkbox "Apply to similar future transactions" per row (checked by default); unchecking sends `save_rule: false` to `PATCH /transactions/{id}` so the category is assigned without creating a persistent rule
+- `[n4o1]` Pre-import duplicate detection — `useImportDuplicateCheck` composable calls `POST /transactions/check-duplicates` before showing the preview; potential duplicates highlighted with a "Duplicate" badge and a banner showing the count; "Remove all" button removes all flagged rows at once; applies to both CSV and PDF importers
+- `[o6p5]` Cancel flow when all transactions removed as duplicates — if the user removes every transaction in the preview step, the import button is replaced with "← Start over, nothing left to import" which resets the importer instead of allowing an empty import
+- `[p8q2]` Import balance summary on success screen — after a successful import, the confirmation screen shows a breakdown of total income, total expenses and net balance for the imported batch; applies to both CSV and PDF importers
+- `[q1r4]` Inline notes per transaction — each transaction row shows a free-text note field below the description; clicking opens an inline textarea; saving stores the note via `PATCH /transactions/{id}`; empty notes are stored as `null`; hint text "Add note…" appears on row hover when no note exists
 
 ### Fixed
 

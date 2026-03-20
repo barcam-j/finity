@@ -70,6 +70,9 @@ Each entry has a unique ID `[XXXX]` for easy reference in PRs and discussions.
 - `[o3p6]` `GET /ai-config/api-key` — returns the decrypted API key for the current user; used by the frontend "Show" button to reveal the stored key
 - `[p5q8]` `POST /importers/csv/parse` returns `all_rows` — all non-empty CSV rows without header assumption, enabling the frontend header row selector
 - `[q7r3]` `POST /importers/pdf/parse` — extracts tables from digitally-generated PDFs using `pdfplumber`; returns `all_rows` for manual column mapping; no AI involved; returns 422 with actionable message if no table is detected
+- `[s2t1]` `save_rule: bool = True` added to `TransactionUpdate` — `PATCH /transactions/{id}` only saves a categorization rule and triggers auto-categorization when `save_rule` is `true`; allows the post-import review step to assign categories without creating rules
+- `[t4u3]` `POST /transactions/check-duplicates` endpoint — accepts a list of `{date, amount, description}` objects and returns the indices of those already present in the user's transaction history; used by the frontend to flag potential duplicates before confirming an import
+- `[u6v5]` `note: str | None` field added to `Transaction` model and `TransactionUpdate` — stores a free-text note per transaction; empty string on PATCH is coerced to `null`
 
 ### Fixed
 
