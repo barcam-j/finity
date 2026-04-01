@@ -10,7 +10,7 @@
               <a href="https://aistudio.google.com" target="_blank" rel="noopener">{{ t('aiBanner.googleAiStudio') }}</a>
             </template>
             <template #1>
-              <RouterLink to="/settings">{{ t('aiBanner.settings') }}</RouterLink>
+              <RouterLink :to="{ name: 'Settings' }">{{ t('aiBanner.settings') }}</RouterLink>
             </template>
           </i18n-t>
         </p>

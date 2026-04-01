@@ -48,7 +48,7 @@
 
         <p v-if="!enabled" class="ai-hint">
           {{ t('analysis.enableAiPrefix') }}
-          <RouterLink to="/settings" class="link">{{ t('analysis.enableAiLink') }}</RouterLink>
+          <RouterLink :to="{ name: 'Settings' }" class="link">{{ t('analysis.enableAiLink') }}</RouterLink>
           {{ t('analysis.enableAiSuffix') }}
         </p>
       </div>

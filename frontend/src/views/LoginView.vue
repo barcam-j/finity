@@ -1,5 +1,6 @@
 <template>
   <div class="auth-page">
+    <div class="auth-wrapper">
     <div class="auth-card">
       <h1 class="auth-logo">finity</h1>
       <p class="auth-subtitle">{{ isLogin ? t('auth.signIn') : t('auth.createAccount') }}</p>
@@ -43,20 +44,25 @@
         </a>
       </p>
     </div>
+    <RouterLink :to="{ name: 'Landing' }" class="back-link">{{ t('landing.backToHome') }}</RouterLink>
+    <LangSwitcher class="lang-switcher-login" />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter, useRoute } from 'vue-router'
+import LangSwitcher from '@/components/LangSwitcher.vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 
 const { t } = useI18n()
 const router = useRouter()
+const route = useRoute()
 const auth = useAuthStore()
 
-const isLogin = ref(true)
+const isLogin = ref(route.name !== 'Register')
 const email = ref('')
 const password = ref('')
 const error = ref<string | null>(null)
@@ -95,7 +101,6 @@ async function submit(): Promise<void> {
   border-radius: 12px;
   box-shadow: var(--card-shadow);
   width: 100%;
-  max-width: 380px;
 }
 
 .auth-logo {
@@ -186,5 +191,33 @@ button:disabled {
 
 .auth-switch a:hover {
   text-decoration: underline;
+}
+
+.auth-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 380px;
+}
+
+.back-link {
+  display: block;
+  margin-top: 1.25rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s;
+}
+
+.back-link:hover {
+  color: var(--text);
+}
+
+.lang-switcher-login {
+  margin-top: 1rem;
+  justify-content: center;
 }
 </style>

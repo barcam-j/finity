@@ -21,6 +21,7 @@
       </ul>
 
       <div class="sidebar-footer">
+        <LangSwitcher class="sidebar-lang" />
         <button class="theme-btn" @click="themeStore.cycle()" :title="themeLabel">
           {{ themeLabel }}
         </button>
@@ -40,6 +41,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
+import LangSwitcher from '@/components/LangSwitcher.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -54,7 +56,7 @@ const themeLabel = computed(() => {
 
 function handleLogout(): void {
   auth.logout()
-  router.push({ name: 'Login' })
+  router.push({ name: 'Landing' })
 }
 </script>
 
@@ -120,6 +122,10 @@ function handleLogout(): void {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.sidebar-lang {
+  padding: 0 0.1rem;
 }
 
 .theme-btn,
